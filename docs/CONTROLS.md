@@ -24,7 +24,9 @@
 
 ## Touch (mobile)
 
-Touch controls appear automatically on touch devices.
+Play in **landscape**. Hold the phone in portrait and an animated "rotate your device"
+prompt appears and the game pauses until you turn it back. Touch controls appear
+automatically on touch devices.
 
 | Input | Action |
 |-------|--------|

@@ -13,6 +13,8 @@ export class TouchControls {
   private thumb: Phaser.GameObjects.Arc;
   private joyPointerId = -1;
   private readonly radius = 130;
+  private enabled = true;
+  private buttons: { circle: Phaser.GameObjects.Arc; text: Phaser.GameObjects.Text }[] = [];
 
   constructor(private scene: GameScene) {
     this.base = scene.add
@@ -43,18 +45,41 @@ export class TouchControls {
       .setDepth(DEPTHS.UI_TOP)
       .setScrollFactor(0)
       .setInteractive({ useHandCursor: true });
-    this.scene.add
+    const text = this.scene.add
       .text(x, y, label, { fontSize: `${Math.round(r * 0.8)}px` })
       .setOrigin(0.5)
       .setDepth(DEPTHS.UI_TOP)
       .setScrollFactor(0);
     btn.on('pointerdown', (_p: Phaser.Input.Pointer, _lx: number, _ly: number, e: Phaser.Types.Input.EventData) => {
+      if (!this.enabled) return;
       e.stopPropagation();
       action();
     });
+    this.buttons.push({ circle: btn, text });
+  }
+
+  /**
+   * Show/hide the on-screen controls. Called when the game pauses (user pause or the
+   * landscape gate) so the joystick + buttons can't be touched behind an overlay and the
+   * stale move vector is cleared.
+   */
+  setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+    // Always reset the joystick — a held thumb shouldn't survive a pause.
+    this.joyPointerId = -1;
+    this.moveVec = { x: 0, y: 0 };
+    this.base.setVisible(false);
+    this.thumb.setVisible(false);
+    for (const { circle, text } of this.buttons) {
+      circle.setVisible(enabled);
+      text.setVisible(enabled);
+      if (enabled) circle.setInteractive({ useHandCursor: true });
+      else circle.disableInteractive();
+    }
   }
 
   private onDown(pointer: Phaser.Input.Pointer): void {
+    if (!this.enabled) return;
     // Activate the joystick only for touches starting in the lower-left region.
     if (this.joyPointerId >= 0) return;
     if (pointer.x > GAME_WIDTH * 0.45 || pointer.y < GAME_HEIGHT * 0.35) return;
@@ -64,6 +89,7 @@ export class TouchControls {
   }
 
   private onMove(pointer: Phaser.Input.Pointer): void {
+    if (!this.enabled) return;
     if (pointer.id !== this.joyPointerId) return;
     const dx = pointer.x - this.base.x;
     const dy = pointer.y - this.base.y;
