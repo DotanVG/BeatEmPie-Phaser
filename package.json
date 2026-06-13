@@ -22,6 +22,7 @@
   "author": "Dotan, Romi, Noam",
   "license": "MIT",
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "phaser": "^3.88.0"
   },
   "devDependencies": {
