@@ -47,7 +47,7 @@ export function installOrientationGate(game: Phaser.Game): void {
   };
 
   const restartRotateHint = (): void => {
-    const animatedNodes = document.querySelectorAll<HTMLElement>('#rotate-gate .phone, #rotate-gate .turn-ring');
+    const animatedNodes = document.querySelectorAll<HTMLElement>('#rotate-gate .phone');
     for (const node of animatedNodes) {
       node.style.animation = 'none';
       void node.offsetWidth;

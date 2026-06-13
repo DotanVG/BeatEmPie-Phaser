@@ -15,7 +15,9 @@
       :root {
         color-scheme: dark;
         --app-width: 100vw;
+        /* dvh tracks the URL-bar-adjusted mobile viewport; vh is the static fallback. */
         --app-height: 100vh;
+        --app-height: 100dvh;
       }
       * {
         margin: 0;
@@ -24,36 +26,36 @@
       }
       html,
       body {
-        width: var(--app-width);
-        min-width: var(--app-width);
-        height: var(--app-height);
-        min-height: var(--app-height);
+        /* inset:0 pins the shell to the whole window so the navy background always covers the
+           full viewport - no uncovered strip (the mobile "grey bar") can ever show through. */
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
         overflow: hidden;
         background: #0b0d2b;
         font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
         touch-action: none;
         -webkit-user-select: none;
         user-select: none;
-        position: fixed;
-        inset: 0;
         overscroll-behavior: none;
       }
       #game-root {
         position: fixed;
         inset: 0;
-        width: var(--app-width);
-        min-width: var(--app-width);
-        height: var(--app-height);
-        min-height: var(--app-height);
+        width: 100%;
+        height: 100%;
         overflow: hidden;
         background: #0b0d2b;
       }
       #game-root:fullscreen,
       #game-root:-webkit-full-screen {
         inset: 0;
-        width: var(--app-width);
-        height: var(--app-height);
+        width: 100%;
+        height: 100%;
       }
+      /* NONE-scale canvas stretched edge-to-edge over the navy shell (full-bleed, like desktop).
+         The vars default to the full viewport and are kept pixel-exact by the orientation gate. */
       #game-root canvas {
         display: block;
         width: var(--app-width) !important;
@@ -163,49 +165,16 @@
           display: flex;
         }
       }
-      #rotate-gate .phone-wrap {
-        position: relative;
-        width: 220px;
-        height: 220px;
-        transform: translateZ(0);
-        backface-visibility: hidden;
-      }
-      #rotate-gate .turn-ring {
-        position: absolute;
-        inset: 18px;
-        border-radius: 50%;
-        border: 4px solid rgba(255, 224, 138, 0.26);
-        border-right-color: #ffe08a;
-        border-bottom-color: transparent;
-        animation: turn-ring 2.2s linear infinite;
-        will-change: transform;
-        transform: translateZ(0);
-        backface-visibility: hidden;
-      }
-      #rotate-gate .turn-ring::after {
-        content: '';
-        position: absolute;
-        top: 14px;
-        right: 18px;
-        width: 16px;
-        height: 16px;
-        border-top: 4px solid #ffe08a;
-        border-right: 4px solid #ffe08a;
-        transform: rotate(28deg);
-      }
       #rotate-gate .phone {
         position: relative;
-        margin: 40px auto 0;
-        width: 78px;
-        height: 140px;
+        width: 86px;
+        height: 150px;
         border: 6px solid #ffe08a;
         border-radius: 16px;
         background: rgba(255, 224, 138, 0.08);
         transform-origin: center;
-        animation: rotate-hint 2.2s cubic-bezier(0.55, 0.05, 0.45, 0.95) infinite;
-        will-change: transform;
-        transform: translateZ(0);
-        backface-visibility: hidden;
+        /* Simple, reliable portrait->landscape tilt (the version that worked first). */
+        animation: rotate-hint 2.4s ease-in-out infinite;
       }
       #rotate-gate .phone::before {
         content: '';
@@ -243,35 +212,18 @@
       }
       @keyframes rotate-hint {
         0%,
-        24% {
-          transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+        28% {
+          transform: rotate(0deg);
         }
-        50%,
+        55%,
         80% {
-          transform: translate3d(0, 6px, 0) rotate(-90deg) scale(1.04);
+          transform: rotate(-90deg);
         }
         100% {
-          transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-        }
-      }
-      @keyframes turn-ring {
-        from {
           transform: rotate(0deg);
-          opacity: 0.7;
-        }
-        50% {
-          opacity: 1;
-        }
-        to {
-          transform: rotate(360deg);
-          opacity: 0.7;
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        #rotate-gate .turn-ring {
-          animation: none;
-          transform: rotate(28deg);
-        }
         #rotate-gate .phone {
           animation: none;
           transform: rotate(-90deg);
@@ -290,10 +242,7 @@
       <span class="fs-corner br" aria-hidden="true"></span>
     </button>
     <div id="rotate-gate" aria-hidden="true">
-      <div class="phone-wrap">
-        <div class="turn-ring"></div>
-        <div class="phone"></div>
-      </div>
+      <div class="phone"></div>
       <p class="rotate-msg">Rotate your device to play 🥧</p>
       <p class="rotate-sub">BeatEmPie is best in landscape</p>
     </div>

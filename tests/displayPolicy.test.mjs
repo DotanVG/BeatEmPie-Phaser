@@ -72,14 +72,15 @@ test('mobile reserves more top-right HUD space for the fullscreen button', () =>
   assert.ok(getHudRightInset(true) > getHudRightInset(false));
 });
 
-test('viewport sizing prefers visualViewport dimensions when available', () => {
+test('viewport sizing uses the full layout viewport, not the URL-bar-shrunk visual viewport', () => {
+  // The full layout viewport keeps the canvas full-bleed (no bottom grey bar / side margins).
   assert.deepEqual(
     measureViewport({
       innerWidth: 932,
       innerHeight: 430,
       visualViewport: { width: 915.4, height: 411.6 },
     }),
-    { width: 915, height: 412 },
+    { width: 932, height: 430 },
   );
 });
 
@@ -223,7 +224,7 @@ test('orientation gate tracks viewport resize even if orientation media-query ne
     value: Object.assign(createListenerTarget(), {
       documentElement,
       querySelectorAll(selector) {
-        if (selector === '#rotate-gate .phone, #rotate-gate .turn-ring') return animatedNodes;
+        if (selector === '#rotate-gate .phone') return animatedNodes;
         return [];
       },
     }),

@@ -39,14 +39,17 @@ export function hasManagedGameScene(sceneState: OrientationSceneState): boolean 
   return sceneState.isActive('GameScene') || sceneState.isPaused('GameScene');
 }
 
-/** Prefer visualViewport when present so mobile URL-bar and fullscreen transitions size correctly. */
+/**
+ * Measure the full layout viewport (innerWidth/innerHeight) so the canvas fills the whole window.
+ *
+ * The visual viewport excludes the mobile URL-bar strip; sizing the shell to it left an uncovered
+ * "grey bar" at the bottom and side margins in landscape. With `user-scalable=no` there is no
+ * pinch-zoom, so the layout viewport is the correct full-bleed size on both mobile and desktop.
+ */
 export function measureViewport(source: ViewportMeasurementSource): { width: number; height: number } {
-  const width = source.visualViewport?.width ?? source.innerWidth;
-  const height = source.visualViewport?.height ?? source.innerHeight;
-
   return {
-    width: Math.round(width),
-    height: Math.round(height),
+    width: Math.round(source.innerWidth),
+    height: Math.round(source.innerHeight),
   };
 }
 
