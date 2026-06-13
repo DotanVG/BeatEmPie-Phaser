@@ -1,0 +1,14 @@
+# Normalize line endings: text files stored as LF in the repo.
+* text=auto eol=lf
+
+# Treat binary assets as binary (no EOL conversion / diffing).
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+
+# Shell hooks must stay LF even on Windows checkouts.
+*.sh text eol=lf

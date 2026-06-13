@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="description" content="BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky." />
+    <title>BeatEmPie 🥧</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0d2b;
+        font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      #game-root {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #game-root canvas {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+      #boot-loader {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffe08a;
+        font-size: 1.5rem;
+        letter-spacing: 0.1em;
+        pointer-events: none;
+        z-index: 10;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-root">
+      <div id="boot-loader">Heating the ovens… 🥧</div>
+    </div>
+    <script type="module" src="/src/game/main.ts"></script>
+  </body>
+</html>

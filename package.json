@@ -1,0 +1,35 @@
+{
+  "name": "beatempie-phaser",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts"
+  },
+  "keywords": [
+    "phaser",
+    "game",
+    "arcade",
+    "beat-em-up",
+    "typescript",
+    "vite"
+  ],
+  "author": "Dotan, Romi, Noam",
+  "license": "MIT",
+  "dependencies": {
+    "phaser": "^3.88.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "eslint": "^9.17.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}

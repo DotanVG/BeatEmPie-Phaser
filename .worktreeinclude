@@ -1,0 +1,7 @@
+# Files and directories copied into every agent worktree created by the
+# AI-assisted orchestration workflow (see WORKFLOW.md / docs/SYMPHONY_ORCHESTRATION.md).
+# These carry project memory and guardrails so every isolated worktree behaves
+# consistently, even on a shallow clone.
+CLAUDE.md
+WORKFLOW.md
+.claude/
