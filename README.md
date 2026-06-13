@@ -31,6 +31,9 @@ Pies are **sky-drop attacks**, not thrown projectiles. Pick a pie, aim at the gr
 | Pause | `P` / `Esc` | — |
 | Restart (after game over) | `R` | On-screen button |
 
+On phones, play in **landscape** — holding the device in portrait shows a "rotate your
+device" prompt and pauses the game until you turn it back.
+
 See [docs/CONTROLS.md](docs/CONTROLS.md) for the full reference.
 
 ## 🥧 The Pie Arsenal

@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta name="description" content="BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky." />
     <title>BeatEmPie 🥧</title>
     <style>
@@ -24,13 +27,21 @@
         touch-action: none;
         -webkit-user-select: none;
         user-select: none;
+        /* Lock the page to the viewport: no rubber-band scroll / overscroll on mobile. */
+        position: fixed;
+        inset: 0;
+        overscroll-behavior: none;
       }
       #game-root {
         width: 100vw;
         height: 100vh;
+        /* dvh tracks the URL-bar-adjusted viewport on modern mobile; vh is the fallback. */
+        height: 100dvh;
         display: flex;
         align-items: center;
         justify-content: center;
+        /* FIT letterbox/pillarbox bars show this color — themed to read as intentional. */
+        background: #0b0d2b;
       }
       #game-root canvas {
         image-rendering: pixelated;
@@ -48,11 +59,106 @@
         pointer-events: none;
         z-index: 10;
       }
+
+      /* --- Landscape-only gate: animated "rotate your device" overlay --------- */
+      /* Hidden by default; the media query below is the SOLE visibility toggle,  */
+      /* so it works even if JavaScript fails to load. (pointer: coarse) keeps it */
+      /* off desktop entirely — a mouse user resizing tall never sees it.         */
+      #rotate-gate {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        background: #0b0d2b;
+        color: #ffe08a;
+        text-align: center;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
+      @media (orientation: portrait) and (pointer: coarse) {
+        #rotate-gate {
+          display: flex;
+        }
+      }
+      #rotate-gate .phone {
+        position: relative;
+        width: 78px;
+        height: 140px;
+        border: 6px solid #ffe08a;
+        border-radius: 16px;
+        background: rgba(255, 224, 138, 0.08);
+        transform-origin: center;
+        animation: rotate-hint 2.4s ease-in-out infinite;
+      }
+      /* Speaker bar + home dot drawn with pseudo-elements — no image assets. */
+      #rotate-gate .phone::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 26px;
+        height: 5px;
+        border-radius: 3px;
+        background: #ffe08a;
+        opacity: 0.7;
+      }
+      #rotate-gate .phone::after {
+        content: '';
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid #ffe08a;
+        opacity: 0.7;
+      }
+      #rotate-gate .rotate-msg {
+        font-size: 1.5rem;
+        font-weight: bold;
+        letter-spacing: 0.04em;
+      }
+      #rotate-gate .rotate-sub {
+        font-size: 1rem;
+        color: #fff4d6;
+        opacity: 0.75;
+      }
+      @keyframes rotate-hint {
+        0%,
+        28% {
+          transform: rotate(0deg);
+        }
+        55%,
+        80% {
+          transform: rotate(-90deg);
+        }
+        100% {
+          transform: rotate(0deg);
+        }
+      }
+      /* Respect reduced-motion: hold the device in landscape, no spin. */
+      @media (prefers-reduced-motion: reduce) {
+        #rotate-gate .phone {
+          animation: none;
+          transform: rotate(-90deg);
+        }
+      }
     </style>
   </head>
   <body>
     <div id="game-root">
       <div id="boot-loader">Heating the ovens… 🥧</div>
+    </div>
+    <div id="rotate-gate" aria-hidden="true">
+      <div class="phone"></div>
+      <p class="rotate-msg">Rotate your device to play 🥧</p>
+      <p class="rotate-sub">BeatEmPie is best in landscape</p>
     </div>
     <script type="module" src="/src/game/main.ts"></script>
     <script>

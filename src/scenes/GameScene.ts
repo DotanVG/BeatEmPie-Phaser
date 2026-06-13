@@ -223,15 +223,36 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  /** True once the run has ended (death or boss defeat); the end-scene transition is queued. */
+  get isGameEnded(): boolean {
+    return this.gameEnded;
+  }
+
   togglePause(): void {
     if (this.gameEnded) return;
     this.isInputLocked = true;
+    this.touch?.setEnabled(false);
     this.scene.launch('PauseScene', { gameScene: this });
     this.scene.pause();
   }
 
   resumeFromPause(): void {
     this.isInputLocked = false;
+    this.touch?.setEnabled(true);
+  }
+
+  /** Pause driven by the landscape gate (phone rotated to portrait). */
+  suspendForOrientation(): void {
+    this.isInputLocked = true;
+    this.touch?.setEnabled(false);
+    this.scene.pause();
+  }
+
+  /** Resume when the phone returns to landscape. */
+  resumeFromOrientation(): void {
+    this.scene.resume();
+    this.isInputLocked = false;
+    this.touch?.setEnabled(true);
   }
 
   // --- Flow -----------------------------------------------------------------

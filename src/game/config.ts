@@ -12,14 +12,21 @@ import { VictoryScene } from '../scenes/VictoryScene';
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game-root',
-  backgroundColor: '#14123a',
+  // Matches the #game-root letterbox bars so the FIT framing has no visible seam.
+  backgroundColor: '#0b0d2b',
   pixelArt: true,
   roundPixels: true,
   scale: {
     mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
+    // The #game-root flexbox centers the canvas. Phaser's own centering would ADD a margin
+    // on top of that (double-offset → off-centre bars on non-16:9 screens), so disable it.
+    autoCenter: Phaser.Scale.NO_CENTER,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
+    // Round the scaled canvas to whole pixels (no sub-pixel blur on the pixel-art canvas).
+    autoRound: true,
+    // #game-root is explicitly sized in CSS (100vw/100dvh); don't let Phaser fight it.
+    expandParent: false,
   },
   physics: {
     default: 'arcade',
