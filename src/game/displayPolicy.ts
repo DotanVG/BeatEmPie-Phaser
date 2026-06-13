@@ -1,0 +1,25 @@
+export interface FullscreenButtonState {
+  supported: boolean;
+  active: boolean;
+  coarsePointer: boolean;
+}
+
+interface OrientationSceneState {
+  isActive(key: string): boolean;
+  isPaused(key: string): boolean;
+}
+
+/** The desktop button disappears once fullscreen is active; touch keeps a visible escape hatch. */
+export function shouldShowFullscreenButton(state: FullscreenButtonState): boolean {
+  return state.supported && (state.coarsePointer || !state.active);
+}
+
+/** Reserve space for the floating fullscreen button when it is visible over the canvas. */
+export function getHudRightInset(buttonVisible: boolean): number {
+  return buttonVisible ? 176 : 40;
+}
+
+/** Orientation-managed gameplay must be recoverable while paused, not just while active. */
+export function hasManagedGameScene(sceneState: OrientationSceneState): boolean {
+  return sceneState.isActive('GameScene') || sceneState.isPaused('GameScene');
+}

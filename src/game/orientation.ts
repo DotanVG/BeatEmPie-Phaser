@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import type { GameScene } from '../scenes/GameScene';
+import { hasManagedGameScene } from './displayPolicy';
 
 /**
  * Landscape-only orientation gate.
@@ -20,35 +21,49 @@ export function installOrientationGate(game: Phaser.Game): void {
   // True only while *this module* holds the GameScene paused. Lets us avoid resuming a
   // pause the player opened themselves (PauseScene).
   let autoPaused = false;
+  let autoPausedAudio = false;
 
-  /** The GameScene only when it is actually running (not on menu / preload / end screens). */
-  const activeGameScene = (): GameScene | null => {
-    if (!game.scene.isActive('GameScene')) return null;
+  /** The gameplay scene while running OR paused by this gate. */
+  const managedGameScene = (): GameScene | null => {
+    if (!hasManagedGameScene(game.scene)) return null;
     return game.scene.getScene('GameScene') as GameScene;
+  };
+
+  const syncScale = (): void => {
+    game.scale.updateBounds();
+    game.scale.refresh();
   };
 
   const onEnterPortrait = (): void => {
     // Suspend audio for whatever scene is up (menu music included). Skip while the audio
     // context is still locked — it has nothing to pause yet and unlocks on first tap.
-    if (!game.sound.locked) game.sound.pauseAll();
+    if (!game.sound.locked) {
+      game.sound.pauseAll();
+      autoPausedAudio = true;
+    }
 
-    const gs = activeGameScene();
+    const gs = managedGameScene();
     if (!gs) return; // menu / preload / end screen — overlay alone is enough
     if (game.scene.isPaused('GameScene')) return; // user already paused; don't take ownership
     if (gs.isGameEnded) return; // mid-transition to GameOver/Victory; leave it be
 
     gs.suspendForOrientation();
     autoPaused = true;
+    syncScale();
   };
 
   const onEnterLandscape = (): void => {
+    if (autoPausedAudio && !game.sound.locked) {
+      game.sound.resumeAll();
+      autoPausedAudio = false;
+    }
+
     if (autoPaused) {
-      if (!game.sound.locked) game.sound.resumeAll();
-      const gs = activeGameScene();
+      const gs = managedGameScene();
       gs?.resumeFromOrientation();
       autoPaused = false;
     }
-    game.scale.refresh();
+    syncScale();
   };
 
   mql.addEventListener('change', (e) => {
@@ -56,21 +71,22 @@ export function installOrientationGate(game: Phaser.Game): void {
     else onEnterLandscape();
   });
 
-  // Keep the FIT canvas correctly sized when the mobile URL bar shows/hides or the device
-  // rotates. Debounced through rAF so the iOS double-fire collapses to a single refresh.
-  let refreshQueued = false;
+  // Keep the stretched canvas shell synced while the mobile URL bar shows/hides or the
+  // device rotates. A short timeout coalesces the resize/orientation event bursts.
+  let refreshTimer: number | null = null;
   const queueRefresh = (): void => {
-    if (refreshQueued) return;
-    refreshQueued = true;
-    requestAnimationFrame(() => {
-      refreshQueued = false;
-      game.scale.refresh();
-    });
+    if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+    refreshTimer = window.setTimeout(() => {
+      refreshTimer = null;
+      syncScale();
+    }, 40);
   };
   window.visualViewport?.addEventListener('resize', queueRefresh);
   window.addEventListener('resize', queueRefresh);
   window.addEventListener('orientationchange', queueRefresh);
+  window.screen.orientation?.addEventListener('change', queueRefresh);
 
   // Sync once at boot: if we load straight into portrait, suspend audio immediately.
   if (mql.matches) onEnterPortrait();
+  else syncScale();
 }

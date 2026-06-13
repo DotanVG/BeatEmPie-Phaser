@@ -1,4 +1,5 @@
 import type Phaser from 'phaser';
+import { shouldShowFullscreenButton } from './displayPolicy';
 
 type FullscreenDocument = Document & {
   webkitExitFullscreen?: () => Promise<void> | void;
@@ -12,6 +13,10 @@ type FullscreenElement = HTMLElement & {
 
 function getFullscreenDocument(): FullscreenDocument {
   return document as FullscreenDocument;
+}
+
+function isCoarsePointerDevice(): boolean {
+  return window.matchMedia('(pointer: coarse)').matches;
 }
 
 function canToggleFullscreen(target: FullscreenElement): boolean {
@@ -44,13 +49,19 @@ export function installFullscreenButton(game: Phaser.Game): void {
   const sync = (): void => {
     const supported = canToggleFullscreen(target) || isFullscreenActive();
     const active = isFullscreenActive();
+    const visible = shouldShowFullscreenButton({
+      supported,
+      active,
+      coarsePointer: isCoarsePointerDevice(),
+    });
 
-    button.hidden = !supported;
+    button.hidden = !visible;
     button.dataset.active = active ? 'true' : 'false';
     button.setAttribute('aria-pressed', active ? 'true' : 'false');
     button.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
     button.title = active ? 'Exit fullscreen' : 'Enter fullscreen';
 
+    game.scale.updateBounds();
     game.scale.refresh();
   };
 

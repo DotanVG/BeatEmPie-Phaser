@@ -7,6 +7,7 @@ import { BossHealthBar } from './BossHealthBar';
 import { CooldownMeter } from './CooldownMeter';
 import { PieSelector } from './PieSelector';
 import { withEmojiPadding } from '../utils/text';
+import { getHudRightInset } from '../game/displayPolicy';
 
 const UI_FONT = 'Trebuchet MS, Segoe UI, sans-serif';
 
@@ -24,6 +25,7 @@ export class Hud {
   private waveText: Phaser.GameObjects.Text;
   private selectedText: Phaser.GameObjects.Text;
   private bossAlive = false;
+  private readonly relayoutTopRight = () => this.applyTopRightLayout();
 
   constructor(private scene: GameScene) {
     this.healthBar = new HealthBar(scene, 40, 44);
@@ -109,6 +111,11 @@ export class Hud {
 
     this.bind();
     this.refreshSelected();
+    this.applyTopRightLayout();
+
+    document.addEventListener('fullscreenchange', this.relayoutTopRight);
+    document.addEventListener('webkitfullscreenchange', this.relayoutTopRight as EventListener);
+    window.addEventListener('resize', this.relayoutTopRight);
   }
 
   private bind(): void {
@@ -147,10 +154,25 @@ export class Hud {
     this.selectedText.setColor(`#${pie.color.toString(16).padStart(6, '0')}`);
   }
 
+  private applyTopRightLayout(): void {
+    const button = document.getElementById('fullscreen-btn') as HTMLButtonElement | null;
+    const x = GAME_WIDTH - getHudRightInset(Boolean(button && !button.hidden));
+
+    this.scoreText.setX(x);
+    this.highScoreText.setX(x);
+    this.comboText.setX(x);
+  }
+
   update(): void {
     this.selector.update();
     this.pieCooldown.set(this.scene.pies.getCooldownProgress(this.scene.pies.selectedPie.id));
     this.dashMeter.set(this.scene.player.dashCooldown.progress);
     if (!this.bossAlive) this.bossBar.hide();
+  }
+
+  destroy(): void {
+    document.removeEventListener('fullscreenchange', this.relayoutTopRight);
+    document.removeEventListener('webkitfullscreenchange', this.relayoutTopRight as EventListener);
+    window.removeEventListener('resize', this.relayoutTopRight);
   }
 }

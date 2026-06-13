@@ -313,6 +313,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private onShutdown(): void {
+    this.hud?.destroy();
     this.inputSystem?.dispose();
     this.bus?.destroy();
     this.boss = null;

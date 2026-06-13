@@ -43,13 +43,16 @@
         height: 100vh;
         /* dvh tracks the URL-bar-adjusted viewport on modern mobile; vh is the fallback. */
         height: 100dvh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        overflow: hidden;
         /* FIT letterbox/pillarbox bars show this color — themed to read as intentional. */
         background: #0b0d2b;
       }
       #game-root canvas {
+        display: block;
+        width: 100% !important;
+        width: 100dvw !important;
+        height: 100% !important;
+        height: 100dvh !important;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
       }

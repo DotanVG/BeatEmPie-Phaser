@@ -8,6 +8,7 @@ import { makeButton } from '../ui/Button';
 import { emojiText, withEmojiPadding } from '../utils/text';
 import { popIn, pulse } from '../utils/animation';
 import { stepFloaters, type MenuFloaterBounds, type MenuFloaterState } from '../utils/menuFloaters';
+import { getHudRightInset } from '../game/displayPolicy';
 
 interface MenuFloater {
   text: Phaser.GameObjects.Text;
@@ -19,6 +20,8 @@ interface MenuFloater {
 export class MainMenuScene extends Phaser.Scene {
   private audio!: AudioSystem;
   private floaters: MenuFloater[] = [];
+  private muteLabel!: Phaser.GameObjects.Text;
+  private readonly relayoutTopRight = () => this.layoutTopRight();
   private readonly floaterBounds: MenuFloaterBounds = {
     minX: 40,
     maxX: GAME_WIDTH - 40,
@@ -107,6 +110,10 @@ export class MainMenuScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.buildMuteToggle();
+    this.layoutTopRight();
+    document.addEventListener('fullscreenchange', this.relayoutTopRight);
+    document.addEventListener('webkitfullscreenchange', this.relayoutTopRight as EventListener);
+    window.addEventListener('resize', this.relayoutTopRight);
 
     this.add
       .text(cx, GAME_HEIGHT - 40, 'A game by Dotan · Romi · Noam', {
@@ -118,6 +125,11 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.input.keyboard?.once('keydown-ENTER', () => this.startGame());
     this.input.keyboard?.once('keydown-SPACE', () => this.startGame());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      document.removeEventListener('fullscreenchange', this.relayoutTopRight);
+      document.removeEventListener('webkitfullscreenchange', this.relayoutTopRight as EventListener);
+      window.removeEventListener('resize', this.relayoutTopRight);
+    });
   }
 
   update(_time: number, delta: number): void {
@@ -191,7 +203,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private buildMuteToggle(): void {
-    const label = this.add
+    this.muteLabel = this.add
       .text(
         GAME_WIDTH - 40,
         40,
@@ -207,12 +219,17 @@ export class MainMenuScene extends Phaser.Scene {
       )
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
-    label.on('pointerdown', () => {
+    this.muteLabel.on('pointerdown', () => {
       const muted = !this.audio.isMuted();
       this.audio.setMuted(muted);
-      label.setText(muted ? '🔇 Muted' : '🔊 Sound');
+      this.muteLabel.setText(muted ? '🔇 Muted' : '🔊 Sound');
       if (!muted) this.audio.playMusic(AUDIO.musicMenu);
     });
+  }
+
+  private layoutTopRight(): void {
+    const button = document.getElementById('fullscreen-btn') as HTMLButtonElement | null;
+    this.muteLabel?.setX(GAME_WIDTH - getHudRightInset(Boolean(button && !button.hidden)));
   }
 
   private startGame(): void {
