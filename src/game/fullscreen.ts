@@ -44,7 +44,7 @@ export function installFullscreenButton(game: Phaser.Game): void {
   const button = document.getElementById('fullscreen-btn') as HTMLButtonElement | null;
   if (!button) return;
 
-  const target = document.documentElement as FullscreenElement;
+  const target = (document.getElementById('game-root') ?? document.documentElement) as FullscreenElement;
 
   const sync = (): void => {
     const supported = canToggleFullscreen(target) || isFullscreenActive();

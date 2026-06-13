@@ -6,11 +6,16 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <meta name="description" content="BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky." />
+    <meta
+      name="description"
+      content="BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky."
+    />
     <title>BeatEmPie 🥧</title>
     <style>
       :root {
         color-scheme: dark;
+        --app-width: 100vw;
+        --app-height: 100vh;
       }
       * {
         margin: 0;
@@ -19,16 +24,16 @@
       }
       html,
       body {
-        width: 100%;
-        width: 100dvw;
-        height: 100%;
+        width: var(--app-width);
+        min-width: var(--app-width);
+        height: var(--app-height);
+        min-height: var(--app-height);
         overflow: hidden;
         background: #0b0d2b;
         font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
         touch-action: none;
         -webkit-user-select: none;
         user-select: none;
-        /* Lock the page to the viewport: no rubber-band scroll / overscroll on mobile. */
         position: fixed;
         inset: 0;
         overscroll-behavior: none;
@@ -36,23 +41,23 @@
       #game-root {
         position: fixed;
         inset: 0;
-        width: 100vw;
-        width: 100dvw;
-        min-width: 100vw;
-        min-width: 100dvw;
-        height: 100vh;
-        /* dvh tracks the URL-bar-adjusted viewport on modern mobile; vh is the fallback. */
-        height: 100dvh;
+        width: var(--app-width);
+        min-width: var(--app-width);
+        height: var(--app-height);
+        min-height: var(--app-height);
         overflow: hidden;
-        /* FIT letterbox/pillarbox bars show this color — themed to read as intentional. */
         background: #0b0d2b;
+      }
+      #game-root:fullscreen,
+      #game-root:-webkit-full-screen {
+        inset: 0;
+        width: var(--app-width);
+        height: var(--app-height);
       }
       #game-root canvas {
         display: block;
-        width: 100% !important;
-        width: 100dvw !important;
-        height: 100% !important;
-        height: 100dvh !important;
+        width: var(--app-width) !important;
+        height: var(--app-height) !important;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
       }
@@ -132,10 +137,6 @@
         transform: translate(-5px, -5px);
       }
 
-      /* --- Landscape-only gate: animated "rotate your device" overlay --------- */
-      /* Hidden by default; the media query below is the SOLE visibility toggle,  */
-      /* so it works even if JavaScript fails to load. (pointer: coarse) keeps it */
-      /* off desktop entirely — a mouse user resizing tall never sees it.         */
       #rotate-gate {
         display: none;
         position: fixed;
@@ -151,8 +152,14 @@
         padding: env(safe-area-inset-top) env(safe-area-inset-right)
           env(safe-area-inset-bottom) env(safe-area-inset-left);
       }
+      html[data-rotate-gate='active'] #rotate-gate {
+        display: flex;
+      }
+      html[data-rotate-gate='inactive'] #rotate-gate {
+        display: none;
+      }
       @media (orientation: portrait) and (pointer: coarse) {
-        #rotate-gate {
+        html:not([data-rotate-gate='inactive']) #rotate-gate {
           display: flex;
         }
       }
@@ -160,6 +167,8 @@
         position: relative;
         width: 220px;
         height: 220px;
+        transform: translateZ(0);
+        backface-visibility: hidden;
       }
       #rotate-gate .turn-ring {
         position: absolute;
@@ -169,6 +178,9 @@
         border-right-color: #ffe08a;
         border-bottom-color: transparent;
         animation: turn-ring 2.2s linear infinite;
+        will-change: transform;
+        transform: translateZ(0);
+        backface-visibility: hidden;
       }
       #rotate-gate .turn-ring::after {
         content: '';
@@ -192,8 +204,9 @@
         transform-origin: center;
         animation: rotate-hint 2.2s cubic-bezier(0.55, 0.05, 0.45, 0.95) infinite;
         will-change: transform;
+        transform: translateZ(0);
+        backface-visibility: hidden;
       }
-      /* Speaker bar + home dot drawn with pseudo-elements — no image assets. */
       #rotate-gate .phone::before {
         content: '';
         position: absolute;
@@ -231,14 +244,14 @@
       @keyframes rotate-hint {
         0%,
         24% {
-          transform: translateY(0) rotate(0deg) scale(1);
+          transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
         }
         50%,
         80% {
-          transform: translateY(6px) rotate(-90deg) scale(1.04);
+          transform: translate3d(0, 6px, 0) rotate(-90deg) scale(1.04);
         }
         100% {
-          transform: translateY(0) rotate(0deg) scale(1);
+          transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
         }
       }
       @keyframes turn-ring {
@@ -254,7 +267,6 @@
           opacity: 0.7;
         }
       }
-      /* Respect reduced-motion: hold the device in landscape, no spin. */
       @media (prefers-reduced-motion: reduce) {
         #rotate-gate .turn-ring {
           animation: none;

@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import type { GameScene } from '../scenes/GameScene';
-import { hasManagedGameScene } from './displayPolicy';
+import { hasManagedGameScene, measureViewport, shouldShowRotateGate } from './displayPolicy';
 
 /**
  * Landscape-only orientation gate.
@@ -16,17 +16,43 @@ import { hasManagedGameScene } from './displayPolicy';
  * never trips the gate. Desktop behaviour is unchanged.
  */
 export function installOrientationGate(game: Phaser.Game): void {
-  const mql = window.matchMedia('(orientation: portrait) and (pointer: coarse)');
+  const coarsePointerQuery = window.matchMedia('(pointer: coarse)');
+  const root = document.documentElement;
 
   // True only while *this module* holds the GameScene paused. Lets us avoid resuming a
   // pause the player opened themselves (PauseScene).
   let autoPaused = false;
   let autoPausedAudio = false;
+  let rotateGateActive = false;
 
   /** The gameplay scene while running OR paused by this gate. */
   const managedGameScene = (): GameScene | null => {
     if (!hasManagedGameScene(game.scene)) return null;
     return game.scene.getScene('GameScene') as GameScene;
+  };
+
+  const syncViewportShell = (): boolean => {
+    const { width, height } = measureViewport(window);
+    const active = shouldShowRotateGate({
+      width,
+      height,
+      coarsePointer: coarsePointerQuery.matches,
+    });
+
+    root.style.setProperty('--app-width', `${width}px`);
+    root.style.setProperty('--app-height', `${height}px`);
+    root.dataset.rotateGate = active ? 'active' : 'inactive';
+
+    return active;
+  };
+
+  const restartRotateHint = (): void => {
+    const animatedNodes = document.querySelectorAll<HTMLElement>('#rotate-gate .phone, #rotate-gate .turn-ring');
+    for (const node of animatedNodes) {
+      node.style.animation = 'none';
+      void node.offsetWidth;
+      node.style.animation = '';
+    }
   };
 
   const syncScale = (): void => {
@@ -49,7 +75,6 @@ export function installOrientationGate(game: Phaser.Game): void {
 
     gs.suspendForOrientation();
     autoPaused = true;
-    syncScale();
   };
 
   const onEnterLandscape = (): void => {
@@ -63,13 +88,23 @@ export function installOrientationGate(game: Phaser.Game): void {
       gs?.resumeFromOrientation();
       autoPaused = false;
     }
-    syncScale();
   };
 
-  mql.addEventListener('change', (e) => {
-    if (e.matches) onEnterPortrait();
-    else onEnterLandscape();
-  });
+  const syncViewportState = (): void => {
+    const active = syncViewportShell();
+
+    if (active !== rotateGateActive) {
+      if (active) {
+        restartRotateHint();
+        onEnterPortrait();
+      } else {
+        onEnterLandscape();
+      }
+      rotateGateActive = active;
+    }
+
+    syncScale();
+  };
 
   // Keep the stretched canvas shell synced while the mobile URL bar shows/hides or the
   // device rotates. A short timeout coalesces the resize/orientation event bursts.
@@ -78,15 +113,17 @@ export function installOrientationGate(game: Phaser.Game): void {
     if (refreshTimer !== null) window.clearTimeout(refreshTimer);
     refreshTimer = window.setTimeout(() => {
       refreshTimer = null;
-      syncScale();
+      syncViewportState();
     }, 40);
   };
+  coarsePointerQuery.addEventListener('change', queueRefresh);
   window.visualViewport?.addEventListener('resize', queueRefresh);
   window.addEventListener('resize', queueRefresh);
   window.addEventListener('orientationchange', queueRefresh);
   window.screen.orientation?.addEventListener('change', queueRefresh);
+  document.addEventListener('fullscreenchange', queueRefresh);
+  document.addEventListener('webkitfullscreenchange', queueRefresh as EventListener);
 
-  // Sync once at boot: if we load straight into portrait, suspend audio immediately.
-  if (mql.matches) onEnterPortrait();
-  else syncScale();
+  // Sync once at boot so CSS sizing and portrait gating reflect the real mobile viewport.
+  syncViewportState();
 }
