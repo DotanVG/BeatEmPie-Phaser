@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DEPTHS } from '../game/constants';
+import { emojiPadding } from '../utils/text';
 
 export interface FloatingTextOptions {
   color?: string;
@@ -27,6 +28,7 @@ export class FloatingText {
         fontStyle: 'bold',
         stroke: '#0b0d2b',
         strokeThickness,
+        padding: emojiPadding(fontSize),
       })
       .setOrigin(0.5)
       .setDepth(DEPTHS.FLOATING_TEXT);

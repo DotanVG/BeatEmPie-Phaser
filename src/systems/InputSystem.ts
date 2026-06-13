@@ -41,12 +41,9 @@ export class InputSystem {
   }
 
   private onPointerDown(pointer: Phaser.Input.Pointer): void {
-    // On touch devices the DROP button handles drops; tap-to-drop is mouse-only.
+    // PC mouse only — on touch devices TouchControls owns tap-to-drop (avoids double-firing).
     if (this.scene.touch || this.scene.isInputLocked || !pointer.leftButtonDown()) return;
-    const wy = pointer.worldY;
-    if (wy >= ARENA.minY - 240 && wy <= ARENA.maxY + 80) {
-      this.scene.pies.dropAtPoint(pointer.worldX, pointer.worldY);
-    }
+    this.scene.pies.dropAtScreenPoint(pointer.worldX, pointer.worldY);
   }
 
   update(): void {
@@ -87,10 +84,9 @@ export class InputSystem {
       if (Phaser.Input.Keyboard.JustDown(this.numberKeys[i])) pies.selectIndex(i);
     }
 
-    // Aim toward the cursor when standing still.
+    // Face the cursor whenever standing still (any height) — the "FreeCell" turn-to-aim feel.
     if (mx === 0 && my === 0) {
-      const p = this.scene.input.activePointer;
-      if (p.worldY >= ARENA.minY - 200 && p.worldY <= ARENA.maxY + 80) player.faceToward(p.worldX);
+      player.faceToward(this.scene.input.activePointer.worldX);
     }
 
     this.updateReticle();

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { DEPTHS } from '../game/constants';
 import { TEX } from '../utils/assetKeys';
+import { emojiText } from '../utils/text';
 import type { GameScene } from '../scenes/GameScene';
 
 export type PickupKind = 'pumpkin' | 'health';
@@ -24,10 +25,7 @@ export class Pickup extends Phaser.Physics.Arcade.Image {
     this.setTint(kind === 'pumpkin' ? 0xff8a33 : 0x6ee7a8);
     (this.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
 
-    this.label = scene.add
-      .text(x, y, kind === 'pumpkin' ? '🎃' : '❤️', { fontSize: '34px' })
-      .setOrigin(0.5)
-      .setDepth(DEPTHS.PIE + 1);
+    this.label = emojiText(scene, x, y, kind === 'pumpkin' ? '🎃' : '❤️', 34).setDepth(DEPTHS.PIE + 1);
 
     scene.tweens.add({
       targets: [this, this.label],

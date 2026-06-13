@@ -42,12 +42,12 @@ selected pie, number keys / Q-E to choose pies, Shift to dash, P/Esc to pause.
 | 🍓 Strawberry | homing | Locks onto nearest enemy, can’t miss; re-targets if it dies |
 | 🥩 Meat | heavy | Long wind-up, massive damage, cracks the ground, big shake |
 | 🍄 Mushroom | confusion | Enemies turn on their allies (boss/whale resist) |
-| 🎃 Pumpkin | ultimate | Screen-wide blast, **limited charges**, damages (not one-shots) the boss |
 | 🍫 Chocolate | dot | Leaves a slowing, damaging puddle (area denial) |
 | 🌶️ Chili | fire trail | A burning lane; burn lingers briefly after leaving it |
+| 🎃 Pumpkin | ultimate | Screen-wide blast, **limited charges**, damages (not one-shots) the boss — last slot, key `0` |
 
-Pies unlock as you progress (Apple/Cherry/Blueberry/Pumpkin from the start; Lemon/Strawberry
-early; Meat/Mushroom mid; Chocolate/Chili later).
+Pies unlock as you progress (Apple/Cherry/Blueberry from the start, plus the Pumpkin ultimate on
+key `0`; Lemon/Strawberry early; Meat/Mushroom mid; Chocolate/Chili later).
 
 ## Wave structure
 

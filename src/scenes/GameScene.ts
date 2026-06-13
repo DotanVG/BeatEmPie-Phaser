@@ -4,6 +4,7 @@ import { TEX, AUDIO } from '../utils/assetKeys';
 import { GameEvents } from '../game/GameEvents';
 import { SCORING } from '../data/balance';
 import { distance } from '../utils/math';
+import { withEmojiPadding } from '../utils/text';
 
 import { Player } from '../entities/Player';
 import { Enemy } from '../entities/Enemy';
@@ -181,14 +182,22 @@ export class GameScene extends Phaser.Scene {
     const cx = GAME_WIDTH / 2;
     const cy = 360;
     const titleText = this.add
-      .text(cx, cy, title, {
-        fontFamily: 'Trebuchet MS, sans-serif',
-        fontSize: '96px',
-        color,
-        fontStyle: 'bold',
-        stroke: '#0b0d2b',
-        strokeThickness: 10,
-      })
+      .text(
+        cx,
+        cy,
+        title,
+        withEmojiPadding(
+          {
+            fontFamily: 'Trebuchet MS, sans-serif',
+            fontSize: '96px',
+            color,
+            fontStyle: 'bold',
+            stroke: '#0b0d2b',
+            strokeThickness: 10,
+          },
+          96,
+        ),
+      )
       .setOrigin(0.5)
       .setDepth(DEPTHS.UI_TOP)
       .setScrollFactor(0);

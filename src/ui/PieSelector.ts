@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { DEPTHS, GAME_WIDTH, GAME_HEIGHT } from '../game/constants';
+import { emojiText } from '../utils/text';
+import { squash } from '../utils/animation';
 import type { PieSystem } from '../systems/PieSystem';
 
 interface Slot {
@@ -14,10 +16,13 @@ interface Slot {
 export class PieSelector {
   private overlay: Phaser.GameObjects.Graphics;
   private slots: Slot[] = [];
-  private readonly size = 104;
+  private readonly size = 116;
   private readonly gap = 14;
+  private scene: Phaser.Scene;
+  private lastSelected = -1;
 
   constructor(scene: Phaser.Scene, private pies: PieSystem) {
+    this.scene = scene;
     const count = pies.pies.length;
     const totalW = count * this.size + (count - 1) * this.gap;
     const startX = (GAME_WIDTH - totalW) / 2;
@@ -37,9 +42,7 @@ export class PieSelector {
         .setInteractive({ useHandCursor: true });
       hit.on('pointerdown', () => this.pies.selectIndex(i));
 
-      const emoji = scene.add
-        .text(cx, y + this.size / 2 - 6, pie.emoji, { fontSize: '46px' })
-        .setOrigin(0.5)
+      const emoji = emojiText(scene, cx, y + this.size / 2, pie.emoji, 58)
         .setDepth(DEPTHS.UI_TOP)
         .setScrollFactor(0);
 
@@ -71,6 +74,13 @@ export class PieSelector {
   }
 
   update(): void {
+    // Pop the newly selected slot's icon.
+    if (this.pies.selectedIndex !== this.lastSelected) {
+      this.lastSelected = this.pies.selectedIndex;
+      const sel = this.slots[this.pies.selectedIndex];
+      if (sel) squash(this.scene, sel.emoji, 1, 1, 0.22);
+    }
+
     this.overlay.clear();
     this.slots.forEach((slot, i) => {
       const pie = this.pies.pies[i];

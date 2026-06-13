@@ -100,6 +100,16 @@ export class PieSystem {
     return this.attemptDrop({ x: px, y: py });
   }
 
+  /**
+   * Drop at a pointer location (mouse click or mobile screen tap), gated to the playable
+   * vertical band. Shared by InputSystem (mouse) and TouchControls (touch) so both behave
+   * identically.
+   */
+  dropAtScreenPoint(worldX: number, worldY: number): boolean {
+    if (worldY < ARENA.minY - 240 || worldY > ARENA.maxY + 80) return false;
+    return this.dropAtPoint(worldX, worldY);
+  }
+
   /** Drop the selected pie auto-targeting the nearest enemy / in front (space bar). */
   dropAuto(): boolean {
     return this.attemptDrop();

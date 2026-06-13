@@ -47,9 +47,9 @@ See [docs/CONTROLS.md](docs/CONTROLS.md) for the full reference.
 | 5 | 🍓 Strawberry Pie | Homing — locks onto the nearest enemy, cannot miss |
 | 6 | 🥩 Meat Pie | Heavy — massive damage, slow charge, cracks the ground |
 | 7 | 🍄 Mushroom Pie | Confusion — enemies turn and attack their own allies |
-| 8 | 🎃 Pumpkin Pie | Ultimate — screen-wide blast, very limited charges |
-| 9 | 🍫 Chocolate Pie | DOT — leaves a puddle that slows and damages over time |
-| 10 | 🌶️ Chili Pie | Fire Trail — a burning lane that scorches enemies who cross it |
+| 8 | 🍫 Chocolate Pie | DOT — leaves a puddle that slows and damages over time |
+| 9 | 🌶️ Chili Pie | Fire Trail — a burning lane that scorches enemies who cross it |
+| 0 | 🎃 Pumpkin Pie | Ultimate — screen-wide blast, very limited charges (key `0`) |
 
 ## 🚀 Setup
 

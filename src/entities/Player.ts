@@ -6,6 +6,7 @@ import { GameEvents } from '../game/GameEvents';
 import { TEX, AUDIO } from '../utils/assetKeys';
 import { Cooldown } from '../utils/timers';
 import { hitFlash } from '../utils/animation';
+import { facingFromDelta, flipForFacing } from '../utils/direction';
 import type { Facing } from '../utils/direction';
 
 /**
@@ -168,8 +169,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       const len = Math.hypot(this.moveX, this.moveY);
       if (len > 0) {
         this.setVelocity((this.moveX / len) * PLAYER.speed, (this.moveY / len) * PLAYER.speed);
-        if (this.moveX < -0.1) this.facing = 'left';
-        else if (this.moveX > 0.1) this.facing = 'right';
+        // Face the horizontal movement direction (scaled so the touch joystick's fractional
+        // values still register through facingFromDelta's ±1 threshold).
+        this.facing = facingFromDelta(this.moveX * 100, this.facing);
       } else {
         this.setVelocity(0, 0);
       }
@@ -181,7 +183,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private updatePose(deltaMs: number): void {
-    this.setFlipX(this.facing === 'left');
+    this.setFlipX(flipForFacing(this.facing));
 
     if (this.callPoseTimer > 0) {
       this.callPoseTimer -= deltaMs;

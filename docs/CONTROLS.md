@@ -6,7 +6,7 @@
 |--------|--------|
 | `W` `A` `S` `D` or Arrow keys | Move Shushki |
 | `Space` | Drop the selected pie on the nearest enemy (or in front if none) |
-| `1` `2` `3` `4` `5` `6` `7` `8` `9` `0` | Select pies 1–10 |
+| `1` `2` `3` `4` `5` `6` `7` `8` `9` `0` | Select pies (key `0` is the 🎃 Pumpkin ultimate) |
 | `Q` | Cycle to the previous pie |
 | `E` | Cycle to the next pie |
 | `Shift` | Dash (short invulnerable burst, has a cooldown) |
