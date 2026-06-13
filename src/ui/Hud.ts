@@ -6,6 +6,7 @@ import { HealthBar } from './HealthBar';
 import { BossHealthBar } from './BossHealthBar';
 import { CooldownMeter } from './CooldownMeter';
 import { PieSelector } from './PieSelector';
+import { withEmojiPadding } from '../utils/text';
 
 const UI_FONT = 'Trebuchet MS, Segoe UI, sans-serif';
 
@@ -82,19 +83,27 @@ export class Hud {
       .setScrollFactor(0);
 
     this.selectedText = scene.add
-      .text(GAME_WIDTH / 2, 902, '', {
-        fontFamily: UI_FONT,
-        fontSize: '30px',
-        color: '#fff4d6',
-        fontStyle: 'bold',
-        stroke: '#0b0d2b',
-        strokeThickness: 4,
-      })
+      .text(
+        GAME_WIDTH / 2,
+        884,
+        '',
+        withEmojiPadding(
+          {
+            fontFamily: UI_FONT,
+            fontSize: '30px',
+            color: '#fff4d6',
+            fontStyle: 'bold',
+            stroke: '#0b0d2b',
+            strokeThickness: 4,
+          },
+          30,
+        ),
+      )
       .setOrigin(0.5)
       .setDepth(DEPTHS.UI_TOP)
       .setScrollFactor(0);
 
-    this.pieCooldown = new CooldownMeter(scene, GAME_WIDTH / 2 - 130, 930, 260, 14);
+    this.pieCooldown = new CooldownMeter(scene, GAME_WIDTH / 2 - 130, 912, 260, 14);
     this.bossBar = new BossHealthBar(scene);
     this.selector = new PieSelector(scene, scene.pies);
 

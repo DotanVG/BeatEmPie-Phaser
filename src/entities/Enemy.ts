@@ -5,6 +5,7 @@ import { DEPTHS } from '../game/constants';
 import { GameEvents } from '../game/GameEvents';
 import { StatusController, StatusApply } from './StatusController';
 import { hitFlash } from '../utils/animation';
+import { emojiText } from '../utils/text';
 import { SCORING } from '../data/balance';
 
 export interface DamageOpts {
@@ -222,10 +223,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       return;
     }
     if (!this.statusText) {
-      this.statusText = this.gscene.add
-        .text(this.x, this.y, icon, { fontSize: '30px' })
-        .setOrigin(0.5)
-        .setDepth(DEPTHS.FLOATING_TEXT);
+      this.statusText = emojiText(this.gscene, this.x, this.y, icon, 30).setDepth(DEPTHS.FLOATING_TEXT);
     }
     this.statusText.setText(icon).setVisible(true).setPosition(this.x, this.y - this.displayHeight * 0.62);
   }

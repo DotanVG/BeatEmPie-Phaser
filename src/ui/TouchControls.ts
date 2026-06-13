@@ -1,11 +1,14 @@
 import Phaser from 'phaser';
 import type { GameScene } from '../scenes/GameScene';
 import { DEPTHS, GAME_WIDTH, GAME_HEIGHT } from '../game/constants';
+import { GameEvents } from '../game/GameEvents';
+import { emojiText } from '../utils/text';
 
 /**
- * Optional on-screen controls for touch devices: a dynamic left-side virtual
- * joystick (movement) plus DROP / DASH buttons on the right. Pie selection uses
- * the bottom selector slots (already tappable).
+ * On-screen controls for touch devices: a dynamic left-side virtual joystick (movement),
+ * DROP / DASH buttons and a prev/next pie toggle on the right. Tapping anywhere else in the
+ * playfield drops the selected pie at that point (mirrors a PC mouse click); the DROP button
+ * auto-targets the nearest enemy (mirrors Space). Pie selection also works via the bottom slots.
  */
 export class TouchControls {
   private moveVec = { x: 0, y: 0 };
@@ -15,6 +18,9 @@ export class TouchControls {
   private readonly radius = 130;
   private enabled = true;
   private buttons: { circle: Phaser.GameObjects.Arc; text: Phaser.GameObjects.Text }[] = [];
+  /** Circular keep-out zones (control buttons) where a tap must NOT drop a pie. */
+  private controlZones: { x: number; y: number; r: number }[] = [];
+  private midEmoji!: Phaser.GameObjects.Text;
 
   constructor(private scene: GameScene) {
     this.base = scene.add
@@ -32,6 +38,16 @@ export class TouchControls {
     this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 200, 110, '🥧', 0xff6a4d, () => scene.pies.dropAuto());
     this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 430, 84, '💨', 0x4f8cff, () => scene.player.tryDash());
 
+    // Prev / next pie toggle above the dash button, with the current pie between the arrows.
+    const togY = GAME_HEIGHT - 590;
+    this.makeButton(GAME_WIDTH - 320, togY, 46, '↶', 0x6a6fae, () => scene.pies.cyclePie(-1));
+    this.makeButton(GAME_WIDTH - 80, togY, 46, '↷', 0x6a6fae, () => scene.pies.cyclePie(1));
+    this.midEmoji = emojiText(scene, GAME_WIDTH - 200, togY, scene.pies.selectedPie.emoji, 52)
+      .setDepth(DEPTHS.UI_TOP)
+      .setScrollFactor(0);
+    this.controlZones.push({ x: GAME_WIDTH - 200, y: togY, r: 50 });
+    scene.bus.on(GameEvents.PIE_SELECTED, () => this.midEmoji.setText(scene.pies.selectedPie.emoji));
+
     scene.input.on('pointerdown', this.onDown, this);
     scene.input.on('pointermove', this.onMove, this);
     scene.input.on('pointerup', this.onUp, this);
@@ -45,9 +61,7 @@ export class TouchControls {
       .setDepth(DEPTHS.UI_TOP)
       .setScrollFactor(0)
       .setInteractive({ useHandCursor: true });
-    const text = this.scene.add
-      .text(x, y, label, { fontSize: `${Math.round(r * 0.8)}px` })
-      .setOrigin(0.5)
+    const text = emojiText(this.scene, x, y, label, Math.round(r * 0.8))
       .setDepth(DEPTHS.UI_TOP)
       .setScrollFactor(0);
     btn.on('pointerdown', (_p: Phaser.Input.Pointer, _lx: number, _ly: number, e: Phaser.Types.Input.EventData) => {
@@ -56,6 +70,7 @@ export class TouchControls {
       action();
     });
     this.buttons.push({ circle: btn, text });
+    this.controlZones.push({ x, y, r });
   }
 
   /**
@@ -65,11 +80,11 @@ export class TouchControls {
    */
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
-    // Always reset the joystick — a held thumb shouldn't survive a pause.
     this.joyPointerId = -1;
     this.moveVec = { x: 0, y: 0 };
     this.base.setVisible(false);
     this.thumb.setVisible(false);
+    this.midEmoji.setVisible(enabled);
     for (const { circle, text } of this.buttons) {
       circle.setVisible(enabled);
       text.setVisible(enabled);
@@ -80,12 +95,25 @@ export class TouchControls {
 
   private onDown(pointer: Phaser.Input.Pointer): void {
     if (!this.enabled) return;
-    // Activate the joystick only for touches starting in the lower-left region.
-    if (this.joyPointerId >= 0) return;
-    if (pointer.x > GAME_WIDTH * 0.45 || pointer.y < GAME_HEIGHT * 0.35) return;
-    this.joyPointerId = pointer.id;
-    this.base.setPosition(pointer.x, pointer.y).setVisible(true);
-    this.thumb.setPosition(pointer.x, pointer.y).setVisible(true);
+
+    // Joystick: a touch starting in the lower-left region.
+    if (this.joyPointerId < 0 && pointer.x <= GAME_WIDTH * 0.45 && pointer.y >= GAME_HEIGHT * 0.35) {
+      this.joyPointerId = pointer.id;
+      this.base.setPosition(pointer.x, pointer.y).setVisible(true);
+      this.thumb.setPosition(pointer.x, pointer.y).setVisible(true);
+      return;
+    }
+
+    // A tap on a control button is handled by that button — don't also drop a pie.
+    for (const z of this.controlZones) {
+      if (Math.hypot(pointer.x - z.x, pointer.y - z.y) <= z.r + 8) return;
+    }
+    // Leave the bottom selector bar to its own slot taps.
+    if (pointer.y >= GAME_HEIGHT - 140) return;
+    if (this.scene.isInputLocked) return;
+
+    // Otherwise: tap-to-drop at that point, exactly like a PC left-click.
+    this.scene.pies.dropAtScreenPoint(pointer.worldX, pointer.worldY);
   }
 
   private onMove(pointer: Phaser.Input.Pointer): void {

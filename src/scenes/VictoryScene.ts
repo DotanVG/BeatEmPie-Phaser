@@ -3,6 +3,8 @@ import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../game/constants';
 import { TEX, AUDIO } from '../utils/assetKeys';
 import { AudioSystem } from '../systems/AudioSystem';
 import { makeButton } from '../ui/Button';
+import { emojiText, withEmojiPadding } from '../utils/text';
+import { popIn } from '../utils/animation';
 
 interface ResultData {
   score: number;
@@ -28,14 +30,22 @@ export class VictoryScene extends Phaser.Scene {
     const cx = GAME_WIDTH / 2;
 
     this.add
-      .text(cx, 230, '🥧 VICTORY! 🐋', {
-        fontFamily: 'Trebuchet MS, sans-serif',
-        fontSize: '110px',
-        color: COLORS.goldHex,
-        fontStyle: 'bold',
-        stroke: '#0b0d2b',
-        strokeThickness: 10,
-      })
+      .text(
+        cx,
+        230,
+        '🥧 VICTORY! 🐋',
+        withEmojiPadding(
+          {
+            fontFamily: 'Trebuchet MS, sans-serif',
+            fontSize: '110px',
+            color: COLORS.goldHex,
+            fontStyle: 'bold',
+            stroke: '#0b0d2b',
+            strokeThickness: 10,
+          },
+          110,
+        ),
+      )
       .setOrigin(0.5);
 
     this.add
@@ -56,12 +66,20 @@ export class VictoryScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(cx, 540, data.record ? '🏆 NEW BEST SCORE!' : `Best  ${data.highScore}`, {
-        fontFamily: 'Trebuchet MS, sans-serif',
-        fontSize: '36px',
-        color: data.record ? '#6ee7a8' : '#9aa0c0',
-        fontStyle: 'bold',
-      })
+      .text(
+        cx,
+        540,
+        data.record ? '🏆 NEW BEST SCORE!' : `Best  ${data.highScore}`,
+        withEmojiPadding(
+          {
+            fontFamily: 'Trebuchet MS, sans-serif',
+            fontSize: '36px',
+            color: data.record ? '#6ee7a8' : '#9aa0c0',
+            fontStyle: 'bold',
+          },
+          36,
+        ),
+      )
       .setOrigin(0.5);
 
     // Confetti of pies.
@@ -70,7 +88,7 @@ export class VictoryScene extends Phaser.Scene {
       loop: true,
       callback: () => {
         const x = Phaser.Math.Between(100, GAME_WIDTH - 100);
-        const pie = this.add.text(x, -40, '🥧', { fontSize: '48px' }).setDepth(50);
+        const pie = emojiText(this, x, -40, '🥧', 48).setDepth(50);
         this.tweens.add({
           targets: pie,
           y: GAME_HEIGHT + 60,
@@ -81,8 +99,12 @@ export class VictoryScene extends Phaser.Scene {
       },
     });
 
-    makeButton(this, cx - 220, 720, '↻  Play Again', () => this.restart(), { width: 380 });
-    makeButton(this, cx + 220, 720, '☰  Menu', () => this.toMenu(), { width: 380 });
+    const again = makeButton(this, cx - 220, 720, '↻  Play Again', () => this.restart(), { width: 380 });
+    const menu = makeButton(this, cx + 220, 720, '☰  Menu', () => this.toMenu(), { width: 380 });
+    [again, menu].forEach((b, i) => {
+      b.setScale(0);
+      this.time.delayedCall(120 + i * 90, () => popIn(this, b, 1, 240));
+    });
 
     this.input.keyboard?.once('keydown-R', () => this.restart());
   }
