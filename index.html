@@ -20,6 +20,7 @@
       html,
       body {
         width: 100%;
+        width: 100dvw;
         height: 100%;
         overflow: hidden;
         background: #0b0d2b;
@@ -33,7 +34,12 @@
         overscroll-behavior: none;
       }
       #game-root {
+        position: fixed;
+        inset: 0;
         width: 100vw;
+        width: 100dvw;
+        min-width: 100vw;
+        min-width: 100dvw;
         height: 100vh;
         /* dvh tracks the URL-bar-adjusted viewport on modern mobile; vh is the fallback. */
         height: 100dvh;
@@ -58,6 +64,69 @@
         letter-spacing: 0.1em;
         pointer-events: none;
         z-index: 10;
+      }
+      #fullscreen-btn {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 0px) + 18px);
+        right: calc(env(safe-area-inset-right, 0px) + 18px);
+        width: 58px;
+        height: 58px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(11, 13, 43, 0.42);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        cursor: pointer;
+        z-index: 9000;
+        transition: transform 160ms ease, background 160ms ease;
+      }
+      #fullscreen-btn:hover {
+        background: rgba(58, 43, 107, 0.62);
+        transform: scale(1.06);
+      }
+      #fullscreen-btn:active {
+        transform: scale(0.96);
+      }
+      #fullscreen-btn .fs-corner {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-color: #ffe08a;
+        border-style: solid;
+        transition: transform 180ms ease;
+      }
+      #fullscreen-btn .tl {
+        top: 14px;
+        left: 14px;
+        border-width: 3px 0 0 3px;
+      }
+      #fullscreen-btn .tr {
+        top: 14px;
+        right: 14px;
+        border-width: 3px 3px 0 0;
+      }
+      #fullscreen-btn .bl {
+        bottom: 14px;
+        left: 14px;
+        border-width: 0 0 3px 3px;
+      }
+      #fullscreen-btn .br {
+        right: 14px;
+        bottom: 14px;
+        border-width: 0 3px 3px 0;
+      }
+      #fullscreen-btn[data-active='true'] .tl {
+        transform: translate(5px, 5px);
+      }
+      #fullscreen-btn[data-active='true'] .tr {
+        transform: translate(-5px, 5px);
+      }
+      #fullscreen-btn[data-active='true'] .bl {
+        transform: translate(5px, -5px);
+      }
+      #fullscreen-btn[data-active='true'] .br {
+        transform: translate(-5px, -5px);
       }
 
       /* --- Landscape-only gate: animated "rotate your device" overlay --------- */
@@ -84,15 +153,42 @@
           display: flex;
         }
       }
+      #rotate-gate .phone-wrap {
+        position: relative;
+        width: 220px;
+        height: 220px;
+      }
+      #rotate-gate .turn-ring {
+        position: absolute;
+        inset: 18px;
+        border-radius: 50%;
+        border: 4px solid rgba(255, 224, 138, 0.26);
+        border-right-color: #ffe08a;
+        border-bottom-color: transparent;
+        animation: turn-ring 2.2s linear infinite;
+      }
+      #rotate-gate .turn-ring::after {
+        content: '';
+        position: absolute;
+        top: 14px;
+        right: 18px;
+        width: 16px;
+        height: 16px;
+        border-top: 4px solid #ffe08a;
+        border-right: 4px solid #ffe08a;
+        transform: rotate(28deg);
+      }
       #rotate-gate .phone {
         position: relative;
+        margin: 40px auto 0;
         width: 78px;
         height: 140px;
         border: 6px solid #ffe08a;
         border-radius: 16px;
         background: rgba(255, 224, 138, 0.08);
         transform-origin: center;
-        animation: rotate-hint 2.4s ease-in-out infinite;
+        animation: rotate-hint 2.2s cubic-bezier(0.55, 0.05, 0.45, 0.95) infinite;
+        will-change: transform;
       }
       /* Speaker bar + home dot drawn with pseudo-elements — no image assets. */
       #rotate-gate .phone::before {
@@ -131,19 +227,36 @@
       }
       @keyframes rotate-hint {
         0%,
-        28% {
-          transform: rotate(0deg);
+        24% {
+          transform: translateY(0) rotate(0deg) scale(1);
         }
-        55%,
+        50%,
         80% {
-          transform: rotate(-90deg);
+          transform: translateY(6px) rotate(-90deg) scale(1.04);
         }
         100% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+      }
+      @keyframes turn-ring {
+        from {
           transform: rotate(0deg);
+          opacity: 0.7;
+        }
+        50% {
+          opacity: 1;
+        }
+        to {
+          transform: rotate(360deg);
+          opacity: 0.7;
         }
       }
       /* Respect reduced-motion: hold the device in landscape, no spin. */
       @media (prefers-reduced-motion: reduce) {
+        #rotate-gate .turn-ring {
+          animation: none;
+          transform: rotate(28deg);
+        }
         #rotate-gate .phone {
           animation: none;
           transform: rotate(-90deg);
@@ -155,8 +268,17 @@
     <div id="game-root">
       <div id="boot-loader">Heating the ovens… 🥧</div>
     </div>
+    <button id="fullscreen-btn" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
+      <span class="fs-corner tl" aria-hidden="true"></span>
+      <span class="fs-corner tr" aria-hidden="true"></span>
+      <span class="fs-corner bl" aria-hidden="true"></span>
+      <span class="fs-corner br" aria-hidden="true"></span>
+    </button>
     <div id="rotate-gate" aria-hidden="true">
-      <div class="phone"></div>
+      <div class="phone-wrap">
+        <div class="turn-ring"></div>
+        <div class="phone"></div>
+      </div>
       <p class="rotate-msg">Rotate your device to play 🥧</p>
       <p class="rotate-sub">BeatEmPie is best in landscape</p>
     </div>

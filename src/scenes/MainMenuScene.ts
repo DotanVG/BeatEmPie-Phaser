@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../game/constants';
+import { GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTHS } from '../game/constants';
 import { TEX, AUDIO } from '../utils/assetKeys';
 import { AudioSystem } from '../systems/AudioSystem';
 import { SaveSystem } from '../systems/SaveSystem';
@@ -7,10 +7,24 @@ import { PIE_TYPES } from '../data/pieTypes';
 import { makeButton } from '../ui/Button';
 import { emojiText, withEmojiPadding } from '../utils/text';
 import { popIn, pulse } from '../utils/animation';
+import { stepFloaters, type MenuFloaterBounds, type MenuFloaterState } from '../utils/menuFloaters';
+
+interface MenuFloater {
+  text: Phaser.GameObjects.Text;
+  spinDegPerSecond: number;
+  state: MenuFloaterState;
+}
 
 /** Title screen: pitch, play button, controls, high score and a mute toggle. */
 export class MainMenuScene extends Phaser.Scene {
   private audio!: AudioSystem;
+  private floaters: MenuFloater[] = [];
+  private readonly floaterBounds: MenuFloaterBounds = {
+    minX: 40,
+    maxX: GAME_WIDTH - 40,
+    minY: 60,
+    maxY: GAME_HEIGHT - 60,
+  };
 
   constructor() {
     super('MainMenuScene');
@@ -106,33 +120,74 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard?.once('keydown-SPACE', () => this.startGame());
   }
 
-  /** Slow drifting/bobbing pies behind the menu content for a little life. */
+  update(_time: number, delta: number): void {
+    if (this.floaters.length === 0) return;
+
+    const stepped = stepFloaters(
+      this.floaters.map((floater) => floater.state),
+      this.floaterBounds,
+      Math.min(delta / 1000, 1 / 30),
+    );
+
+    stepped.forEach((state, index) => {
+      const floater = this.floaters[index];
+      floater.state = state;
+      floater.text.setPosition(state.x, state.y);
+      floater.text.angle += floater.spinDegPerSecond * (delta / 1000);
+    });
+  }
+
+  /** Menu pies fly around the full screen and bounce off walls and each other. */
   private buildFloatingPies(): void {
-    const pies = PIE_TYPES.map((p) => p.emoji);
-    for (let i = 0; i < 7; i++) {
-      const x = Phaser.Math.Between(120, GAME_WIDTH - 120);
-      const y = Phaser.Math.Between(160, GAME_HEIGHT - 160);
-      const e = emojiText(this, x, y, pies[i % pies.length], Phaser.Math.Between(40, 72))
-        .setAlpha(0.16)
-        .setDepth(-1);
-      this.tweens.add({
-        targets: e,
-        y: y - Phaser.Math.Between(26, 60),
-        duration: Phaser.Math.Between(2600, 4200),
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-        delay: i * 180,
-      });
-      this.tweens.add({
-        targets: e,
-        angle: Phaser.Math.Between(-12, 12),
-        duration: Phaser.Math.Between(3000, 5000),
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
+    const totalFloaters = 14;
+    const pieEmojis = PIE_TYPES.map((pie) => pie.emoji);
+
+    for (let i = 0; i < totalFloaters; i++) {
+      const size = Phaser.Math.Between(46, 88);
+      const radius = Math.round(size * 0.42);
+      const state = this.placeFloater(radius);
+      state.vx = Phaser.Math.FloatBetween(-180, 180);
+      state.vy = Phaser.Math.FloatBetween(-150, 150);
+
+      const text = emojiText(this, state.x, state.y, pieEmojis[i % pieEmojis.length], size)
+        .setAlpha(0.24)
+        .setDepth(DEPTHS.BACKGROUND + 1);
+
+      this.floaters.push({
+        text,
+        state,
+        spinDegPerSecond: Phaser.Math.FloatBetween(-22, 22),
       });
     }
+  }
+
+  private placeFloater(radius: number): MenuFloaterState {
+    let candidate: MenuFloaterState = {
+      x: GAME_WIDTH / 2,
+      y: GAME_HEIGHT / 2,
+      vx: 0,
+      vy: 0,
+      radius,
+    };
+
+    for (let attempt = 0; attempt < 40; attempt++) {
+      candidate = {
+        x: Phaser.Math.Between(this.floaterBounds.minX + radius, this.floaterBounds.maxX - radius),
+        y: Phaser.Math.Between(this.floaterBounds.minY + radius, this.floaterBounds.maxY - radius),
+        vx: 0,
+        vy: 0,
+        radius,
+      };
+
+      const overlaps = this.floaters.some((floater) => {
+        const dx = floater.state.x - candidate.x;
+        const dy = floater.state.y - candidate.y;
+        return Math.hypot(dx, dy) < floater.state.radius + candidate.radius + 24;
+      });
+      if (!overlaps) break;
+    }
+
+    return candidate;
   }
 
   private buildMuteToggle(): void {

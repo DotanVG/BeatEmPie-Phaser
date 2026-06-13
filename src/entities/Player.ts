@@ -30,6 +30,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private invulnTimer = 0;
   private callPoseTimer = 0;
   private walkPhase = 0;
+  private walkFrameTimer = 0;
+  private walkFrame = 0;
   private baseScale = 0.82;
   private dead = false;
 
@@ -200,9 +202,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (moving) {
       this.walkPhase += deltaMs / 90;
-      this.setTexture(TEX.shushkiWalk);
+      this.walkFrameTimer += deltaMs;
+      if (this.walkFrameTimer >= 120) {
+        this.walkFrameTimer = 0;
+        this.walkFrame = this.walkFrame === 0 ? 1 : 0;
+      }
+      this.setTexture(this.walkFrame === 0 ? TEX.shushkiIdle : TEX.shushkiWalk);
       this.setScale(this.baseScale, this.baseScale * (1 + Math.sin(this.walkPhase) * 0.05));
     } else {
+      this.walkPhase = 0;
+      this.walkFrameTimer = 0;
+      this.walkFrame = 0;
       this.setTexture(TEX.shushkiIdle);
       this.setScale(this.baseScale);
     }

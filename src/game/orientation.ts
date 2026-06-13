@@ -68,6 +68,7 @@ export function installOrientationGate(game: Phaser.Game): void {
     });
   };
   window.visualViewport?.addEventListener('resize', queueRefresh);
+  window.addEventListener('resize', queueRefresh);
   window.addEventListener('orientationchange', queueRefresh);
 
   // Sync once at boot: if we load straight into portrait, suspend audio immediately.

@@ -7,7 +7,7 @@ export function facingFromDelta(dx: number, previous: Facing): Facing {
   return previous;
 }
 
-/** Phaser flipX value for a given facing (sprites authored facing right). */
+/** Phaser flipX value for a given facing (sprites authored facing left). */
 export function flipForFacing(facing: Facing): boolean {
-  return facing === 'left';
+  return facing === 'right';
 }

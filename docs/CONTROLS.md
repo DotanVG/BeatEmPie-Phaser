@@ -13,6 +13,7 @@
 | `P` or `Esc` | Pause / resume |
 | `R` | Restart (on the Game Over / Victory screen) |
 | `Enter` / `Space` | Start the game (on the main menu) |
+| Top-right fullscreen button | Toggle fullscreen when the browser supports it |
 
 ## Mouse
 
@@ -37,6 +38,8 @@ automatically on touch devices.
 
 ## Notes
 
+- The semi-transparent top-right fullscreen button is available on both desktop and touch
+  layouts when the current browser supports the Fullscreen API.
 - Pies are **sky-drop attacks**: a warning marker shows where the pie will land, then it
   falls from above and impacts after a short delay (longer for the heavy Meat Pie).
 - Targeting depends on the pie: ground-target pies land at your cursor / nearest enemy,
