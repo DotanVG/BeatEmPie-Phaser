@@ -198,9 +198,9 @@
         align-items: center;
         justify-content: center;
       }
-      /* The arrow is a STATIC SVG — static SVG paths render correctly on iOS
-         Safari; only *animated* SVG (CSS keyframes / SMIL) froze. Its glow is
-         pulsed by the rAF loop below, never by the CSS animation engine. */
+      /* The arrow SVG is static — its opacity is driven by the rAF loop at the
+         end of <body>, not by CSS animations (which freeze on mobile browsers
+         when Phaser holds the compositor). */
       #rotate-gate .rotate-arc {
         position: absolute;
         inset: 0;
@@ -209,17 +209,11 @@
         overflow: visible;
         opacity: 0.4;
         will-change: opacity;
-        animation: arc-pulse 3s ease-in-out infinite;
       }
-      /* The phone is a plain HTML <div>, NOT an SVG group, animated by a CSS
-         keyframe rotation. This is the key change from every prior (failed)
-         attempt: those all froze on mobile Safari because they animated an SVG
-         — `transform-box: fill-box`/`view-box` and SMIL only apply to SVG and
-         each silently stalled on iOS. A regular block element has none of those
-         quirks: `transform` rotates around `transform-origin` on the border-box
-         the way it does everywhere, and the keyframe clock starts the moment
-         the gate flips from `display:none` to `display:flex`. Kept class
-         `.phone` so unit tests keep matching it. */
+      /* The phone is a plain HTML <div>. Its transform is set imperatively each
+         frame by the rAF loop at the end of <body> — JS-driven transforms are
+         bulletproof on mobile Chrome/Firefox/Safari where CSS keyframe animations
+         can silently freeze when Phaser's WebGL context holds the compositor. */
       #rotate-gate .phone {
         position: relative;
         width: clamp(60px, 18vw, 76px);
@@ -232,24 +226,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        animation: phone-tilt 3s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-      }
-      /* Portrait (0deg) -> landscape (90deg), brief hold, ease back — a seamless
-         rock demonstrating the gesture. Plain-element transform: rock solid on
-         iOS Safari + Chrome. */
-      @keyframes phone-tilt {
-        0%, 12% { transform: rotate(0deg); }
-        45%, 72% { transform: rotate(90deg); }
-        100% { transform: rotate(0deg); }
-      }
-      @keyframes arc-pulse {
-        0%, 12% { opacity: 0.2; }
-        40%, 55% { opacity: 0.95; }
-        80%, 100% { opacity: 0.2; }
       }
       @media (prefers-reduced-motion: reduce) {
-        #rotate-gate .phone { animation: none; transform: rotate(90deg); }
-        #rotate-gate .rotate-arc { animation: none; opacity: 0.55; }
+        #rotate-gate .phone { transform: rotate(90deg); }
+        #rotate-gate .rotate-arc { opacity: 0.55; }
       }
       #rotate-gate .phone-screen {
         width: 74%;
@@ -325,6 +305,60 @@
       </div>
     </div>
     <script type="module" src="/src/game/main.ts"></script>
+    <!-- rAF loop: drives phone rotation + arc opacity imperatively so Phaser's
+         compositor can never freeze them the way it freezes CSS keyframe animations. -->
+    <script>
+      (function () {
+        var CYCLE = 3000;
+        var gate = document.getElementById('rotate-gate');
+        if (!gate) return;
+        var phone = gate.querySelector('.phone');
+        var arc = gate.querySelector('.rotate-arc');
+        if (!phone || !arc) return;
+        var html = document.documentElement;
+        var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        function smoothstep(t) { return t * t * (3 - 2 * t); }
+
+        function phoneDeg(elapsed) {
+          var t = (elapsed % CYCLE) / CYCLE;
+          if (t < 0.12) return 0;
+          if (t < 0.45) return smoothstep((t - 0.12) / 0.33) * 90;
+          if (t < 0.72) return 90;
+          return (1 - smoothstep((t - 0.72) / 0.28)) * 90;
+        }
+
+        function arcOpacity(elapsed) {
+          var t = (elapsed % CYCLE) / CYCLE;
+          if (t < 0.12) return 0.2;
+          if (t < 0.40) return 0.2 + smoothstep((t - 0.12) / 0.28) * 0.75;
+          if (t < 0.55) return 0.95;
+          if (t < 0.80) return 0.95 - smoothstep((t - 0.55) / 0.25) * 0.75;
+          return 0.2;
+        }
+
+        var startTime = null;
+
+        function tick(now) {
+          requestAnimationFrame(tick);
+          if (html.dataset.rotateGate !== 'active') {
+            startTime = null; // reset so animation restarts fresh next time gate opens
+            return;
+          }
+          if (prefersReduced.matches) {
+            phone.style.transform = 'rotate(90deg)';
+            arc.style.opacity = '0.55';
+            return;
+          }
+          if (startTime === null) startTime = now;
+          var elapsed = now - startTime;
+          phone.style.transform = 'rotate(' + phoneDeg(elapsed).toFixed(1) + 'deg)';
+          arc.style.opacity = arcOpacity(elapsed).toFixed(3);
+        }
+
+        requestAnimationFrame(tick);
+      })();
+    </script>
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
