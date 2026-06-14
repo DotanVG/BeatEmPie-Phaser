@@ -46,15 +46,6 @@ export function installOrientationGate(game: Phaser.Game): void {
     return active;
   };
 
-  const restartRotateHint = (): void => {
-    const animatedNodes = document.querySelectorAll<HTMLElement>('#rotate-gate .phone');
-    for (const node of animatedNodes) {
-      node.style.animation = 'none';
-      void node.offsetWidth;
-      node.style.animation = '';
-    }
-  };
-
   const syncScale = (): void => {
     game.scale.updateBounds();
     game.scale.refresh();
@@ -95,7 +86,10 @@ export function installOrientationGate(game: Phaser.Game): void {
 
     if (active !== rotateGateActive) {
       if (active) {
-        restartRotateHint();
+        // The rotate-gate phone animates via a plain CSS keyframe rotation on a
+        // <div> (see index.html); its keyframe clock starts on its own when the
+        // gate flips from display:none to display:flex, so no per-show restart
+        // hook is needed here.
         onEnterPortrait();
       } else {
         onEnterLandscape();
