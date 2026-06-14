@@ -51,7 +51,20 @@ export function installOrientationGate(game: Phaser.Game): void {
     game.scale.refresh();
   };
 
+  const restartPhoneAnimation = (): void => {
+    const gate = document.getElementById('rotate-gate');
+    const phone = gate?.querySelector('.phone') as HTMLElement | null;
+    if (phone) {
+      phone.style.animation = 'none';
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      phone.offsetHeight; // force reflow so the browser registers the animation reset
+      phone.style.animation = '';
+    }
+  };
+
   const onEnterPortrait = (): void => {
+    restartPhoneAnimation();
+
     // Suspend audio for whatever scene is up (menu music included). Skip while the audio
     // context is still locked — it has nothing to pause yet and unlocks on first tap.
     if (!game.sound.locked) {
