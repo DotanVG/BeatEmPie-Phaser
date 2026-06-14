@@ -185,50 +185,47 @@
         height: clamp(140px, 44vw, 200px);
         overflow: visible;
       }
-      /* The phone body is the only animated node — kept as `.phone` so the
-         JS animation-restart hook (and unit tests) keep matching it. */
+      /* The phone is the animated node — kept as `.phone` so the JS restart
+         helper (and unit tests) keep matching it. We animate via CSS keyframes
+         (not SMIL): CSS animations reliably (re)start when the gate flips from
+         `display:none` to `display:flex`, whereas an SVG's SMIL clock never
+         begins ticking when the SVG is parsed inside a hidden container.
+         `transform-box: fill-box; transform-origin: center` pins the rotation
+         to the group's own bounding-box centre, which is honoured on mobile
+         Safari (16+) and Chrome — unlike `view-box` + pixel origins, which
+         silently froze on iOS. */
       #rotate-gate .phone {
-        transform-box: view-box;
-        transform-origin: 110px 110px;
+        transform-box: fill-box;
+        transform-origin: center;
         animation: phone-tilt 3s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+        will-change: transform;
       }
       #rotate-gate .rotate-arc {
-        transform-box: view-box;
-        transform-origin: 110px 110px;
         animation: arc-pulse 3s ease-in-out infinite;
+        will-change: opacity;
       }
-      #rotate-gate .rotate-msg {
-        font-size: clamp(1.3rem, 6vw, 1.7rem);
-        font-weight: 700;
-        letter-spacing: 0.04em;
-      }
-      #rotate-gate .rotate-sub {
-        font-size: clamp(0.85rem, 3.6vw, 1rem);
-        color: #fff4d6;
-        opacity: 0.72;
-      }
-      /* Portrait -> landscape tilt, hold, then ease back — a seamless rock
-         that demonstrates the gesture the player needs to make. */
+      /* Portrait (0deg) -> landscape (90deg), hold, then ease back — a seamless
+         rock that demonstrates the gesture the player needs to make. */
       @keyframes phone-tilt {
-        0%, 16% {
+        0%, 12% {
           transform: rotate(0deg);
         }
-        46%, 70% {
+        45%, 72% {
           transform: rotate(90deg);
         }
         100% {
           transform: rotate(0deg);
         }
       }
-      /* The rotation arc brightens as the phone turns, fades while it holds. */
+      /* The rotation arrow brightens as the phone turns, fades while it holds. */
       @keyframes arc-pulse {
-        0%, 16% {
+        0%, 12% {
           opacity: 0.2;
         }
-        40% {
+        40%, 55% {
           opacity: 0.95;
         }
-        70%, 100% {
+        80%, 100% {
           opacity: 0.2;
         }
       }
@@ -241,6 +238,16 @@
           animation: none;
           opacity: 0.55;
         }
+      }
+      #rotate-gate .rotate-msg {
+        font-size: clamp(1.3rem, 6vw, 1.7rem);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+      #rotate-gate .rotate-sub {
+        font-size: clamp(0.85rem, 3.6vw, 1rem);
+        color: #fff4d6;
+        opacity: 0.72;
       }
     </style>
   </head>
@@ -257,12 +264,15 @@
     <div id="rotate-gate" role="alertdialog" aria-label="Rotate your device to play" aria-hidden="true">
       <div class="rotate-card">
         <svg class="rotate-icon" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <!-- Rotation arc + arrowhead, sweeping clockwise over the phone. -->
-          <g class="rotate-arc" fill="none" stroke="#ffe08a" stroke-linecap="round">
-            <path d="M 52 74 A 80 80 0 0 1 168 74" stroke-width="5" stroke-dasharray="5 11" />
-            <path d="M 159 60 L 172 74 L 158 86" stroke-width="5" stroke-linejoin="round" />
+          <!-- Rotation arrow sweeping clockwise over the phone; brightens as
+               the phone turns to landscape, then fades while it rocks back. -->
+          <g class="rotate-arc" fill="none" stroke="#ffe08a" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M 60 84 A 72 72 0 0 1 160 84" stroke-width="6" />
+            <path d="M 147 70 L 162 84 L 147 98" stroke-width="6" />
           </g>
-          <!-- Phone — the animated node. Rotates portrait -> landscape on loop. -->
+          <!-- Phone — rocks portrait (0deg) -> landscape (90deg) and back on a
+               continuous loop (see #rotate-gate .phone keyframes). -->
           <g class="phone">
             <rect x="78" y="48" width="64" height="124" rx="13" ry="13"
               fill="rgba(255, 224, 138, 0.08)" stroke="#ffe08a" stroke-width="6" />
