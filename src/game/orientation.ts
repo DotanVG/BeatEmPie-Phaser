@@ -52,6 +52,11 @@ export function installOrientationGate(game: Phaser.Game): void {
   };
 
   const onEnterPortrait = (): void => {
+    // Launch the Phaser rotate-gate scene (replaces the old DOM #rotate-gate overlay).
+    // Optional chains guard against test mocks that omit run/stop on their scene stub.
+    if (!game.scene.isActive?.('RotateScene')) {
+      game.scene.run?.('RotateScene');
+    }
 
     // Suspend audio for whatever scene is up (menu music included). Skip while the audio
     // context is still locked — it has nothing to pause yet and unlocks on first tap.
@@ -70,6 +75,9 @@ export function installOrientationGate(game: Phaser.Game): void {
   };
 
   const onEnterLandscape = (): void => {
+    // Stop the Phaser rotate-gate scene when landscape is restored.
+    game.scene.stop?.('RotateScene');
+
     if (autoPausedAudio && !game.sound.locked) {
       game.sound.resumeAll();
       autoPausedAudio = false;
@@ -87,9 +95,6 @@ export function installOrientationGate(game: Phaser.Game): void {
 
     if (active !== rotateGateActive) {
       if (active) {
-        // The rotate-gate phone and arc are driven by a rAF loop in index.html
-        // that watches data-rotate-gate and resets its own timer when the gate
-        // closes — no per-show restart hook is needed here.
         onEnterPortrait();
       } else {
         onEnterLandscape();

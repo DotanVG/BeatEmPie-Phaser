@@ -7,6 +7,7 @@ import { GameScene } from '../scenes/GameScene';
 import { PauseScene } from '../scenes/PauseScene';
 import { GameOverScene } from '../scenes/GameOverScene';
 import { VictoryScene } from '../scenes/VictoryScene';
+import { RotateScene } from '../scenes/RotateScene';
 
 /** Phaser game configuration: pixel-art, CSS-stretched canvas shell, Arcade physics. */
 export const gameConfig: Phaser.Types.Core.GameConfig = {
@@ -34,5 +35,5 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
-  scene: [BootScene, PreloadScene, MainMenuScene, GameScene, PauseScene, GameOverScene, VictoryScene],
+  scene: [BootScene, PreloadScene, MainMenuScene, GameScene, PauseScene, GameOverScene, VictoryScene, RotateScene],
 };
