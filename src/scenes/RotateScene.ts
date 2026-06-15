@@ -23,14 +23,11 @@ const ARROW_CYCLE = 2400;
  *
  * Animation is driven by wall-clock time (Date.now() - startTime) so it is immune to
  * delta = 0 / corrupted delta on mobile WebGL. update() advances the animation each frame;
- * a setInterval fallback takes over if update() ever stops firing. The debug text (top-left)
- * shows live values: F = frame count, d = delta, e = elapsed in cycle, ang = phone angle.
+ * a setInterval fallback takes over if update() ever stops firing.
  */
 export class RotateScene extends Phaser.Scene {
   private phoneContainer!: Phaser.GameObjects.Container;
   private arrowGfx!: Phaser.GameObjects.Graphics;
-  private debugText!: Phaser.GameObjects.Text;
-  private debugText2!: Phaser.GameObjects.Text;
 
   private startTime = 0;
   private elapsed = 0;
@@ -109,28 +106,6 @@ export class RotateScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setAlpha(0.72);
 
-    // Line 1: frame counter — "F:0" = game loop frozen, "F:N" climbing = Phaser ticking.
-    this.debugText = this.add
-      .text(10, 10, 'F:0', {
-        fontFamily: 'monospace',
-        fontSize: '28px',
-        color: '#ffff00',
-        backgroundColor: '#000000',
-      })
-      .setAlpha(0.8)
-      .setDepth(100);
-
-    // Line 2: animation diagnostics — delta ms, elapsed in cycle, computed angle.
-    this.debugText2 = this.add
-      .text(10, 46, 'd:? e:? ang:?', {
-        fontFamily: 'monospace',
-        fontSize: '28px',
-        color: '#00ffff',
-        backgroundColor: '#000000',
-      })
-      .setAlpha(0.8)
-      .setDepth(100);
-
     // We intentionally ignore prefers-reduced-motion: this overlay is functional
     // instruction, not decorative animation. A static phone at 90° gave no visual
     // feedback that the device needed rotating, which looked like a frozen bug.
@@ -147,23 +122,15 @@ export class RotateScene extends Phaser.Scene {
     this.scene.bringToTop();
   }
 
-  update(_time: number, delta: number): void {
-    if (this.frameCount === 0) console.log('[RotateScene] update() firing — loop is alive');
+  update(_time: number, _delta: number): void {
     this.frameCount++;
 
-    if (this.prefersReduced) {
-      this.debugText.setText(`F:${this.frameCount}`);
-      return;
-    }
+    if (this.prefersReduced) return;
 
     // Use wall-clock elapsed so animation is immune to delta=0 / corrupted delta on mobile.
     const wallMs = Date.now() - this.startTime;
     this.elapsed = wallMs % PHONE_CYCLE;
     this.arrowElapsed = wallMs % ARROW_CYCLE;
-
-    const angle = this.computeAngle(this.elapsed);
-    this.debugText.setText(`F:${this.frameCount}`);
-    this.debugText2.setText(`d:${Math.round(delta)} e:${Math.round(this.elapsed)} ang:${angle.toFixed(0)}`);
 
     this.applyAnimation();
   }
@@ -220,7 +187,7 @@ export class RotateScene extends Phaser.Scene {
    */
   private drawRotationArrow(g: Phaser.GameObjects.Graphics, cx: number, cy: number): void {
     const radius = 215;
-    const arcCy = cy + 55;
+    const arcCy = cy + 20;
 
     const startDeg = 222;
     const endDeg = 318;
