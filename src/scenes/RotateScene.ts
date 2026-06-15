@@ -131,11 +131,10 @@ export class RotateScene extends Phaser.Scene {
       .setAlpha(0.8)
       .setDepth(100);
 
-    this.prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (this.prefersReduced) {
-      this.phoneContainer.rotation = Math.PI / 2;
-      this.arrowGfx.setAlpha(0.55);
-    }
+    // We intentionally ignore prefers-reduced-motion: this overlay is functional
+    // instruction, not decorative animation. A static phone at 90° gave no visual
+    // feedback that the device needed rotating, which looked like a frozen bug.
+    this.prefersReduced = false;
 
     // Start the setInterval fallback immediately. intervalTick() yields to Phaser's
     // update() whenever it detects that frameCount has advanced, so there is no double-
@@ -149,6 +148,7 @@ export class RotateScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    if (this.frameCount === 0) console.log('[RotateScene] update() firing — loop is alive');
     this.frameCount++;
 
     if (this.prefersReduced) {

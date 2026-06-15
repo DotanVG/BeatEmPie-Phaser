@@ -55,7 +55,11 @@ export function installOrientationGate(game: Phaser.Game): void {
     // Launch the Phaser rotate-gate scene (replaces the old DOM #rotate-gate overlay).
     // Optional chains guard against test mocks that omit run/stop on their scene stub.
     if (!game.scene.isActive?.('RotateScene')) {
-      game.scene.run?.('RotateScene');
+      // SceneManager has no launch(); use systemScene's ScenePlugin which does.
+      // ScenePlugin.launch() queues a 'start' op so Phaser processes it on the
+      // next game step — this is the canonical way to start a parallel scene
+      // and guarantees update() is called.
+      game.scene.systemScene.scene.launch('RotateScene');
     }
 
     // Suspend audio for whatever scene is up (menu music included). Skip while the audio
@@ -123,6 +127,10 @@ export function installOrientationGate(game: Phaser.Game): void {
   document.addEventListener('fullscreenchange', queueRefresh);
   document.addEventListener('webkitfullscreenchange', queueRefresh as EventListener);
 
-  // Sync once at boot so CSS sizing and portrait gating reflect the real mobile viewport.
-  syncViewportState();
+  // Sync CSS shell immediately so dimensions are correct before first paint.
+  // The scene launch is deferred via queueRefresh (40 ms) so Phaser's SceneManager has
+  // time to register scenes before we attempt to launch RotateScene.
+  syncViewportShell();
+  syncScale();
+  queueRefresh();
 }
