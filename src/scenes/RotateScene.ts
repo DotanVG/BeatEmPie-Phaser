@@ -21,16 +21,18 @@ const ARROW_CYCLE = 2400;
  * Fullscreen "rotate your device" overlay rendered entirely through Phaser's own pipeline.
  * Launched by orientation.ts when a touch device enters portrait; stopped on landscape.
  *
- * Animation is driven by update() delta time (not tweens) so it survives cases where
- * Phaser's rAF loop is delayed or throttled by the mobile browser on startup. A setInterval
- * fallback takes over automatically if update() itself never fires — the frame counter text
- * (top-left) makes this visible during QA: 0 = game loop dead, >0 = Phaser is ticking.
+ * Animation is driven by wall-clock time (Date.now() - startTime) so it is immune to
+ * delta = 0 / corrupted delta on mobile WebGL. update() advances the animation each frame;
+ * a setInterval fallback takes over if update() ever stops firing. The debug text (top-left)
+ * shows live values: F = frame count, d = delta, e = elapsed in cycle, ang = phone angle.
  */
 export class RotateScene extends Phaser.Scene {
   private phoneContainer!: Phaser.GameObjects.Container;
   private arrowGfx!: Phaser.GameObjects.Graphics;
   private debugText!: Phaser.GameObjects.Text;
+  private debugText2!: Phaser.GameObjects.Text;
 
+  private startTime = 0;
   private elapsed = 0;
   private arrowElapsed = 0;
   private frameCount = 0;
@@ -38,7 +40,6 @@ export class RotateScene extends Phaser.Scene {
 
   // setInterval fallback — kicks in when Phaser's game loop isn't ticking
   private intervalId: ReturnType<typeof setInterval> | null = null;
-  private lastIntervalTime = 0;
   private lastIntervalFrame = -1;
 
   constructor() {
@@ -46,6 +47,7 @@ export class RotateScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.startTime = Date.now();
     this.elapsed = 0;
     this.arrowElapsed = 0;
     this.frameCount = 0;
@@ -107,14 +109,23 @@ export class RotateScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setAlpha(0.72);
 
-    // Frame counter — confirms Phaser's game loop is running on mobile during QA.
-    // "F:0" = game loop frozen (setInterval fallback driving animation).
-    // "F:N" climbing = Phaser is ticking normally.
+    // Line 1: frame counter — "F:0" = game loop frozen, "F:N" climbing = Phaser ticking.
     this.debugText = this.add
       .text(10, 10, 'F:0', {
         fontFamily: 'monospace',
         fontSize: '28px',
         color: '#ffff00',
+        backgroundColor: '#000000',
+      })
+      .setAlpha(0.8)
+      .setDepth(100);
+
+    // Line 2: animation diagnostics — delta ms, elapsed in cycle, computed angle.
+    this.debugText2 = this.add
+      .text(10, 46, 'd:? e:? ang:?', {
+        fontFamily: 'monospace',
+        fontSize: '28px',
+        color: '#00ffff',
         backgroundColor: '#000000',
       })
       .setAlpha(0.8)
@@ -129,7 +140,6 @@ export class RotateScene extends Phaser.Scene {
     // Start the setInterval fallback immediately. intervalTick() yields to Phaser's
     // update() whenever it detects that frameCount has advanced, so there is no double-
     // drive when the game loop is healthy.
-    this.lastIntervalTime = Date.now();
     this.lastIntervalFrame = -1;
     this.intervalId = setInterval(() => this.intervalTick(), 16);
 
@@ -140,13 +150,21 @@ export class RotateScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     this.frameCount++;
+
+    if (this.prefersReduced) {
+      this.debugText.setText(`F:${this.frameCount}`);
+      return;
+    }
+
+    // Use wall-clock elapsed so animation is immune to delta=0 / corrupted delta on mobile.
+    const wallMs = Date.now() - this.startTime;
+    this.elapsed = wallMs % PHONE_CYCLE;
+    this.arrowElapsed = wallMs % ARROW_CYCLE;
+
+    const angle = this.computeAngle(this.elapsed);
     this.debugText.setText(`F:${this.frameCount}`);
+    this.debugText2.setText(`d:${Math.round(delta)} e:${Math.round(this.elapsed)} ang:${angle.toFixed(0)}`);
 
-    if (this.prefersReduced) return;
-
-    // Game loop is alive — advance time and apply animation
-    this.elapsed = (this.elapsed + delta) % PHONE_CYCLE;
-    this.arrowElapsed = (this.arrowElapsed + delta) % ARROW_CYCLE;
     this.applyAnimation();
   }
 
@@ -159,10 +177,6 @@ export class RotateScene extends Phaser.Scene {
   private intervalTick(): void {
     if (this.prefersReduced) return;
 
-    const now = Date.now();
-    const delta = now - this.lastIntervalTime;
-    this.lastIntervalTime = now;
-
     if (this.frameCount !== this.lastIntervalFrame) {
       // Phaser's update() is running — let it own the animation, just track frame
       this.lastIntervalFrame = this.frameCount;
@@ -170,26 +184,22 @@ export class RotateScene extends Phaser.Scene {
     }
 
     // update() hasn't fired since the last interval tick — game loop is frozen.
-    // Drive animation ourselves using wall-clock delta.
-    this.elapsed = (this.elapsed + delta) % PHONE_CYCLE;
-    this.arrowElapsed = (this.arrowElapsed + delta) % ARROW_CYCLE;
+    // Drive animation from the same wall-clock source.
+    const wallMs = Date.now() - this.startTime;
+    this.elapsed = wallMs % PHONE_CYCLE;
+    this.arrowElapsed = wallMs % ARROW_CYCLE;
     this.applyAnimation();
   }
 
+  private computeAngle(t: number): number {
+    if (t < PHONE_IN) return sineEaseInOut(t / PHONE_IN) * 90;
+    if (t < PHONE_HOLD_END) return 90;
+    if (t < PHONE_OUT_END) return (1 - sineEaseInOut((t - PHONE_HOLD_END) / (PHONE_OUT_END - PHONE_HOLD_END))) * 90;
+    return 0;
+  }
+
   private applyAnimation(): void {
-    // Phone rotation: 0° → 90° → hold → 90° → 0° → pause → repeat
-    const t = this.elapsed;
-    let angle: number;
-    if (t < PHONE_IN) {
-      angle = sineEaseInOut(t / PHONE_IN) * 90;
-    } else if (t < PHONE_HOLD_END) {
-      angle = 90;
-    } else if (t < PHONE_OUT_END) {
-      angle = (1 - sineEaseInOut((t - PHONE_HOLD_END) / (PHONE_OUT_END - PHONE_HOLD_END))) * 90;
-    } else {
-      angle = 0;
-    }
-    this.phoneContainer.setAngle(angle);
+    this.phoneContainer.setAngle(this.computeAngle(this.elapsed));
 
     // Arrow alpha: triangle wave 0.2 → 0.95 → 0.2
     const at = this.arrowElapsed / ARROW_CYCLE;
