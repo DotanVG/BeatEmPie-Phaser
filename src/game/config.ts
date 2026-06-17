@@ -9,23 +9,25 @@ import { GameOverScene } from '../scenes/GameOverScene';
 import { VictoryScene } from '../scenes/VictoryScene';
 import { RotateScene } from '../scenes/RotateScene';
 
-/** Phaser game configuration: pixel-art, CSS-stretched canvas shell, Arcade physics. */
+/** Phaser game configuration: pixel-art, aspect-locked (FIT) canvas, Arcade physics. */
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game-root',
-  // Matches the #game-root shell background.
+  // Matches the #game-root shell background (and the letterbox/pillarbox gutters).
   backgroundColor: '#0b0d2b',
   pixelArt: true,
   roundPixels: true,
   scale: {
-    // Keep a stable 1920x1080 internal world while CSS stretches the canvas to the full shell.
-    mode: Phaser.Scale.NONE,
-    autoCenter: Phaser.Scale.NO_CENTER,
+    // FIT scales the 1920x1080 world UNIFORMLY to fit the viewport, preserving aspect ratio
+    // (slim navy gutters appear on non-16:9 screens) so text/icons/animations never distort.
+    mode: Phaser.Scale.FIT,
+    // Centre the scaled canvas so the gutters are symmetric.
+    autoCenter: Phaser.Scale.CENTER_BOTH,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
     // Round the scaled canvas to whole pixels (no sub-pixel blur on the pixel-art canvas).
     autoRound: true,
-    // #game-root is explicitly sized in CSS; Phaser should keep its hands off the parent box.
+    // #game-root is explicitly sized in CSS to the full viewport; FIT measures it directly.
     expandParent: false,
   },
   physics: {
