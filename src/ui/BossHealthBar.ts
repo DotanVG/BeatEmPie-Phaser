@@ -14,8 +14,8 @@ export class BossHealthBar {
 
   constructor(private scene: Phaser.Scene, name = 'Captain Leviathan') {
     this.x = (GAME_WIDTH - this.w) / 2;
-    this.bg = scene.add.graphics().setDepth(DEPTHS.UI).setScrollFactor(0).setVisible(false);
-    this.fill = scene.add.graphics().setDepth(DEPTHS.UI).setScrollFactor(0).setVisible(false);
+    this.bg = scene.add.graphics().setDepth(DEPTHS.UI).setVisible(false);
+    this.fill = scene.add.graphics().setDepth(DEPTHS.UI).setVisible(false);
     this.label = scene.add
       .text(GAME_WIDTH / 2, this.y - 26, `🐋 ${name}`, {
         fontFamily: 'Trebuchet MS, sans-serif',
@@ -26,9 +26,7 @@ export class BossHealthBar {
         strokeThickness: 5,
       })
       .setOrigin(0.5)
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0)
-      .setVisible(false);
+      .setDepth(DEPTHS.UI_TOP)      .setVisible(false);
   }
 
   show(): void {

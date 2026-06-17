@@ -54,12 +54,11 @@
         width: 100%;
         height: 100%;
       }
-      /* NONE-scale canvas stretched edge-to-edge over the navy shell (full-bleed, like desktop).
-         The vars default to the full viewport and are kept pixel-exact by the orientation gate. */
+      /* RESIZE mode: Phaser sizes the canvas to the full viewport itself (the per-scene camera
+         scales + centres the world). We only enforce pixel-art crispness here and let the Scale
+         Manager own width/height. */
       #game-root canvas {
         display: block;
-        width: var(--app-width) !important;
-        height: var(--app-height) !important;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
       }

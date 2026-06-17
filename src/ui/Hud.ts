@@ -33,8 +33,7 @@ export class Hud {
 
     scene.add
       .text(40, 92, 'DASH', { fontFamily: UI_FONT, fontSize: '20px', color: '#ffe08a', fontStyle: 'bold' })
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
     this.dashMeter = new CooldownMeter(scene, 120, 96, 200, 16);
 
     this.scoreText = scene.add
@@ -47,8 +46,7 @@ export class Hud {
         strokeThickness: 5,
       })
       .setOrigin(1, 0)
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
 
     this.highScoreText = scene.add
       .text(GAME_WIDTH - 40, 82, `BEST ${scene.combat.highScore}`, {
@@ -57,8 +55,7 @@ export class Hud {
         color: '#9aa0c0',
       })
       .setOrigin(1, 0)
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
 
     this.comboText = scene.add
       .text(GAME_WIDTH - 40, 118, '', {
@@ -68,8 +65,7 @@ export class Hud {
         fontStyle: 'bold',
       })
       .setOrigin(1, 0)
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
 
     this.waveText = scene.add
       .text(GAME_WIDTH / 2, 40, '', {
@@ -81,8 +77,7 @@ export class Hud {
         strokeThickness: 4,
       })
       .setOrigin(0.5, 0)
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
 
     this.selectedText = scene.add
       .text(
@@ -102,8 +97,7 @@ export class Hud {
         ),
       )
       .setOrigin(0.5)
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
 
     this.pieCooldown = new CooldownMeter(scene, GAME_WIDTH / 2 - 130, 912, 260, 14);
     this.bossBar = new BossHealthBar(scene);

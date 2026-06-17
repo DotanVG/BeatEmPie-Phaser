@@ -16,8 +16,8 @@ export class HealthBar {
     private h = 34,
     private labelText = 'HP',
   ) {
-    this.bg = scene.add.graphics().setDepth(DEPTHS.UI).setScrollFactor(0);
-    this.fill = scene.add.graphics().setDepth(DEPTHS.UI).setScrollFactor(0);
+    this.bg = scene.add.graphics().setDepth(DEPTHS.UI);
+    this.fill = scene.add.graphics().setDepth(DEPTHS.UI);
     this.label = scene.add
       .text(x + 6, y + h / 2, '', {
         fontFamily: 'Trebuchet MS, sans-serif',
@@ -26,8 +26,7 @@ export class HealthBar {
         fontStyle: 'bold',
       })
       .setOrigin(0, 0.5)
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
     this.drawBg();
   }
 

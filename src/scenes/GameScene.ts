@@ -199,8 +199,7 @@ export class GameScene extends Phaser.Scene {
         ),
       )
       .setOrigin(0.5)
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
 
     const objs: Phaser.GameObjects.GameObject[] = [titleText];
     if (subtitle) {
@@ -215,8 +214,7 @@ export class GameScene extends Phaser.Scene {
             strokeThickness: 5,
           })
           .setOrigin(0.5)
-          .setDepth(DEPTHS.UI_TOP)
-          .setScrollFactor(0),
+          .setDepth(DEPTHS.UI_TOP),
       );
     }
 

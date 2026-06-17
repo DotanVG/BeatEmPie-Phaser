@@ -64,8 +64,7 @@ export class EffectsSystem {
   fullscreenFlash(color: number, alpha = 0.7, durationMs = 520): void {
     const rect = this.scene.add
       .rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, color, alpha)
-      .setDepth(DEPTHS.EFFECT)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.EFFECT);
     this.scene.tweens.add({ targets: rect, alpha: 0, duration: durationMs, onComplete: () => rect.destroy() });
   }
 

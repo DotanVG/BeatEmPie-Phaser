@@ -28,7 +28,7 @@ export class PieSelector {
     const startX = (GAME_WIDTH - totalW) / 2;
     const y = GAME_HEIGHT - this.size - 22;
 
-    this.overlay = scene.add.graphics().setDepth(DEPTHS.UI).setScrollFactor(0);
+    this.overlay = scene.add.graphics().setDepth(DEPTHS.UI);
 
     pies.pies.forEach((pie, i) => {
       const x = startX + i * (this.size + this.gap);
@@ -37,14 +37,12 @@ export class PieSelector {
       const hit = scene.add
         .rectangle(x, y, this.size, this.size, 0x000000, 0.001)
         .setOrigin(0, 0)
-        .setDepth(DEPTHS.UI)
-        .setScrollFactor(0)
-        .setInteractive({ useHandCursor: true });
+        .setDepth(DEPTHS.UI)        .setInteractive({ useHandCursor: true });
       hit.on('pointerdown', () => this.pies.selectIndex(i));
 
       const emoji = emojiText(scene, cx, y + this.size / 2, pie.emoji, 58)
         .setDepth(DEPTHS.UI_TOP)
-        .setScrollFactor(0);
+        ;
 
       const num = scene.add
         .text(x + 8, y + 4, `${(i + 1) % 10}`, {
@@ -54,7 +52,7 @@ export class PieSelector {
           fontStyle: 'bold',
         })
         .setDepth(DEPTHS.UI_TOP)
-        .setScrollFactor(0);
+        ;
 
       const charge = scene.add
         .text(x + this.size - 8, y + this.size - 26, '', {
@@ -67,7 +65,7 @@ export class PieSelector {
         })
         .setOrigin(1, 0)
         .setDepth(DEPTHS.UI_TOP)
-        .setScrollFactor(0);
+        ;
 
       this.slots.push({ x, y, emoji, num, charge });
     });

@@ -27,12 +27,10 @@ export class TouchControls {
       .circle(220, GAME_HEIGHT - 230, this.radius, 0xffffff, 0.08)
       .setStrokeStyle(4, 0xffffff, 0.25)
       .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0)
       .setVisible(false);
     this.thumb = scene.add
       .circle(220, GAME_HEIGHT - 230, this.radius * 0.45, 0xffe08a, 0.4)
       .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0)
       .setVisible(false);
 
     this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 200, 110, '🥧', 0xff6a4d, () => scene.pies.dropAuto());
@@ -43,8 +41,7 @@ export class TouchControls {
     this.makeButton(GAME_WIDTH - 320, togY, 46, '↶', 0x6a6fae, () => scene.pies.cyclePie(-1));
     this.makeButton(GAME_WIDTH - 80, togY, 46, '↷', 0x6a6fae, () => scene.pies.cyclePie(1));
     this.midEmoji = emojiText(scene, GAME_WIDTH - 200, togY, scene.pies.selectedPie.emoji, 52)
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
     this.controlZones.push({ x: GAME_WIDTH - 200, y: togY, r: 50 });
     scene.bus.on(GameEvents.PIE_SELECTED, () => this.midEmoji.setText(scene.pies.selectedPie.emoji));
 
@@ -59,11 +56,9 @@ export class TouchControls {
       .circle(x, y, r, color, 0.3)
       .setStrokeStyle(4, color, 0.8)
       .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0)
       .setInteractive({ useHandCursor: true });
     const text = emojiText(this.scene, x, y, label, Math.round(r * 0.8))
-      .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0);
+      .setDepth(DEPTHS.UI_TOP);
     btn.on('pointerdown', (_p: Phaser.Input.Pointer, _lx: number, _ly: number, e: Phaser.Types.Input.EventData) => {
       if (!this.enabled) return;
       e.stopPropagation();
@@ -96,20 +91,21 @@ export class TouchControls {
   private onDown(pointer: Phaser.Input.Pointer): void {
     if (!this.enabled) return;
 
-    // Joystick: a touch starting in the lower-left region.
-    if (this.joyPointerId < 0 && pointer.x <= GAME_WIDTH * 0.45 && pointer.y >= GAME_HEIGHT * 0.35) {
+    // Joystick: a touch starting in the lower-left region. Use world coords so the joystick is
+    // placed correctly under the finger regardless of the responsive camera zoom/centre offset.
+    if (this.joyPointerId < 0 && pointer.worldX <= GAME_WIDTH * 0.45 && pointer.worldY >= GAME_HEIGHT * 0.35) {
       this.joyPointerId = pointer.id;
-      this.base.setPosition(pointer.x, pointer.y).setVisible(true);
-      this.thumb.setPosition(pointer.x, pointer.y).setVisible(true);
+      this.base.setPosition(pointer.worldX, pointer.worldY).setVisible(true);
+      this.thumb.setPosition(pointer.worldX, pointer.worldY).setVisible(true);
       return;
     }
 
     // A tap on a control button is handled by that button — don't also drop a pie.
     for (const z of this.controlZones) {
-      if (Math.hypot(pointer.x - z.x, pointer.y - z.y) <= z.r + 8) return;
+      if (Math.hypot(pointer.worldX - z.x, pointer.worldY - z.y) <= z.r + 8) return;
     }
     // Leave the bottom selector bar to its own slot taps.
-    if (pointer.y >= GAME_HEIGHT - 140) return;
+    if (pointer.worldY >= GAME_HEIGHT - 140) return;
     if (this.scene.isInputLocked) return;
 
     // Otherwise: tap-to-drop at that point, exactly like a PC left-click.
@@ -119,8 +115,8 @@ export class TouchControls {
   private onMove(pointer: Phaser.Input.Pointer): void {
     if (!this.enabled) return;
     if (pointer.id !== this.joyPointerId) return;
-    const dx = pointer.x - this.base.x;
-    const dy = pointer.y - this.base.y;
+    const dx = pointer.worldX - this.base.x;
+    const dy = pointer.worldY - this.base.y;
     const len = Math.hypot(dx, dy) || 1;
     const clamped = Math.min(len, this.radius);
     const nx = dx / len;

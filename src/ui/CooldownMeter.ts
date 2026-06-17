@@ -14,8 +14,8 @@ export class CooldownMeter {
     private w = 260,
     private h = 14,
   ) {
-    this.bg = scene.add.graphics().setDepth(DEPTHS.UI).setScrollFactor(0);
-    this.fill = scene.add.graphics().setDepth(DEPTHS.UI_TOP).setScrollFactor(0);
+    this.bg = scene.add.graphics().setDepth(DEPTHS.UI);
+    this.fill = scene.add.graphics().setDepth(DEPTHS.UI_TOP);
     this.bg.fillStyle(0x000000, 0.5);
     this.bg.fillRoundedRect(this.x - 3, this.y - 3, this.w + 6, this.h + 6, 5);
   }

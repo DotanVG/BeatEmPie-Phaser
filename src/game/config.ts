@@ -9,23 +9,25 @@ import { GameOverScene } from '../scenes/GameOverScene';
 import { VictoryScene } from '../scenes/VictoryScene';
 import { RotateScene } from '../scenes/RotateScene';
 
-/** Phaser game configuration: pixel-art, CSS-stretched canvas shell, Arcade physics. */
+/** Phaser game configuration: pixel-art, fluid (RESIZE) full-bleed canvas, Arcade physics. */
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game-root',
-  // Matches the #game-root shell background.
+  // Matches the #game-root shell background (and the centred-camera margins).
   backgroundColor: '#0b0d2b',
   pixelArt: true,
   roundPixels: true,
   scale: {
-    // Keep a stable 1920x1080 internal world while CSS stretches the canvas to the full shell.
-    mode: Phaser.Scale.NONE,
+    // RESIZE keeps the canvas matching the live viewport (no pixel distortion). Each scene's
+    // camera then uniformly scales + centres the 1920x1080 design into it (see game/layout.ts),
+    // so the canvas is full-bleed with the game background filling the margin on the longer axis.
+    mode: Phaser.Scale.RESIZE,
+    // Centring is handled per-camera (viewport offset), not by the Scale Manager.
     autoCenter: Phaser.Scale.NO_CENTER,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
     // Round the scaled canvas to whole pixels (no sub-pixel blur on the pixel-art canvas).
     autoRound: true,
-    // #game-root is explicitly sized in CSS; Phaser should keep its hands off the parent box.
     expandParent: false,
   },
   physics: {
