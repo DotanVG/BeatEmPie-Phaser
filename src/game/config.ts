@@ -9,7 +9,7 @@ import { GameOverScene } from '../scenes/GameOverScene';
 import { VictoryScene } from '../scenes/VictoryScene';
 import { RotateScene } from '../scenes/RotateScene';
 
-/** Phaser game configuration: pixel-art, CSS-stretched canvas shell, Arcade physics. */
+/** Phaser game configuration: pixel-art, cover-fill (ENVELOP) canvas, Arcade physics. */
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game-root',
@@ -18,14 +18,18 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
   pixelArt: true,
   roundPixels: true,
   scale: {
-    // Keep a stable 1920x1080 internal world while CSS stretches the canvas to the full shell.
-    mode: Phaser.Scale.NONE,
-    autoCenter: Phaser.Scale.NO_CENTER,
+    // ENVELOP scales the 1920x1080 world UNIFORMLY to COVER the viewport (like CSS
+    // background-size: cover): no distortion, no bars — the overflow on the longer axis is
+    // cropped. Trade-off: on very wide/tall screens the outer edges (and edge-hugging HUD)
+    // are cropped off-screen.
+    mode: Phaser.Scale.ENVELOP,
+    // Centre the oversized canvas so the crop is symmetric.
+    autoCenter: Phaser.Scale.CENTER_BOTH,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
     // Round the scaled canvas to whole pixels (no sub-pixel blur on the pixel-art canvas).
     autoRound: true,
-    // #game-root is explicitly sized in CSS; Phaser should keep its hands off the parent box.
+    // #game-root is explicitly sized in CSS to the full viewport; ENVELOP measures it directly.
     expandParent: false,
   },
   physics: {
