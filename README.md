@@ -24,7 +24,7 @@ Pies are **sky-drop attacks**, not thrown projectiles. Pick a pie, aim at the gr
 | Move | `WASD` / Arrow keys | Bottom-left virtual joystick (always on) |
 | Aim | Mouse cursor | — |
 | Drop pie at cursor | Left click | Tap anywhere on screen |
-| Drop pie (auto-target) | `Space` | — |
+| Drop pie (auto-target) | `Space` | 🥧 button |
 | Select pie 1–10 | `1` `2` … `9` `0` | Tap a selector slot |
 | Cycle pies | `Q` / `E` | Tap a selector slot |
 | Dash | `Shift` | 💨 button |

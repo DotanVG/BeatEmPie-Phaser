@@ -6,9 +6,10 @@ import { emojiText } from '../utils/text';
 
 /**
  * On-screen controls for touch devices: an always-visible bottom-left virtual joystick
- * (movement), a DASH button and a prev/next pie toggle on the right. Tapping anywhere else
- * on screen drops the selected pie at that point (mirrors a PC mouse click). Pie selection
- * also works via the bottom slots.
+ * (movement), DROP / DASH buttons and a prev/next pie toggle on the right. Tapping anywhere
+ * else on screen drops the selected pie at that point (mirrors a PC mouse click); the DROP
+ * button auto-targets the nearest enemy (mirrors Space). Pie selection also works via the
+ * bottom slots.
  */
 export class TouchControls {
   private moveVec = { x: 0, y: 0 };
@@ -33,7 +34,8 @@ export class TouchControls {
       .setDepth(DEPTHS.UI_TOP)
       .setScrollFactor(0);
 
-    this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 200, 84, '💨', 0x4f8cff, () => scene.player.tryDash());
+    this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 200, 110, '🥧', 0xff6a4d, () => scene.pies.dropAuto());
+    this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 430, 84, '💨', 0x4f8cff, () => scene.player.tryDash());
 
     // Prev / next pie toggle above the dash button, with the current pie between the arrows.
     const togY = GAME_HEIGHT - 590;
