@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
-    "phaser": "^3.88.0"
+    "phaser": "^4.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
