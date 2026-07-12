@@ -31,8 +31,8 @@ automatically on touch devices.
 
 | Input | Action |
 |-------|--------|
-| Left-side virtual joystick | Move Shushki (drag from anywhere in the lower-left) |
-| 🥧 button (bottom-right) | Drop the selected pie (auto-target) |
+| Bottom-left virtual joystick (always visible) | Move Shushki |
+| Tap anywhere else on screen | Drop the selected pie at that point |
 | 💨 button (right) | Dash |
 | Tap a pie slot | Select that pie |
 

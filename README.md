@@ -21,10 +21,10 @@ Pies are **sky-drop attacks**, not thrown projectiles. Pick a pie, aim at the gr
 
 | Action | Keyboard / Mouse | Touch |
 |--------|------------------|-------|
-| Move | `WASD` / Arrow keys | Left virtual joystick |
+| Move | `WASD` / Arrow keys | Bottom-left virtual joystick (always on) |
 | Aim | Mouse cursor | — |
-| Drop pie at cursor | Left click | — |
-| Drop pie (auto-target) | `Space` | 🥧 button |
+| Drop pie at cursor | Left click | Tap anywhere on screen |
+| Drop pie (auto-target) | `Space` | — |
 | Select pie 1–10 | `1` `2` … `9` `0` | Tap a selector slot |
 | Cycle pies | `Q` / `E` | Tap a selector slot |
 | Dash | `Shift` | 💨 button |
@@ -66,6 +66,7 @@ npm run build      # type-check + production build to dist/
 npm run preview    # preview the production build locally
 npm run typecheck  # TypeScript type-check only
 npm run lint       # ESLint
+npm test           # unit tests (node --test, tests/*.test.mjs)
 ```
 
 ## 🌐 Deployment
@@ -91,7 +92,7 @@ npm run lint       # ESLint
 ```
 src/
   game/        bootstrap, Phaser config, constants, event names
-  scenes/      Boot, Preload, MainMenu, Game, Pause, GameOver, Victory
+  scenes/      Boot, Preload, MainMenu, Game, Pause, GameOver, Victory, Rotate
   entities/    Player, enemies, pie drops, puddles, pickups, status effects
   systems/     input, pies, combat, spawner, waves, collisions, effects, audio, save
   ui/          HUD, health/boss bars, pie selector, cooldown meter, touch controls
@@ -99,6 +100,7 @@ src/
   utils/       asset keys, math, animation, placeholder generation
   types/       shared TypeScript interfaces
 public/assets/ sprites, audio, backgrounds, ui
+tests/         node --test unit tests
 docs/          design, technical, controls, testing, deployment, workflow docs
 ```
 
