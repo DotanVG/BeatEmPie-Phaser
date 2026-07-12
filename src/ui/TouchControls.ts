@@ -5,10 +5,11 @@ import { GameEvents } from '../game/GameEvents';
 import { emojiText } from '../utils/text';
 
 /**
- * On-screen controls for touch devices: a dynamic left-side virtual joystick (movement),
- * DROP / DASH buttons and a prev/next pie toggle on the right. Tapping anywhere else in the
- * playfield drops the selected pie at that point (mirrors a PC mouse click); the DROP button
- * auto-targets the nearest enemy (mirrors Space). Pie selection also works via the bottom slots.
+ * On-screen controls for touch devices: an always-visible bottom-left virtual joystick
+ * (movement), DROP / DASH buttons and a prev/next pie toggle on the right. Tapping anywhere
+ * else on screen drops the selected pie at that point (mirrors a PC mouse click); the DROP
+ * button auto-targets the nearest enemy (mirrors Space). Pie selection also works via the
+ * bottom slots.
  */
 export class TouchControls {
   private moveVec = { x: 0, y: 0 };
@@ -27,13 +28,11 @@ export class TouchControls {
       .circle(220, GAME_HEIGHT - 230, this.radius, 0xffffff, 0.08)
       .setStrokeStyle(4, 0xffffff, 0.25)
       .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0)
-      .setVisible(false);
+      .setScrollFactor(0);
     this.thumb = scene.add
       .circle(220, GAME_HEIGHT - 230, this.radius * 0.45, 0xffe08a, 0.4)
       .setDepth(DEPTHS.UI_TOP)
-      .setScrollFactor(0)
-      .setVisible(false);
+      .setScrollFactor(0);
 
     this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 200, 110, '🥧', 0xff6a4d, () => scene.pies.dropAuto());
     this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 430, 84, '💨', 0x4f8cff, () => scene.player.tryDash());
@@ -82,8 +81,9 @@ export class TouchControls {
     this.enabled = enabled;
     this.joyPointerId = -1;
     this.moveVec = { x: 0, y: 0 };
-    this.base.setVisible(false);
-    this.thumb.setVisible(false);
+    this.thumb.setPosition(this.base.x, this.base.y);
+    this.base.setVisible(enabled);
+    this.thumb.setVisible(enabled);
     this.midEmoji.setVisible(enabled);
     for (const { circle, text } of this.buttons) {
       circle.setVisible(enabled);
@@ -96,11 +96,11 @@ export class TouchControls {
   private onDown(pointer: Phaser.Input.Pointer): void {
     if (!this.enabled) return;
 
-    // Joystick: a touch starting in the lower-left region.
-    if (this.joyPointerId < 0 && pointer.x <= GAME_WIDTH * 0.45 && pointer.y >= GAME_HEIGHT * 0.35) {
+    // Joystick: a touch starting on/near the fixed base engages it (grab radius a bit
+    // larger than the visual base so it's easy to hit); everywhere else is a pie drop.
+    const joyDist = Math.hypot(pointer.x - this.base.x, pointer.y - this.base.y);
+    if (this.joyPointerId < 0 && joyDist <= this.radius * 1.3) {
       this.joyPointerId = pointer.id;
-      this.base.setPosition(pointer.x, pointer.y).setVisible(true);
-      this.thumb.setPosition(pointer.x, pointer.y).setVisible(true);
       return;
     }
 
@@ -134,8 +134,7 @@ export class TouchControls {
     if (pointer.id !== this.joyPointerId) return;
     this.joyPointerId = -1;
     this.moveVec = { x: 0, y: 0 };
-    this.base.setVisible(false);
-    this.thumb.setVisible(false);
+    this.thumb.setPosition(this.base.x, this.base.y);
   }
 
   getMove(): { x: number; y: number } {
