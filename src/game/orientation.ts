@@ -59,7 +59,7 @@ export function installOrientationGate(game: Phaser.Game): void {
       // ScenePlugin.launch() queues a 'start' op so Phaser processes it on the
       // next game step — this is the canonical way to start a parallel scene
       // and guarantees update() is called.
-      game.scene.systemScene.scene.launch('RotateScene');
+      game.scene.systemScene?.scene.launch('RotateScene');
     }
 
     // Suspend audio for whatever scene is up (menu music included). Skip while the audio
