@@ -93,8 +93,10 @@ export class TouchControls {
     }
   }
 
-  private onDown(pointer: Phaser.Input.Pointer): void {
+  private onDown(pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]): void {
     if (!this.enabled) return;
+    // Tapping an interactive UI element (e.g. a pie selector slot) selects it — don't also drop a pie.
+    if (currentlyOver.length > 0) return;
 
     // Joystick: a touch starting on/near the fixed base engages it (grab radius a bit
     // larger than the visual base so it's easy to hit); everywhere else is a pie drop.
