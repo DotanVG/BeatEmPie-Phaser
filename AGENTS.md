@@ -96,6 +96,7 @@ npm run build      # type-check + production build
 npm run preview    # preview build
 npm run typecheck  # type-check only
 npm run lint       # ESLint
+npm test           # unit tests (node --test, tests/*.test.mjs)
 ```
 
 ## Things agents must NOT do

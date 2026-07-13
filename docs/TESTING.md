@@ -8,6 +8,7 @@ Run before every handoff / PR (the `validate-before-handoff` hook automates this
 - [ ] `npm run typecheck` passes (no TypeScript errors)
 - [ ] `npm run build` succeeds (type-check + Vite production build)
 - [ ] `npm run lint` passes
+- [ ] `npm test` passes (node --test unit tests in `tests/*.test.mjs`)
 - [ ] `npm run preview` serves the built game without console errors
 
 ## Manual smoke checklist
