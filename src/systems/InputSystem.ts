@@ -40,9 +40,11 @@ export class InputSystem {
     this.scene.input.on('pointerdown', this.onPointerDown, this);
   }
 
-  private onPointerDown(pointer: Phaser.Input.Pointer): void {
+  private onPointerDown(pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]): void {
     // PC mouse only — on touch devices TouchControls owns tap-to-drop (avoids double-firing).
     if (this.scene.touch || this.scene.isInputLocked || !pointer.leftButtonDown()) return;
+    // Clicking an interactive UI element (e.g. a pie selector slot) selects it — don't also drop a pie.
+    if (currentlyOver.length > 0) return;
     this.scene.pies.dropAtScreenPoint(pointer.worldX, pointer.worldY);
   }
 
