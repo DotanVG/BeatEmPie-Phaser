@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../game/constants';
-import { PLAYER_IMAGES, MUSIC_FILES } from '../utils/assetKeys';
+import { PLAYER_IMAGES, PLAYER_SHEETS, PLAYER_FRAME, PIE_IMAGES, MUSIC_FILES } from '../utils/assetKeys';
 import { generatePlaceholderTextures } from '../utils/placeholders';
+import { registerPlayerAnims } from '../utils/playerAnims';
 
 /**
  * Loads the real assets (player sprites + music) with a progress bar, then
@@ -17,6 +18,13 @@ export class PreloadScene extends Phaser.Scene {
     this.buildLoadingBar();
 
     for (const [key, path] of Object.entries(PLAYER_IMAGES)) this.load.image(key, path);
+    for (const [key, path] of Object.entries(PIE_IMAGES)) this.load.image(key, path);
+    for (const [key, sheet] of Object.entries(PLAYER_SHEETS)) {
+      this.load.spritesheet(key, sheet.path, {
+        frameWidth: PLAYER_FRAME.width,
+        frameHeight: PLAYER_FRAME.height,
+      });
+    }
     for (const [key, path] of Object.entries(MUSIC_FILES)) this.load.audio(key, path);
 
     // Never let a missing asset abort the boot — just log and continue.
@@ -27,6 +35,7 @@ export class PreloadScene extends Phaser.Scene {
 
   create(): void {
     generatePlaceholderTextures(this);
+    registerPlayerAnims(this);
     this.scene.start('MainMenuScene');
   }
 

@@ -182,6 +182,7 @@ export class PieSystem {
   // --- Impact resolution ----------------------------------------------------
   private resolveImpact(pie: PieType, x: number, y: number): void {
     this.scene.audio.playSfx(pie.soundKey);
+    this.scene.effects.splat(x, y, pie.color, pie.impactRadius);
     this.scene.effects.burst(x, y, pie.particle);
     this.scene.bus.emit(GameEvents.PIE_IMPACT, { id: pie.id, x, y });
 

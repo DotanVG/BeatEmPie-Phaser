@@ -36,7 +36,8 @@ export class PieDrop {
     this.ty = targetY;
     this.startX = targetX;
     this.homing = homing;
-    this.duration = pie.effectType === 'heavy' ? 480 : pie.effectType === 'ultimate' ? 420 : 360;
+    // Slightly slower fall so the pie art (spinning) stays readable in the air.
+    this.duration = pie.effectType === 'heavy' ? 620 : pie.effectType === 'ultimate' ? 540 : 470;
     this.spin = (Math.random() < 0.5 ? -1 : 1) * 0.012;
     this.shadowTargetScale = clamp(pie.impactRadius / 60, 0.5, 4);
 

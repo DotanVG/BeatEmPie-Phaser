@@ -91,14 +91,15 @@ export class Hud {
         '',
         withEmojiPadding(
           {
+            // Slightly larger so the chosen pie (emoji + name) is easy to read mid-fight.
             fontFamily: UI_FONT,
-            fontSize: '30px',
+            fontSize: '36px',
             color: '#fff4d6',
             fontStyle: 'bold',
             stroke: '#0b0d2b',
             strokeThickness: 4,
           },
-          30,
+          36,
         ),
       )
       .setOrigin(0.5)

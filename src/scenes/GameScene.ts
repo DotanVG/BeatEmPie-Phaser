@@ -283,7 +283,8 @@ export class GameScene extends Phaser.Scene {
     this.isInputLocked = true;
     const record = this.combat.finalize();
 
-    this.time.delayedCall(victory ? 1400 : 1100, () => {
+    // Defeat lingers longer so the full death animation (collapse → X-X eyes) is seen.
+    this.time.delayedCall(victory ? 1400 : 2400, () => {
       this.sound.stopAll();
       const data = {
         score: this.combat.score,

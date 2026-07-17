@@ -44,7 +44,7 @@ and keep the game fully playable until bespoke art is dropped in.
 | `tex-puffer-fish` | Puffer Fish (spiky ball) | Real spritesheet |
 | `tex-whale` | Whale | Real whale art |
 | `tex-boss-whale` | Captain Leviathan (crowned whale) | Real boss art |
-| `pie-*` (×10) | Each pie (coloured dome + crust) | Per-pie pie sprites |
+| `pie-*` (×10) | Each pie (coloured dome + crust) | ✅ replaced by real art (fallback only) |
 | `tex-shadow` | Drop shadow under player / falling pies | — (optional polish) |
 | `tex-particle`, `tex-spark` | Impact particles | — |
 | `tex-warning` | Target reticle | — |
@@ -64,7 +64,16 @@ and keep the game fully playable until bespoke art is dropped in.
 
 ## Frame sizes / slicing notes
 
-- Player PNGs are **single frames (128×192)**, not spritesheets — animation is
-  procedural (texture swap + squash/stretch/bob tweens). If multi-frame spritesheets
-  are added later, load them with `this.load.spritesheet(key, path, { frameWidth, frameHeight })`
-  and register animations in `src/utils/animation.ts`.
+- Legacy player PNGs are **single frames (128×192)**; they remain as the fallback
+  path when the animation sheets fail to load.
+- **Player animation sheets** (sliced from Romy's two source spritesheets, chroma-keyed
+  and normalized to face RIGHT on uniform **152×180 bottom-anchored frames**):
+  `shushki_idle.png` (4), `shushki_run.png` (7), `shushki_jump_anim.png` (6: start 2 /
+  loop 2 / land 2 — registered, awaiting a jump mechanic), `shushki_attack.png` (7),
+  `shushki_hurt.png` (2), `shushki_death.png` (8 — mixed from both source sheets,
+  ending on the X-X-eyes frame). Registered in `src/utils/playerAnims.ts`.
+- **Pie art** (`public/assets/sprites/pies/`): `pie_<id>.png` ×10, 64×64, black bg
+  removed, loaded under the same `pie-<id>` keys so placeholders are skipped.
+  `pie_splat.png` (92×76, from source sheet 2) is tinted per-pie on impact.
+- Source images live in `art_source/` (not shipped; `public/assets` holds the
+  processed game-ready files).

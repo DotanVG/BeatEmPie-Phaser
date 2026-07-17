@@ -51,6 +51,34 @@ export class EffectsSystem {
     FloatingText.spawn(this.scene, x, y, text, opts);
   }
 
+  /** Pie splat left on the ground at an impact point, tinted per pie. No-op if the art is missing. */
+  splat(x: number, y: number, color: number, radius: number): void {
+    if (!this.scene.textures.exists(TEX.pieSplat)) return;
+    const scale = Phaser.Math.Clamp(radius / 70, 0.9, 2.6);
+    const img = this.scene.add
+      .image(x, y, TEX.pieSplat)
+      .setDepth(DEPTHS.PUDDLE)
+      .setTint(color)
+      .setAlpha(0.95)
+      .setScale(scale * 0.6);
+    this.scene.tweens.add({
+      targets: img,
+      scale: scale,
+      duration: 120,
+      ease: 'Back.easeOut',
+      onComplete: () => {
+        this.scene.tweens.add({
+          targets: img,
+          alpha: 0,
+          duration: 900,
+          delay: 260,
+          ease: 'Quad.easeIn',
+          onComplete: () => img.destroy(),
+        });
+      },
+    });
+  }
+
   shake(kind: ShakeKind = 'small'): void {
     const cfg = kind === 'big' ? FX.shakeBig : kind === 'medium' ? FX.shakeMedium : FX.shakeSmall;
     this.scene.cameras.main.shake(cfg.duration, cfg.intensity);

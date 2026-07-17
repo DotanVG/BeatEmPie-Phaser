@@ -12,6 +12,17 @@ export const TEX = {
   shushkiWalk: 'shushki-walk',
   shushkiJump: 'shushki-jump',
 
+  // --- Real player animation sheets (uniform 152x180 frames, authored facing RIGHT) ---
+  shushkiAnimIdle: 'shushki-anim-idle',
+  shushkiAnimRun: 'shushki-anim-run',
+  shushkiAnimJump: 'shushki-anim-jump',
+  shushkiAnimAttack: 'shushki-anim-attack',
+  shushkiAnimHurt: 'shushki-anim-hurt',
+  shushkiAnimDeath: 'shushki-anim-death',
+
+  // --- Real pie art (from /public/assets/sprites/pies) ---
+  pieSplat: 'pie-splat',
+
   // --- Procedural placeholders ---
   shadow: 'tex-shadow',
   bgGradient: 'tex-bg-gradient',
@@ -67,6 +78,15 @@ export const AUDIO = {
 export const ANIM = {
   shushkiIdle: 'anim-shushki-idle',
   shushkiWalk: 'anim-shushki-walk',
+  // Frame-based animations built from the animation sheets.
+  idle: 'shushki-idle-anim',
+  run: 'shushki-run-anim',
+  jumpStart: 'shushki-jump-start',
+  jumpLoop: 'shushki-jump-loop',
+  jumpLand: 'shushki-jump-land',
+  attack: 'shushki-attack-anim',
+  hurt: 'shushki-hurt-anim',
+  death: 'shushki-death-anim',
 } as const;
 
 /** Player sprite source paths relative to the Vite base. */
@@ -75,6 +95,35 @@ export const PLAYER_IMAGES = {
   [TEX.shushkiWalk]: 'assets/sprites/player/shushki_walk.png',
   [TEX.shushkiJump]: 'assets/sprites/player/shushki_jump.png',
 } as const;
+
+/** Uniform frame size shared by every player animation sheet. */
+export const PLAYER_FRAME = { width: 152, height: 180 } as const;
+
+/** Player animation spritesheets (strips of PLAYER_FRAME-sized frames, facing right). */
+export const PLAYER_SHEETS: Record<string, { path: string; frames: number }> = {
+  [TEX.shushkiAnimIdle]: { path: 'assets/sprites/player/shushki_idle.png', frames: 4 },
+  [TEX.shushkiAnimRun]: { path: 'assets/sprites/player/shushki_run.png', frames: 7 },
+  [TEX.shushkiAnimJump]: { path: 'assets/sprites/player/shushki_jump_anim.png', frames: 6 },
+  [TEX.shushkiAnimAttack]: { path: 'assets/sprites/player/shushki_attack.png', frames: 7 },
+  [TEX.shushkiAnimHurt]: { path: 'assets/sprites/player/shushki_hurt.png', frames: 2 },
+  [TEX.shushkiAnimDeath]: { path: 'assets/sprites/player/shushki_death.png', frames: 8 },
+};
+
+/** Real pie textures (64x64). Keys match each pie's `assetKey` so the
+ * procedural placeholder is skipped automatically when the file loads. */
+export const PIE_IMAGES: Record<string, string> = {
+  'pie-apple': 'assets/sprites/pies/pie_apple.png',
+  'pie-cherry': 'assets/sprites/pies/pie_cherry.png',
+  'pie-blueberry': 'assets/sprites/pies/pie_blueberry.png',
+  'pie-lemon': 'assets/sprites/pies/pie_lemon.png',
+  'pie-strawberry': 'assets/sprites/pies/pie_strawberry.png',
+  'pie-meat': 'assets/sprites/pies/pie_meat.png',
+  'pie-mushroom': 'assets/sprites/pies/pie_mushroom.png',
+  'pie-chocolate': 'assets/sprites/pies/pie_chocolate.png',
+  'pie-chili': 'assets/sprites/pies/pie_chili.png',
+  'pie-pumpkin': 'assets/sprites/pies/pie_pumpkin.png',
+  [TEX.pieSplat]: 'assets/sprites/pies/pie_splat.png',
+};
 
 /** Real music files. AudioSystem only plays a track if its key actually loaded. */
 export const MUSIC_FILES: Record<string, string> = {

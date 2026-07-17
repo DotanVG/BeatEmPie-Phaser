@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
 import { DEPTHS, GAME_WIDTH, GAME_HEIGHT } from '../game/constants';
-import { emojiText } from '../utils/text';
 import { squash } from '../utils/animation';
 import type { PieSystem } from '../systems/PieSystem';
 
 interface Slot {
   x: number;
   y: number;
-  emoji: Phaser.GameObjects.Text;
+  icon: Phaser.GameObjects.Image;
+  iconScale: number;
   num: Phaser.GameObjects.Text;
   charge: Phaser.GameObjects.Text;
 }
@@ -42,9 +42,13 @@ export class PieSelector {
         .setInteractive({ useHandCursor: true });
       hit.on('pointerdown', () => this.pies.selectIndex(i));
 
-      const emoji = emojiText(scene, cx, y + this.size / 2, pie.emoji, 58)
+      // Pie art icon (real texture, or its procedural placeholder if the file failed).
+      const icon = scene.add
+        .image(cx, y + this.size / 2, pie.assetKey)
         .setDepth(DEPTHS.UI_TOP)
         .setScrollFactor(0);
+      const iconScale = (this.size - 30) / Math.max(icon.width, icon.height);
+      icon.setScale(iconScale);
 
       const num = scene.add
         .text(x + 8, y + 4, `${(i + 1) % 10}`, {
@@ -69,7 +73,7 @@ export class PieSelector {
         .setDepth(DEPTHS.UI_TOP)
         .setScrollFactor(0);
 
-      this.slots.push({ x, y, emoji, num, charge });
+      this.slots.push({ x, y, icon, iconScale, num, charge });
     });
   }
 
@@ -78,7 +82,7 @@ export class PieSelector {
     if (this.pies.selectedIndex !== this.lastSelected) {
       this.lastSelected = this.pies.selectedIndex;
       const sel = this.slots[this.pies.selectedIndex];
-      if (sel) squash(this.scene, sel.emoji, 1, 1, 0.22);
+      if (sel) squash(this.scene, sel.icon, sel.iconScale, sel.iconScale, 0.22);
     }
 
     this.overlay.clear();
@@ -110,8 +114,8 @@ export class PieSelector {
       this.overlay.lineStyle(selected ? 5 : 2, selected ? 0xffe08a : 0x6a6fae, selected ? 1 : 0.6);
       this.overlay.strokeRoundedRect(slot.x, slot.y, this.size, this.size, 12);
 
-      // Texts
-      slot.emoji.setAlpha(unlocked ? (progress >= 1 ? 1 : 0.55) : 0.28);
+      // Icon + texts
+      slot.icon.setAlpha(unlocked ? (progress >= 1 ? 1 : 0.55) : 0.28);
       slot.charge.setText(charges !== null ? `x${charges}` : '');
       slot.charge.setColor(charges === 0 ? '#ff5470' : '#ffffff');
     });
