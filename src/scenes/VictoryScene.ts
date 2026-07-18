@@ -5,7 +5,6 @@ import { AudioSystem } from '../systems/AudioSystem';
 import { makeButton } from '../ui/Button';
 import { emojiText, withEmojiPadding } from '../utils/text';
 import { popIn } from '../utils/animation';
-import { GameCursor } from '../ui/GameCursor';
 import { installMissClickPuff } from '../ui/menuPieFx';
 
 interface ResultData {
@@ -28,7 +27,6 @@ export class VictoryScene extends Phaser.Scene {
 
     const audio = new AudioSystem(this);
     audio.playMusic(AUDIO.musicVictory, false);
-    new GameCursor(this);
     installMissClickPuff(this);
 
     const cx = GAME_WIDTH / 2;

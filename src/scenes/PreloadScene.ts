@@ -36,6 +36,8 @@ export class PreloadScene extends Phaser.Scene {
   create(): void {
     generatePlaceholderTextures(this);
     registerPlayerAnims(this);
+    // Launch the persistent cursor overlay exactly once; it outlives scene changes.
+    this.scene.launch('CursorScene');
     this.scene.start('MainMenuScene');
   }
 

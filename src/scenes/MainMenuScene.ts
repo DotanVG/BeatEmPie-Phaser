@@ -11,7 +11,6 @@ import { popIn, pulse } from '../utils/animation';
 import { PieInfoCard } from '../ui/PieInfoCard';
 import { stepFloaters, type MenuFloaterBounds, type MenuFloaterState } from '../utils/menuFloaters';
 import { getHudRightInset } from '../game/displayPolicy';
-import { GameCursor } from '../ui/GameCursor';
 import { installMissClickPuff, menuPieDrop } from '../ui/menuPieFx';
 
 interface MenuFloater {
@@ -43,7 +42,6 @@ export class MainMenuScene extends Phaser.Scene {
     this.sound.stopAll();
     this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, TEX.bgGradient);
     this.buildFloatingPies();
-    new GameCursor(this);
     installMissClickPuff(this);
 
     this.audio = new AudioSystem(this);
