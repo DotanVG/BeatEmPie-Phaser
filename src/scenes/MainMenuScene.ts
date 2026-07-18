@@ -89,18 +89,26 @@ export class MainMenuScene extends Phaser.Scene {
     popIn(this, play, 1, 280);
     this.time.delayedCall(320, () => pulse(this, play, 1, 1.04, 1100));
 
+    // Controls line adapts to the device actually being used.
+    const touchDevice = this.sys.game.device.input.touch;
+    const controlsText = touchDevice
+      ? 'Move: on-screen joystick   •   Drop pie: tap anywhere in the arena   •   🥧 button: auto-drop\nSelect pie: tap its slot   •   Cycle pie: ↶ / ↷ arrows   •   Dash: 💨 button'
+      : 'Move: WASD / Arrows   •   Drop pie: Space or Click   •   Aim: Mouse\nSelect pie: 1-0   •   Cycle: Q / E   •   Dash: Shift   •   Pause: P / Esc';
     this.add
       .text(
         cx,
         700,
-        'Move: WASD / Arrows   •   Drop pie: Space or Click   •   Aim: Mouse\nSelect pie: 1-0   •   Cycle: Q / E   •   Dash: Shift   •   Pause: P / Esc',
-        {
-          fontFamily: 'Trebuchet MS, sans-serif',
-          fontSize: '28px',
-          color: '#c9cdf0',
-          align: 'center',
-          lineSpacing: 12,
-        },
+        controlsText,
+        withEmojiPadding(
+          {
+            fontFamily: 'Trebuchet MS, sans-serif',
+            fontSize: '28px',
+            color: '#c9cdf0',
+            align: 'center',
+            lineSpacing: 12,
+          },
+          28,
+        ),
       )
       .setOrigin(0.5);
 

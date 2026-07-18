@@ -104,7 +104,7 @@ export class GameOverScene extends Phaser.Scene {
 
     rest.push(
       this.add
-        .text(cx, GAME_HEIGHT - 60, 'Press R to retry', {
+        .text(cx, GAME_HEIGHT - 60, this.sys.game.device.input.touch ? 'Tap Retry to jump straight back in' : 'Press R to retry', {
           fontFamily: 'Trebuchet MS, sans-serif',
           fontSize: '28px',
           color: '#7a7fb0',
