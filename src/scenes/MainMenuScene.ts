@@ -4,16 +4,18 @@ import { TEX, AUDIO } from '../utils/assetKeys';
 import { AudioSystem } from '../systems/AudioSystem';
 import { SaveSystem } from '../systems/SaveSystem';
 import { PIE_TYPES } from '../data/pieTypes';
+import type { PieType } from '../types/game';
 import { makeButton } from '../ui/Button';
-import { emojiText, withEmojiPadding } from '../utils/text';
+import { withEmojiPadding } from '../utils/text';
 import { popIn, pulse } from '../utils/animation';
+import { PieInfoCard } from '../ui/PieInfoCard';
 import { stepFloaters, type MenuFloaterBounds, type MenuFloaterState } from '../utils/menuFloaters';
 import { getHudRightInset } from '../game/displayPolicy';
 import { GameCursor } from '../ui/GameCursor';
 import { installMissClickPuff, menuPieDrop } from '../ui/menuPieFx';
 
 interface MenuFloater {
-  text: Phaser.GameObjects.Text;
+  image: Phaser.GameObjects.Image;
   spinDegPerSecond: number;
   state: MenuFloaterState;
 }
@@ -23,6 +25,8 @@ export class MainMenuScene extends Phaser.Scene {
   private audio!: AudioSystem;
   private floaters: MenuFloater[] = [];
   private muteLabel!: Phaser.GameObjects.Text;
+  private pieCard!: PieInfoCard;
+  private showcaseIcons: Array<{ image: Phaser.GameObjects.Image; pie: PieType }> = [];
   private readonly relayoutTopRight = () => this.layoutTopRight();
   private readonly floaterBounds: MenuFloaterBounds = {
     minX: 40,
@@ -77,9 +81,7 @@ export class MainMenuScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Pie parade
-    const pieRow = PIE_TYPES.map((p) => p.emoji).join('  ');
-    emojiText(this, cx, 380, pieRow, 44);
+    this.buildPieShowcase(cx, 385);
 
     const play = makeButton(this, cx, 540, '▶  PLAY', () => this.startGame(), {
       width: 420,
@@ -156,15 +158,45 @@ export class MainMenuScene extends Phaser.Scene {
     stepped.forEach((state, index) => {
       const floater = this.floaters[index];
       floater.state = state;
-      floater.text.setPosition(state.x, state.y);
-      floater.text.angle += floater.spinDegPerSecond * (delta / 1000);
+      floater.image.setPosition(state.x, state.y);
+      floater.image.angle += floater.spinDegPerSecond * (delta / 1000);
+    });
+  }
+
+  /** The pie showcase row: real pie art; hover (PC) or tap (touch) opens its info card. */
+  private buildPieShowcase(cx: number, y: number): void {
+    const iconSize = 76;
+    const gap = 100;
+    const startX = cx - ((PIE_TYPES.length - 1) * gap) / 2;
+
+    this.pieCard = new PieInfoCard(this, (px, py) => {
+      for (const { image, pie } of this.showcaseIcons) {
+        const half = (iconSize * 1.1) / 2;
+        if (Math.abs(px - image.x) <= half && Math.abs(py - image.y) <= half) return pie;
+      }
+      return null;
+    });
+
+    PIE_TYPES.forEach((pie, i) => {
+      const image = this.add
+        .image(startX + i * gap, y, pie.assetKey)
+        .setInteractive({ useHandCursor: true });
+      image.setScale(iconSize / Math.max(image.width, image.height));
+
+      image.on('pointerover', (p: Phaser.Input.Pointer) => {
+        image.setScale((iconSize * 1.15) / Math.max(image.width, image.height));
+        if (!p.wasTouch) this.pieCard.show(pie);
+      });
+      image.on('pointerout', () => image.setScale(iconSize / Math.max(image.width, image.height)));
+      image.on('pointerdown', () => this.pieCard.show(pie));
+
+      this.showcaseIcons.push({ image, pie });
     });
   }
 
   /** Menu pies fly around the full screen and bounce off walls and each other. */
   private buildFloatingPies(): void {
     const totalFloaters = 14;
-    const pieEmojis = PIE_TYPES.map((pie) => pie.emoji);
 
     for (let i = 0; i < totalFloaters; i++) {
       const size = Phaser.Math.Between(46, 88);
@@ -173,12 +205,12 @@ export class MainMenuScene extends Phaser.Scene {
       state.vx = Phaser.Math.FloatBetween(-180, 180);
       state.vy = Phaser.Math.FloatBetween(-150, 150);
 
-      const text = emojiText(this, state.x, state.y, pieEmojis[i % pieEmojis.length], size)
-        .setAlpha(0.24)
-        .setDepth(DEPTHS.BACKGROUND + 1);
+      const pie = PIE_TYPES[i % PIE_TYPES.length];
+      const image = this.add.image(state.x, state.y, pie.assetKey).setAlpha(0.24).setDepth(DEPTHS.BACKGROUND + 1);
+      image.setScale(size / Math.max(image.width, image.height));
 
       this.floaters.push({
-        text,
+        image,
         state,
         spinDegPerSecond: Phaser.Math.FloatBetween(-22, 22),
       });
