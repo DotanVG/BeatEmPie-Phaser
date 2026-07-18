@@ -22,6 +22,27 @@ export function generatePlaceholderTextures(scene: Phaser.Scene): void {
   g.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
   flush(TEX.bgGradient, GAME_WIDTH, GAME_HEIGHT);
 
+  // ---- Game cursor (gold reticle: ring + dot + ticks, dark outline) --------
+  g.lineStyle(7, 0x0b0d2b, 0.9);
+  g.strokeCircle(28, 28, 17);
+  g.lineStyle(4, 0xffe08a, 1);
+  g.strokeCircle(28, 28, 17);
+  g.fillStyle(0x0b0d2b, 0.9);
+  g.fillCircle(28, 28, 5.5);
+  g.fillStyle(0xffe08a, 1);
+  g.fillCircle(28, 28, 3.5);
+  g.lineStyle(4, 0xffe08a, 1);
+  g.beginPath();
+  const tick: Array<[number, number, number, number]> = [
+    [28, 2, 28, 12], [28, 44, 28, 54], [2, 28, 12, 28], [44, 28, 54, 28],
+  ];
+  for (const [x1, y1, x2, y2] of tick) {
+    g.moveTo(x1, y1);
+    g.lineTo(x2, y2);
+  }
+  g.strokePath();
+  flush(TEX.cursor, 56, 56);
+
   // ---- Soft drop shadow (stacked ellipses) ---------------------------------
   for (let i = 6; i >= 1; i--) {
     g.fillStyle(0x000000, 0.06);

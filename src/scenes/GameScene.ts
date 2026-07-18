@@ -22,6 +22,7 @@ import { CollisionSystem } from '../systems/CollisionSystem';
 import { InputSystem } from '../systems/InputSystem';
 import { Hud } from '../ui/Hud';
 import { TouchControls } from '../ui/TouchControls';
+import { GameCursor } from '../ui/GameCursor';
 
 /**
  * The gameplay scene. Owns the player, all systems, the enemy/pickup groups and
@@ -93,6 +94,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.hud = new Hud(this);
+    new GameCursor(this);
 
     this.bus.on(GameEvents.PLAYER_DIED, this.onPlayerDied, this);
     this.bus.on(GameEvents.ENEMY_KILLED, this.onEnemyKilled, this);

@@ -62,6 +62,9 @@
         height: var(--app-height) !important;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
+        /* The game draws its own cursor (see ui/GameCursor); hide the OS pointer so
+           players never see two cursors. !important beats Phaser's inline hand-cursor. */
+        cursor: none !important;
       }
       #boot-loader {
         position: absolute;

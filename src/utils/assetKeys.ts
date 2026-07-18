@@ -24,6 +24,7 @@ export const TEX = {
   pieSplat: 'pie-splat',
 
   // --- Procedural placeholders ---
+  cursor: 'tex-cursor',
   shadow: 'tex-shadow',
   bgGradient: 'tex-bg-gradient',
   warning: 'tex-warning',

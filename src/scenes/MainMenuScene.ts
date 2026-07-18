@@ -9,6 +9,8 @@ import { emojiText, withEmojiPadding } from '../utils/text';
 import { popIn, pulse } from '../utils/animation';
 import { stepFloaters, type MenuFloaterBounds, type MenuFloaterState } from '../utils/menuFloaters';
 import { getHudRightInset } from '../game/displayPolicy';
+import { GameCursor } from '../ui/GameCursor';
+import { installMissClickPuff, menuPieDrop } from '../ui/menuPieFx';
 
 interface MenuFloater {
   text: Phaser.GameObjects.Text;
@@ -37,6 +39,8 @@ export class MainMenuScene extends Phaser.Scene {
     this.sound.stopAll();
     this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, TEX.bgGradient);
     this.buildFloatingPies();
+    new GameCursor(this);
+    installMissClickPuff(this);
 
     this.audio = new AudioSystem(this);
     this.audio.playMusic(AUDIO.musicMenu);
@@ -220,10 +224,15 @@ export class MainMenuScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
     this.muteLabel.on('pointerdown', () => {
-      const muted = !this.audio.isMuted();
-      this.audio.setMuted(muted);
-      this.muteLabel.setText(muted ? '🔇 Muted' : '🔊 Sound');
-      if (!muted) this.audio.playMusic(AUDIO.musicMenu);
+      // Pie falls onto the toggle; the sound state flips on splat.
+      const cx = this.muteLabel.x - this.muteLabel.displayWidth / 2;
+      const cy = this.muteLabel.y + this.muteLabel.displayHeight / 2;
+      menuPieDrop(this, cx, cy, () => {
+        const muted = !this.audio.isMuted();
+        this.audio.setMuted(muted);
+        this.muteLabel.setText(muted ? '🔇 Muted' : '🔊 Sound');
+        if (!muted) this.audio.playMusic(AUDIO.musicMenu);
+      });
     });
   }
 

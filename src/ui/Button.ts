@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { withEmojiPadding } from '../utils/text';
+import { menuPieDrop } from './menuPieFx';
 
 export interface ButtonOptions {
   width?: number;
@@ -7,6 +8,8 @@ export interface ButtonOptions {
   fontSize?: number;
   fill?: number;
   textColor?: string;
+  /** Default true: a random pie falls onto the button and the action fires on splat. */
+  pieDrop?: boolean;
 }
 
 /**
@@ -75,7 +78,9 @@ export function makeButton(
     if (!pressed || fired) return;
     pressed = false;
     fired = true;
-    onClick();
+    // Menu pie mechanic: the action fires when the pie splats on the button (~0.4s).
+    if (opts.pieDrop === false) onClick();
+    else menuPieDrop(scene, container.x, container.y, onClick);
   });
 
   return container;

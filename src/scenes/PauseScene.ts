@@ -4,6 +4,8 @@ import { makeButton } from '../ui/Button';
 import { withEmojiPadding } from '../utils/text';
 import { popIn } from '../utils/animation';
 import type { GameScene } from './GameScene';
+import { GameCursor } from '../ui/GameCursor';
+import { installMissClickPuff } from '../ui/menuPieFx';
 
 /** Overlay launched on top of a paused GameScene. */
 export class PauseScene extends Phaser.Scene {
@@ -18,6 +20,8 @@ export class PauseScene extends Phaser.Scene {
     const cx = GAME_WIDTH / 2;
 
     this.add.rectangle(cx, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0b0d2b, 0.72);
+    new GameCursor(this);
+    installMissClickPuff(this);
     this.add
       .text(
         cx,
