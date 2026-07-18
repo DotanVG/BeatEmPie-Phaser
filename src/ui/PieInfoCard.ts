@@ -3,17 +3,16 @@ import type { PieType } from '../types/game';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../game/constants';
 import { withEmojiPadding } from '../utils/text';
 
-const CARD_W = 660;
-const CARD_H = 470;
+const CARD_W = 980;
+const CARD_H = 620;
+const PAD = 56;
 const DIM_DEPTH = 8000;
 
 /**
- * Main-menu pie info card: a dedicated panel over a dimmed background that
- * explains one pie's power (description includes the pie's emoji).
- *
- * Desktop: opens on icon hover; closes when the pointer leaves the card (unless
- * it moves onto another showcase icon, which swaps the card) or via the X.
- * Touch: opens on icon tap; closes on tap outside the card or on the yellow X.
+ * Pie info card: opens on CLICK/TAP of a showcase icon (same interaction on
+ * desktop and mobile), over a dimmed background. Closes on click/tap outside
+ * the card or on the gold X. Text layout is overflow-safe: the description
+ * wraps inside the card and steps its font size down until it fits.
  */
 export class PieInfoCard {
   private dim: Phaser.GameObjects.Rectangle;
@@ -24,11 +23,7 @@ export class PieInfoCard {
   private unlock: Phaser.GameObjects.Text;
   private shown = false;
 
-  constructor(
-    private scene: Phaser.Scene,
-    /** Returns the pie whose showcase icon is under (x, y), if any — lets a hover slide between icons. */
-    private pieIconAt: (x: number, y: number) => PieType | null,
-  ) {
+  constructor(private scene: Phaser.Scene) {
     const cx = GAME_WIDTH / 2;
     const cy = GAME_HEIGHT / 2;
 
@@ -39,45 +34,45 @@ export class PieInfoCard {
 
     const bg = scene.add.graphics();
     bg.fillStyle(0x14123a, 0.97);
-    bg.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 20);
-    bg.lineStyle(5, 0xffe08a, 1);
-    bg.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 20);
+    bg.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 24);
+    bg.lineStyle(6, 0xffe08a, 1);
+    bg.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 24);
 
-    this.pieImage = scene.add.image(0, -CARD_H / 2 + 130, '__DEFAULT').setScale(2.6);
+    this.pieImage = scene.add.image(0, -CARD_H / 2 + 150, '__DEFAULT').setScale(3.2);
 
     this.title = scene.add
-      .text(0, -CARD_H / 2 + 250, '', withEmojiPadding({
+      .text(0, -CARD_H / 2 + 292, '', withEmojiPadding({
         fontFamily: 'Trebuchet MS, sans-serif',
-        fontSize: '40px',
+        fontSize: '48px',
         color: COLORS.goldHex,
         fontStyle: 'bold',
-      }, 40))
+      }, 48))
       .setOrigin(0.5);
 
     this.desc = scene.add
-      .text(0, -CARD_H / 2 + 330, '', withEmojiPadding({
+      .text(0, -CARD_H / 2 + 360, '', withEmojiPadding({
         fontFamily: 'Trebuchet MS, sans-serif',
-        fontSize: '28px',
+        fontSize: '34px',
         color: COLORS.cream,
         align: 'center',
-        wordWrap: { width: CARD_W - 90 },
-        lineSpacing: 8,
-      }, 28))
+        wordWrap: { width: CARD_W - PAD * 2 },
+        lineSpacing: 10,
+      }, 34))
       .setOrigin(0.5, 0);
 
     this.unlock = scene.add
-      .text(0, CARD_H / 2 - 46, '', {
+      .text(0, CARD_H / 2 - 52, '', {
         fontFamily: 'Trebuchet MS, sans-serif',
-        fontSize: '24px',
+        fontSize: '26px',
         color: '#9aa0c0',
       })
       .setOrigin(0.5);
 
-    // Yellow X, matching the other gold UI accents.
+    // Gold X, matching the game's other gold accents.
     const close = scene.add
-      .text(CARD_W / 2 - 34, -CARD_H / 2 + 34, '✕', {
+      .text(CARD_W / 2 - 44, -CARD_H / 2 + 44, '✕', {
         fontFamily: 'Trebuchet MS, sans-serif',
-        fontSize: '38px',
+        fontSize: '46px',
         color: COLORS.goldHex,
         fontStyle: 'bold',
       })
@@ -95,16 +90,10 @@ export class PieInfoCard {
       .setDepth(DIM_DEPTH + 10)
       .setVisible(false);
 
-    // Tap/click on the dim (outside the card) closes it.
+    // Click/tap on the dim (outside the card) closes it — desktop and mobile alike.
     this.dim.setInteractive();
     this.dim.on('pointerdown', (p: Phaser.Input.Pointer) => {
       if (!this.insideCard(p.x, p.y)) this.hide();
-    });
-
-    // Desktop: pointer leaving the card closes it — unless it lands on another icon.
-    scene.input.on(Phaser.Input.Events.POINTER_MOVE, this.onMove, this);
-    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      scene.input.off(Phaser.Input.Events.POINTER_MOVE, this.onMove, this);
     });
   }
 
@@ -117,14 +106,25 @@ export class PieInfoCard {
     this.pieImage.setTexture(pie.assetKey);
     this.title.setText(pie.displayName);
     this.title.setColor(`#${pie.color.toString(16).padStart(6, '0')}`);
-    this.desc.setText(`${pie.emoji} ${pie.description}`);
+
+    // Overflow-safe description: step the font down until the text fits the
+    // space between the title block and the unlock footer.
+    const maxHeight = CARD_H - 360 /* art + title */ - 90 /* footer */;
+    for (const size of [34, 30, 26, 22]) {
+      this.desc.setFontSize(size);
+      this.desc.setWordWrapWidth(CARD_W - PAD * 2);
+      this.desc.setText(`${pie.emoji} ${pie.description}`);
+      if (this.desc.height <= maxHeight) break;
+    }
+
     const extras: string[] = [];
     if (pie.maxUses !== undefined) extras.push(`${pie.maxUses} charges per run`);
     extras.push(pie.unlockWave > 0 ? `Unlocks at Wave ${pie.unlockWave}` : 'Available from the start');
     this.unlock.setText(extras.join('   •   '));
+
     this.dim.setVisible(true);
-    this.panel.setVisible(true).setScale(0.92);
-    this.scene.tweens.add({ targets: this.panel, scale: 1, duration: 140, ease: 'Back.easeOut' });
+    this.panel.setVisible(true).setScale(0.9);
+    this.scene.tweens.add({ targets: this.panel, scale: 1, duration: 150, ease: 'Back.easeOut' });
   }
 
   hide(): void {
@@ -138,16 +138,5 @@ export class PieInfoCard {
     return (
       Math.abs(x - GAME_WIDTH / 2) <= CARD_W / 2 + 14 && Math.abs(y - GAME_HEIGHT / 2) <= CARD_H / 2 + 14
     );
-  }
-
-  private onMove(pointer: Phaser.Input.Pointer): void {
-    if (!this.shown || pointer.wasTouch) return;
-    if (this.insideCard(pointer.x, pointer.y)) return;
-    const over = this.pieIconAt(pointer.x, pointer.y);
-    if (over) {
-      this.show(over); // hovering another showcase icon swaps the card
-      return;
-    }
-    this.hide();
   }
 }

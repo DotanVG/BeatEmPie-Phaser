@@ -57,7 +57,7 @@ export class GameScene extends Phaser.Scene {
     super('GameScene');
   }
 
-  create(): void {
+  create(data?: { playerX?: number; playerY?: number }): void {
     this.sound.stopAll();
     this.physics.world.isPaused = false;
     this.gameEnded = false;
@@ -75,7 +75,10 @@ export class GameScene extends Phaser.Scene {
     this.enemies = this.physics.add.group();
     this.pickups = this.physics.add.group();
 
-    this.player = new Player(this, GAME_WIDTH / 2, (ARENA.minY + ARENA.maxY) / 2);
+    // Optional spawn hand-off (e.g. Shushki's jump from the main menu Play button).
+    const spawnX = Phaser.Math.Clamp(data?.playerX ?? GAME_WIDTH / 2, ARENA.minX, ARENA.maxX);
+    const spawnY = Phaser.Math.Clamp(data?.playerY ?? (ARENA.minY + ARENA.maxY) / 2, ARENA.minY, ARENA.maxY);
+    this.player = new Player(this, spawnX, spawnY);
 
     this.combat = new CombatSystem(this);
     this.pies = new PieSystem(this);
