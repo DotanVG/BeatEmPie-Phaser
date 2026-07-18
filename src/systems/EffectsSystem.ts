@@ -171,6 +171,34 @@ export class EffectsSystem {
     this.scene.tweens.add({ targets: g, alpha: 0, duration: 200, delay: 150, onComplete: () => g.destroy() });
   }
 
+  /** Pumpkin ultimate: pie sludge splatters across the screen and fades out. */
+  screenSludge(color: number, count = 5): void {
+    if (!this.scene.textures.exists(TEX.pieSplat)) return;
+    for (let i = 0; i < count; i++) {
+      const img = this.scene.add
+        .image(
+          Phaser.Math.Between(GAME_WIDTH * 0.08, GAME_WIDTH * 0.92),
+          Phaser.Math.Between(GAME_HEIGHT * 0.08, GAME_HEIGHT * 0.8),
+          TEX.pieSplat,
+        )
+        .setScrollFactor(0)
+        .setDepth(DEPTHS.UI - 5)
+        .setTint(color)
+        .setAlpha(0.88)
+        .setScale(Phaser.Math.FloatBetween(1.6, 2.9))
+        .setAngle(Phaser.Math.Between(0, 359));
+      this.scene.tweens.add({
+        targets: img,
+        alpha: 0,
+        y: img.y + 34,
+        delay: 450 + i * 240,
+        duration: 1700,
+        ease: 'Quad.easeIn',
+        onComplete: () => img.destroy(),
+      });
+    }
+  }
+
   /** Cracked-ground decal that lingers then fades (Meat Pie). */
   groundCrack(x: number, y: number, scale = 1): void {
     const img = this.scene.add

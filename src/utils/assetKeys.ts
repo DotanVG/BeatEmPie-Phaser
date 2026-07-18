@@ -32,6 +32,7 @@ export const TEX = {
   spark: 'tex-spark',
   puddle: 'tex-puddle',
   fireTrail: 'tex-fire-trail',
+  ice: 'tex-ice',
   groundCrack: 'tex-ground-crack',
   lock: 'tex-lock',
   pickup: 'tex-pickup',

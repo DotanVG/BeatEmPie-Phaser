@@ -3,6 +3,7 @@ import type { PieType } from '../types/game';
 import type { GameScene } from '../scenes/GameScene';
 import type { Enemy } from './Enemy';
 import { ARENA, DEPTHS } from '../game/constants';
+import { TEX } from '../utils/assetKeys';
 import { clamp, lerp } from '../utils/math';
 
 /**
@@ -23,6 +24,7 @@ export class PieDrop {
   private shadowTargetScale: number;
   private homing?: Enemy;
   private done = false;
+  private trailAcc = 0;
 
   constructor(
     private scene: GameScene,
@@ -37,7 +39,9 @@ export class PieDrop {
     this.startX = targetX;
     this.homing = homing;
     // Slightly slower fall so the pie art (spinning) stays readable in the air.
-    this.duration = pie.effectType === 'heavy' ? 620 : pie.effectType === 'ultimate' ? 540 : 470;
+    // Homing (Strawberry) dives fast like a missile.
+    this.duration =
+      pie.effectType === 'heavy' ? 620 : pie.effectType === 'ultimate' ? 540 : pie.effectType === 'homing' ? 320 : 470;
     this.spin = (Math.random() < 0.5 ? -1 : 1) * 0.012;
     this.shadowTargetScale = clamp(pie.impactRadius / 60, 0.5, 4);
 
@@ -79,8 +83,33 @@ export class PieDrop {
     const t = clamp(this.elapsed / this.duration, 0, 1);
     const easedY = t * t; // ease-in for an accelerating fall
 
+    const prevX = this.sprite.x;
+    const prevY = this.sprite.y;
     this.sprite.setPosition(lerp(this.startX, this.tx, t), lerp(this.startY, this.ty, easedY));
-    this.sprite.rotation += this.spin * deltaMs;
+
+    if (this.pie.effectType === 'homing') {
+      // Missile mode: nose points along the flight path, exhaust puffs trail behind.
+      this.sprite.rotation = Math.atan2(this.sprite.y - prevY, this.sprite.x - prevX) - Math.PI / 2;
+      this.trailAcc += deltaMs;
+      if (this.trailAcc >= 26) {
+        this.trailAcc = 0;
+        const puff = this.scene.add
+          .image(this.sprite.x, this.sprite.y, TEX.particle)
+          .setDepth(DEPTHS.PIE - 1)
+          .setTint(Math.random() < 0.5 ? 0xffffff : 0xffb340)
+          .setAlpha(0.8)
+          .setScale(0.9);
+        this.scene.tweens.add({
+          targets: puff,
+          alpha: 0,
+          scale: 0.2,
+          duration: 280,
+          onComplete: () => puff.destroy(),
+        });
+      }
+    } else {
+      this.sprite.rotation += this.spin * deltaMs;
+    }
 
     this.shadow.setPosition(this.tx, this.ty);
     this.shadow.setScale(lerp(0.3, this.shadowTargetScale, t));

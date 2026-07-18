@@ -1,10 +1,11 @@
+import Phaser from 'phaser';
 import type { PieType } from '../types/game';
 import type { GameScene } from '../scenes/GameScene';
 import type { Enemy } from '../entities/Enemy';
 import { PIE_TYPES, PIE_ORDER, PIE_BY_ID } from '../data/pieTypes';
 import { SCORING } from '../data/balance';
 import { ARENA, DEPTHS } from '../game/constants';
-import { AUDIO } from '../utils/assetKeys';
+import { AUDIO, TEX } from '../utils/assetKeys';
 import { GameEvents } from '../game/GameEvents';
 import { Cooldown } from '../utils/timers';
 import { clamp, distance } from '../utils/math';
@@ -31,6 +32,8 @@ export class PieSystem {
   private charges = new Map<string, number>();
   private drops: PieDrop[] = [];
   private puddles: PiePuddle[] = [];
+  /** Missile lock reticles tracking Strawberry targets until the strike. */
+  private locks: Array<{ img: Phaser.GameObjects.Image; enemy: Enemy; ttl: number }> = [];
 
   constructor(private scene: GameScene) {
     for (const pie of PIE_TYPES) {
@@ -144,6 +147,18 @@ export class PieSystem {
     this.scene.audio.playSfx(AUDIO.pieCall, 0.8);
     this.scene.bus.emit(GameEvents.PIE_DROPPED, { id: pie.id });
 
+    // Strawberry: lock-on reticle glued to the hunted target until the missile hits.
+    if (pie.targetMode === 'homing' && homing) {
+      const img = this.scene.add
+        .image(homing.x, homing.y, TEX.lock)
+        .setDepth(DEPTHS.WARNING)
+        .setAlpha(0.95)
+        .setScale(0.7);
+      this.scene.tweens.add({ targets: img, scale: 1.05, duration: 260, yoyo: true, repeat: -1 });
+      this.locks.push({ img, enemy: homing, ttl: pie.skyDropDelayMs + 700 });
+      this.scene.audio.playSfx(pie.soundKey, 0.7);
+    }
+
     const marker = new PieWarningMarker(this.scene, tx, ty, pie.warningRadius, pie.color);
     this.scene.time.delayedCall(pie.skyDropDelayMs, () => {
       marker.destroyMarker();
@@ -216,6 +231,7 @@ export class PieSystem {
         this.scene.effects.hitPause();
         const { hits } = this.damageArea(x, y, pie.impactRadius, pie.damage, pie.knockbackForce ?? 0, pie.id);
         if (hits >= 2) this.scene.combat.addBonus(SCORING.cherryMultiHit * (hits - 1), 'CHERRY COMBO!', x, y);
+        this.spawnCherryCluster(pie, x, y);
         break;
       }
 
@@ -239,7 +255,10 @@ export class PieSystem {
 
       case 'homing': {
         // Single-target assassin hit: no area damage, big instant advantage.
+        // Missile blast visuals — flash + double ring at the strike.
         this.scene.effects.ring(x, y, pie.impactRadius * 0.6, pie.color, 260);
+        this.scene.effects.ring(x, y, pie.impactRadius * 0.35, 0xffffff, 200);
+        this.scene.effects.shake('small');
         const victim =
           target && target.isAlive ? target : this.scene.getNearestEnemy(x, y) ?? undefined;
         if (victim && distance(x, y, victim.x, victim.y) <= victim.def.bodyRadius + 48) {
@@ -259,6 +278,10 @@ export class PieSystem {
       case 'heavy':
         this.scene.effects.groundCrack(x, y, clamp(pie.impactRadius / 120, 1, 2.4));
         this.scene.effects.ring(x, y, pie.impactRadius, pie.color, 480);
+        // The slab hits the waterline: big sea-splash on top of the crack.
+        this.scene.effects.ring(x, y, pie.impactRadius * 0.7, 0x4f8cff, 380);
+        this.scene.effects.ring(x, y, pie.impactRadius * 1.15, 0x9fd0ff, 560);
+        this.scene.effects.burst(x, y, { tints: [0x4f8cff, 0x9fd0ff, 0xffffff], count: 36, speed: 540, lifespan: 640, scale: 1.5 });
         this.scene.effects.shake('big');
         this.scene.effects.hitPause(70);
         this.damageArea(x, y, pie.impactRadius, pie.damage, pie.knockbackForce ?? 0, pie.id);
@@ -300,6 +323,41 @@ export class PieSystem {
     }
   }
 
+  /** Cherry cluster: bomblets arc out from the blast and pop around the impact. */
+  private spawnCherryCluster(pie: PieType, x: number, y: number): void {
+    const count = 6;
+    for (let i = 0; i < count; i++) {
+      const ang = (i / count) * Math.PI * 2 + Phaser.Math.FloatBetween(-0.4, 0.4);
+      const dist = Phaser.Math.Between(95, 195);
+      const px = this.clampX(x + Math.cos(ang) * dist);
+      const py = this.clampY(y + Math.sin(ang) * dist);
+      const cherry = this.scene.add
+        .image(x, y, TEX.particle)
+        .setTint(0xe23150)
+        .setDepth(DEPTHS.PIE)
+        .setScale(1.3);
+      const state = { t: 0 };
+      this.scene.tweens.add({
+        targets: state,
+        t: 1,
+        duration: Phaser.Math.Between(230, 330),
+        ease: 'Linear',
+        onUpdate: () => {
+          cherry.setPosition(
+            Phaser.Math.Linear(x, px, state.t),
+            Phaser.Math.Linear(y, py, state.t) - Math.sin(state.t * Math.PI) * 90,
+          );
+        },
+        onComplete: () => {
+          cherry.destroy();
+          this.scene.effects.ring(px, py, 70, pie.color, 240);
+          this.scene.effects.burst(px, py, { tints: [0xe23150, 0xff8a5c], count: 8, speed: 240, lifespan: 320, scale: 0.9 });
+          this.damageArea(px, py, 74, pie.clusterDamage ?? 9, 70, pie.id);
+        },
+      });
+    }
+  }
+
   private resolveChain(pie: PieType, x: number, y: number): void {
     const primary = this.scene.getNearestEnemy(x, y);
     if (!primary || distance(x, y, primary.x, primary.y) > (pie.chainRange ?? 250)) {
@@ -320,6 +378,8 @@ export class PieSystem {
       hit.add(current);
       points.push({ x: current.x, y: current.y });
       current.takeDamage(dmg, { pieId: pie.id });
+      // Electrocution: a short paralysis after the zap (ccResist scales it down).
+      if (current.isAlive) current.applyStatus({ kind: 'stunned', durationMs: 1600, pieId: pie.id });
       if (hops > 0) this.scene.combat.addBonus(SCORING.lemonChainHit, 'CHAIN', current.x, current.y);
       dmg = Math.max(minDmg, dmg * 0.85);
       hops++;
@@ -331,6 +391,8 @@ export class PieSystem {
   private resolveUltimate(pie: PieType): void {
     this.scene.effects.fullscreenFlash(pie.color, 0.7, 560);
     this.scene.effects.cameraFlash(0xffffff, 200);
+    // Pie sludge splatters across the screen, as if some flew onto the player.
+    this.scene.effects.screenSludge(pie.color);
     this.scene.effects.shake('big');
     this.scene.effects.hitPause(80);
     const player = this.scene.player;
@@ -426,6 +488,17 @@ export class PieSystem {
     for (let i = this.puddles.length - 1; i >= 0; i--) {
       this.puddles[i].update(deltaMs, enemies);
       if (this.puddles[i].isDead) this.puddles.splice(i, 1);
+    }
+
+    for (let i = this.locks.length - 1; i >= 0; i--) {
+      const lock = this.locks[i];
+      lock.ttl -= deltaMs;
+      if (lock.ttl <= 0 || !lock.enemy.isAlive) {
+        lock.img.destroy();
+        this.locks.splice(i, 1);
+        continue;
+      }
+      lock.img.setPosition(lock.enemy.x, lock.enemy.y);
     }
   }
 }

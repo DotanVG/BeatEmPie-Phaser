@@ -64,6 +64,8 @@ export interface PieType {
   knockbackForce?: number;
   /** Lemon Meringue: max hop distance — the chain covers every enemy connected within this range. */
   chainRange?: number;
+  /** Cherry cluster: damage of each bomblet pop. */
+  clusterDamage?: number;
   /** Assassin (Strawberry) tuning: flat damage vs the boss… */
   bossDamage?: number;
   /** …and the max-HP threshold from which enemies take 50% max HP per hit instead of being one-shot. */

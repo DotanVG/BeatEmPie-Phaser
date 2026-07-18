@@ -33,9 +33,9 @@ const STATUS_ICON: Partial<Record<StatusKind, string>> = {
   burning: '🔥',
   fireDot: '🔥',
   chocolateDot: '🍫',
-  confused: '💫',
+  confused: '🍄',
   slowed: '🐌',
-  stunned: '⭐',
+  stunned: '⚡',
 };
 
 /** Precedence for the dominant tint + icon when several statuses overlap. */
@@ -111,6 +111,15 @@ export class StatusController {
       if (this.statuses.has(kind)) return STATUS_ICON[kind] ?? '';
     }
     return '';
+  }
+
+  /** Remaining-life fraction (1 → fresh, 0 → about to expire) of the dominant status. */
+  get dominantRemainingFraction(): number | null {
+    for (const kind of PRIORITY) {
+      const s = this.statuses.get(kind);
+      if (s) return Math.max(0, Math.min(1, s.timeLeft / s.durationMs));
+    }
+    return null;
   }
 
   update(deltaMs: number, enemy: Enemy): void {

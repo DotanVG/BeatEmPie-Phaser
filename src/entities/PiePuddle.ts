@@ -32,6 +32,7 @@ export class PiePuddle {
   private age = 0;
   private tickAcc = 0;
   private dead = false;
+  private flameNext = 0;
 
   constructor(
     private scene: Phaser.Scene,
@@ -75,6 +76,15 @@ export class PiePuddle {
       return;
     }
 
+    // Chili: actual flames flickering in a random burning sequence along the trail.
+    if (this.opts.statusKind === 'burning') {
+      this.flameNext -= deltaMs;
+      if (this.flameNext <= 0) {
+        this.flameNext = Phaser.Math.Between(70, 190);
+        this.spawnFlame();
+      }
+    }
+
     this.tickAcc += deltaMs;
     if (this.tickAcc < this.opts.tickRateMs) return;
     this.tickAcc -= this.opts.tickRateMs;
@@ -86,6 +96,9 @@ export class PiePuddle {
       enemy.takeDamage(this.opts.tickDamage, { pieId: this.opts.pieId, sourceStatus: this.opts.statusKind });
       if (!enemy.isAlive) continue;
 
+      // Chocolate: goo splashes as they wade through it.
+      if (this.opts.statusKind !== 'burning') this.spawnWadeSplash(enemy.x, enemy.y);
+
       if (this.opts.statusKind === 'burning') {
         // Lingering burn that keeps ticking briefly after leaving the trail.
         enemy.applyStatus({
@@ -96,14 +109,58 @@ export class PiePuddle {
           pieId: this.opts.pieId,
         });
       } else {
-        // Chocolate: slow + tint while standing in the goo.
+        // Chocolate: slow + tint while inside; the longer duration keeps the
+        // goo-drip trail (see Enemy.updateStatusFx) going after they leave.
         enemy.applyStatus({
           kind: 'chocolateDot',
-          durationMs: 520,
+          durationMs: 1100,
           speedMultiplier: this.opts.slowMultiplier ?? 0.5,
           pieId: this.opts.pieId,
         });
       }
+    }
+  }
+
+  /** One flame tongue at a random spot inside the trail: rises, stretches, fades. */
+  private spawnFlame(): void {
+    const ang = Math.random() * Math.PI * 2;
+    const dist = Math.sqrt(Math.random()) * this.opts.radius * 0.8;
+    const flame = this.scene.add
+      .image(this.x + Math.cos(ang) * dist, this.y + Math.sin(ang) * dist * 0.5, TEX.fireTrail)
+      .setDepth((this.opts.depth ?? DEPTHS.PUDDLE) + 1)
+      .setTint(Math.random() < 0.4 ? 0xffd166 : 0xff9a33)
+      .setAlpha(0)
+      .setScale(Phaser.Math.FloatBetween(0.5, 1.05));
+    this.scene.tweens.add({
+      targets: flame,
+      alpha: { from: 0.9, to: 0 },
+      y: flame.y - Phaser.Math.Between(22, 40),
+      scaleY: flame.scaleY * 1.6,
+      scaleX: flame.scaleX * 0.7,
+      duration: Phaser.Math.Between(300, 520),
+      ease: 'Quad.easeOut',
+      onComplete: () => flame.destroy(),
+    });
+  }
+
+  /** Chocolate droplets kicked up by an enemy wading through the goo. */
+  private spawnWadeSplash(ex: number, ey: number): void {
+    for (let i = 0; i < 3; i++) {
+      const drop = this.scene.add
+        .image(ex + Phaser.Math.Between(-12, 12), ey + Phaser.Math.Between(0, 10), TEX.particle)
+        .setDepth((this.opts.depth ?? DEPTHS.PUDDLE) + 1)
+        .setTint(this.opts.color)
+        .setAlpha(0.85)
+        .setScale(Phaser.Math.FloatBetween(0.4, 0.8));
+      this.scene.tweens.add({
+        targets: drop,
+        x: drop.x + Phaser.Math.Between(-26, 26),
+        y: drop.y - Phaser.Math.Between(14, 34),
+        alpha: 0,
+        duration: Phaser.Math.Between(240, 380),
+        ease: 'Quad.easeOut',
+        onComplete: () => drop.destroy(),
+      });
     }
   }
 

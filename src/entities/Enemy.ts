@@ -7,6 +7,10 @@ import { StatusController, StatusApply } from './StatusController';
 import { hitFlash } from '../utils/animation';
 import { emojiText } from '../utils/text';
 import { SCORING } from '../data/balance';
+import { TEX } from '../utils/assetKeys';
+
+/** Zombie-green flash tint for confused (mushroomed) enemies. */
+const ZOMBIE_TINT = 0x63e06a;
 
 export interface DamageOpts {
   pieId?: string;
@@ -34,6 +38,12 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   protected dead = false;
 
   private statusText?: Phaser.GameObjects.Text;
+  private iceImage?: Phaser.GameObjects.Image;
+  private blinkPhase = 0;
+  private blinkOn = true;
+  private arcTimer = 0;
+  private flameTimer = 0;
+  private trailTimer = 0;
 
   constructor(scene: GameScene, x: number, y: number, def: EnemyType) {
     super(scene, x, y, def.textureKey);
@@ -120,6 +130,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setVelocity(0, 0);
     this.statusText?.destroy();
     this.statusText = undefined;
+    this.iceImage?.destroy();
+    this.iceImage = undefined;
 
     this.gscene.bus.emit(GameEvents.ENEMY_KILLED, {
       enemy: this,
@@ -162,13 +174,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       this.knockbackTimer -= deltaMs;
       const b = this.body as Phaser.Physics.Arcade.Body;
       this.setVelocity(b.velocity.x * 0.9, b.velocity.y * 0.9);
-      this.updateStatusIcon();
+      this.updateStatusFx(deltaMs);
       return;
     }
 
     if (this.status.isFrozen || this.status.isStunned) {
       this.setVelocity(0, 0);
-      this.updateStatusIcon();
+      this.updateStatusFx(deltaMs);
       return;
     }
 
@@ -179,7 +191,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     this.setFlipX((this.body as Phaser.Physics.Arcade.Body).velocity.x < -2);
-    this.updateStatusIcon();
+    this.updateStatusFx(deltaMs);
   }
 
   /** Default behaviour: swim straight at Shushki. */
@@ -216,16 +228,131 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setVelocity(Math.cos(ang) * sp, Math.sin(ang) * sp);
   }
 
-  private updateStatusIcon(): void {
+  /**
+   * All per-frame status visuals:
+   * - the dominant emoji blinks slowly at first, exponentially faster as the
+   *   effect nears its end, then vanishes with the effect;
+   * - frozen enemies are encased in a translucent ice crystal sized to them;
+   * - stunned (lemon) enemies get little electric arcs wrapping the body;
+   * - confused (mushroom) enemies flash zombie-green;
+   * - burning enemies visibly carry flames even after leaving the trail;
+   * - chocolate-covered enemies drip a goo trail that lingers behind them.
+   */
+  private updateStatusFx(deltaMs: number): void {
     const icon = this.status.dominantIcon;
+    const remain = this.status.dominantRemainingFraction;
+
+    // Accelerating blink: ~1.6Hz fresh -> ~12Hz right before the effect breaks.
+    if (remain !== null) {
+      const freq = 1.6 + 10.4 * Math.pow(1 - remain, 3);
+      this.blinkPhase += (deltaMs / 1000) * freq;
+      this.blinkOn = Math.sin(this.blinkPhase * Math.PI * 2) > -0.35;
+    } else {
+      this.blinkPhase = 0;
+      this.blinkOn = true;
+    }
+
     if (!icon) {
       this.statusText?.setVisible(false);
-      return;
+    } else {
+      if (!this.statusText) {
+        this.statusText = emojiText(this.gscene, this.x, this.y, icon, 30).setDepth(DEPTHS.FLOATING_TEXT);
+      }
+      this.statusText
+        .setText(icon)
+        .setVisible(this.blinkOn)
+        .setPosition(this.x, this.y - this.displayHeight * 0.62);
     }
-    if (!this.statusText) {
-      this.statusText = emojiText(this.gscene, this.x, this.y, icon, 30).setDepth(DEPTHS.FLOATING_TEXT);
+
+    this.updateIceBlock();
+
+    // Zombie-green flashing while mushroomed.
+    if (this.status.isConfused) {
+      this.setTint(this.blinkOn ? ZOMBIE_TINT : this.def.tint);
     }
-    this.statusText.setText(icon).setVisible(true).setPosition(this.x, this.y - this.displayHeight * 0.62);
+
+    // Electric arcs while paralyzed by the lemon chain.
+    this.arcTimer -= deltaMs;
+    if (this.status.isStunned && this.arcTimer <= 0) {
+      this.arcTimer = 150 + Math.random() * 140;
+      const r = this.def.bodyRadius;
+      const y1 = this.y + Phaser.Math.Between(-r, r) * 0.6;
+      const y2 = this.y + Phaser.Math.Between(-r, r) * 0.6;
+      this.gscene.effects.lightning(
+        [{ x: this.x - r * 0.95, y: y1 }, { x: this.x + r * 0.95, y: y2 }],
+        0xffe24a,
+      );
+    }
+
+    // Visible flames while burning (inside the trail or lingering after it).
+    this.flameTimer -= deltaMs;
+    if (this.status.has('burning') && this.flameTimer <= 0) {
+      this.flameTimer = 120 + Math.random() * 100;
+      const flame = this.gscene.add
+        .image(this.x + Phaser.Math.Between(-14, 14), this.y + Phaser.Math.Between(-6, 10), TEX.fireTrail)
+        .setDepth(this.depth + 1)
+        .setTint(Math.random() < 0.5 ? 0xff9a33 : 0xffd166)
+        .setAlpha(0.85)
+        .setScale(Phaser.Math.FloatBetween(0.45, 0.8));
+      this.gscene.tweens.add({
+        targets: flame,
+        y: flame.y - 26,
+        alpha: 0,
+        scaleY: flame.scaleY * 1.5,
+        duration: 320,
+        ease: 'Quad.easeOut',
+        onComplete: () => flame.destroy(),
+      });
+    }
+
+    // Chocolate drip trail that outlives the puddle contact.
+    this.trailTimer -= deltaMs;
+    if (this.status.has('chocolateDot') && this.trailTimer <= 0) {
+      this.trailTimer = 110;
+      const blob = this.gscene.add
+        .image(this.x + Phaser.Math.Between(-10, 10), this.y + this.displayHeight * 0.34, TEX.particle)
+        .setDepth(DEPTHS.PUDDLE)
+        .setTint(0x6b4226)
+        .setAlpha(0.55)
+        .setScale(Phaser.Math.FloatBetween(0.9, 1.7), Phaser.Math.FloatBetween(0.5, 0.8));
+      this.gscene.tweens.add({
+        targets: blob,
+        alpha: 0,
+        duration: 1500,
+        ease: 'Quad.easeIn',
+        onComplete: () => blob.destroy(),
+      });
+    }
+  }
+
+  /** Translucent teal ice crystal encasing a frozen enemy; shatters on thaw. */
+  private updateIceBlock(): void {
+    if (this.status.isFrozen) {
+      if (!this.iceImage) {
+        const r = this.def.bodyRadius;
+        this.iceImage = this.gscene.add
+          .image(this.x, this.y, TEX.ice)
+          .setDepth(this.depth + 2)
+          .setTint(0x8fe0ff)
+          .setAlpha(0.5);
+        // The bigger the fish, the bigger the ice.
+        this.iceImage.setDisplaySize(r * 2.9, r * 2.6);
+      }
+      this.iceImage
+        .setPosition(this.x, this.y)
+        .setAlpha(0.42 + 0.12 * Math.sin(this.blinkPhase * Math.PI * 2));
+    } else if (this.iceImage) {
+      // Shatter.
+      this.gscene.effects.burst(this.x, this.y, {
+        tints: [0x8fe0ff, 0xdff4ff, 0xffffff],
+        count: 12,
+        speed: 260,
+        lifespan: 380,
+        scale: 0.9,
+      });
+      this.iceImage.destroy();
+      this.iceImage = undefined;
+    }
   }
 
   /** Bonus score lookups for special kills (used by CombatSystem). */
@@ -245,6 +372,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   override destroy(fromScene?: boolean): void {
     this.statusText?.destroy();
     this.statusText = undefined;
+    this.iceImage?.destroy();
+    this.iceImage = undefined;
     super.destroy(fromScene);
   }
 }

@@ -81,6 +81,31 @@ export function generatePlaceholderTextures(scene: Phaser.Scene): void {
   g.fillEllipse(160, 78, 56, 40);
   flush(TEX.puddle, 200, 120);
 
+  // ---- Ice crystal (frozen enemies get encased; tinted + translucent at use) --
+  g.fillStyle(0xffffff, 1);
+  g.beginPath();
+  g.moveTo(60, 2);
+  g.lineTo(104, 22);
+  g.lineTo(116, 66);
+  g.lineTo(92, 112);
+  g.lineTo(30, 114);
+  g.lineTo(6, 62);
+  g.lineTo(18, 20);
+  g.closePath();
+  g.fillPath();
+  // Facet lines for a crystal look.
+  g.lineStyle(4, 0xdff4ff, 0.9);
+  g.beginPath();
+  g.moveTo(60, 2);
+  g.lineTo(52, 60);
+  g.lineTo(30, 114);
+  g.moveTo(104, 22);
+  g.lineTo(52, 60);
+  g.moveTo(52, 60);
+  g.lineTo(92, 112);
+  g.strokePath();
+  flush(TEX.ice, 122, 118);
+
   // ---- Fire trail tile ------------------------------------------------------
   g.fillStyle(0xffffff, 1);
   g.fillEllipse(32, 40, 56, 36);
