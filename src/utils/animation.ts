@@ -9,8 +9,9 @@ type Sprite = Phaser.GameObjects.Sprite | Phaser.Physics.Arcade.Sprite | Phaser.
 
 /** White flash on hit, restoring the original tint afterwards. */
 export function hitFlash(scene: Phaser.Scene, target: Sprite, durationMs = 90): void {
-  target.tint = 0xffffff;
-  target.tintFill = true;
+  const t2 = target as unknown as { tint: number; tintFill: boolean };
+  t2.tint = 0xffffff;
+  t2.tintFill = true;
   scene.time.delayedCall(durationMs, () => {
     if (target.active) target.clearTint();
   });
