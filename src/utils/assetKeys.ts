@@ -53,7 +53,9 @@ export const AUDIO = {
   musicVictory: 'bgm-victory',
   musicGameOver: 'bgm-gameover',
 
-  // --- SFX keys (no source files yet — AudioSystem degrades gracefully) ---
+  // --- SFX keys (mostly no source files yet — AudioSystem degrades gracefully) ---
+  /** Placeholder file shipped (see SFX_FILES) — to be replaced with the real SFX pass. */
+  hitmarker: 'sfx-hitmarker',
   uiClick: 'sfx-ui-click',
   pieSelect: 'sfx-pie-select',
   pieCall: 'sfx-pie-call',
@@ -124,6 +126,11 @@ export const PIE_IMAGES: Record<string, string> = {
   'pie-chili': 'assets/sprites/pies/pie_chili.png',
   'pie-pumpkin': 'assets/sprites/pies/pie_pumpkin.png',
   [TEX.pieSplat]: 'assets/sprites/pies/pie_splat.png',
+};
+
+/** Placeholder SFX files (procedurally generated stand-ins until the audio pass). */
+export const SFX_FILES: Record<string, string> = {
+  [AUDIO.hitmarker]: 'assets/audio/sfx/hitmarker.wav',
 };
 
 /** Real music files. AudioSystem only plays a track if its key actually loaded. */

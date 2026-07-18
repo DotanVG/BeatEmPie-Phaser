@@ -237,7 +237,7 @@ export class MainMenuScene extends Phaser.Scene {
     });
   }
 
-  /** Up to 3 translucent enemies swim across the menu; a floater hit whacks them away. */
+  /** Up to 5 translucent enemies swim across the menu; a floater hit whacks them away. */
   private updateSwimmers(time: number, dt: number): void {
     for (let i = this.swimmers.length - 1; i >= 0; i--) {
       const s = this.swimmers[i];
@@ -276,7 +276,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private spawnSwimmer(): void {
-    if (this.swimmers.length >= 3) return;
+    if (this.swimmers.length >= 5) return;
     const kinds: EnemyKind[] = ['fish', 'fish', 'angryFish', 'pufferFish', 'whale'];
     const def = ENEMY_TYPES[Phaser.Utils.Array.GetRandom(kinds)];
     const fromLeft = Math.random() < 0.5;
@@ -299,9 +299,9 @@ export class MainMenuScene extends Phaser.Scene {
     });
   }
 
-  /** Menu pies fly around the full screen and bounce off walls and each other. */
+  /** Menu pies fly around the full screen and bounce off walls and each other — exactly one of each pie. */
   private buildFloatingPies(): void {
-    const totalFloaters = 14;
+    const totalFloaters = PIE_TYPES.length;
 
     for (let i = 0; i < totalFloaters; i++) {
       const size = Phaser.Math.Between(46, 88);
@@ -310,7 +310,7 @@ export class MainMenuScene extends Phaser.Scene {
       state.vx = Phaser.Math.FloatBetween(-180, 180);
       state.vy = Phaser.Math.FloatBetween(-150, 150);
 
-      const pie = PIE_TYPES[i % PIE_TYPES.length];
+      const pie = PIE_TYPES[i];
       const image = this.add.image(state.x, state.y, pie.assetKey).setAlpha(0.24).setDepth(DEPTHS.BACKGROUND + 1);
       image.setScale(size / Math.max(image.width, image.height));
 

@@ -12,6 +12,7 @@ interface ResultData {
   wave: number;
   record: boolean;
   highScore: number;
+  pies?: number;
 }
 
 /** Defeat summary with restart / menu and a high-score notice. */
@@ -94,6 +95,25 @@ export class GameOverScene extends Phaser.Scene {
               fontStyle: 'bold',
             },
             36,
+          ),
+        )
+        .setOrigin(0.5)
+        .setAlpha(0),
+    );
+
+    rest.push(
+      this.add
+        .text(
+          cx,
+          608,
+          `🥧 Pies dropped  ${data.pies ?? 0}`,
+          withEmojiPadding(
+            {
+              fontFamily: 'Trebuchet MS, sans-serif',
+              fontSize: '32px',
+              color: COLORS.cream,
+            },
+            32,
           ),
         )
         .setOrigin(0.5)

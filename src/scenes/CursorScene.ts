@@ -71,10 +71,10 @@ export class CursorScene extends Phaser.Scene {
     this.img.setScale(this.baseScale * (p.isDown ? 0.82 : 1));
   }
 
-  /** COD-style X hitmarker around the cursor. Gold for kills, red + bigger for the boss. */
+  /** COD-style hitmarker: only the X's edges (never connected through the middle), red; bigger for the boss. */
   hitmarker(boss = false): void {
     if (!this.img.visible) return;
-    const color = boss ? 0xff5470 : 0xffe08a;
+    const color = 0xff5470;
     const r0 = boss ? 16 : 12;
     const r1 = boss ? 40 : 30;
     const g = this.add.graphics({ x: this.img.x, y: this.img.y }).setDepth(9_999);

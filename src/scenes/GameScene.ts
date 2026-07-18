@@ -52,6 +52,7 @@ export class GameScene extends Phaser.Scene {
   boss: BossWhale | null = null;
 
   private gameEnded = false;
+  private piesDropped = 0;
 
   constructor() {
     super('GameScene');
@@ -98,8 +99,10 @@ export class GameScene extends Phaser.Scene {
 
     this.hud = new Hud(this);
 
+    this.piesDropped = 0;
     this.bus.on(GameEvents.PLAYER_DIED, this.onPlayerDied, this);
     this.bus.on(GameEvents.ENEMY_KILLED, this.onEnemyKilled, this);
+    this.bus.on(GameEvents.PIE_DROPPED, () => this.piesDropped++);
 
     this.audio.playMusic(AUDIO.musicCalm);
     this.pies.selectIndex(0);
@@ -274,8 +277,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private onEnemyKilled(p: { isBoss?: boolean }): void {
-    // COD-style X hitmarker around the global cursor.
+    // COD-style hitmarker around the global cursor + satisfying kill tick.
     (this.scene.get('CursorScene') as CursorScene | null)?.hitmarker(Boolean(p.isBoss));
+    this.audio.playSfx(AUDIO.hitmarker, 0.9);
     if (p.isBoss) {
       this.boss = null;
       this.bus.emit(GameEvents.BOSS_DEFEATED, {});
@@ -297,6 +301,7 @@ export class GameScene extends Phaser.Scene {
         wave: this.currentWaveNumber,
         record,
         highScore: this.combat.highScore,
+        pies: this.piesDropped,
       };
       this.scene.start(victory ? 'VictoryScene' : 'GameOverScene', data);
     });

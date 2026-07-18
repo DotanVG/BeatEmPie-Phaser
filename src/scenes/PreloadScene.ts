@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../game/constants';
-import { PLAYER_IMAGES, PLAYER_SHEETS, PLAYER_FRAME, PIE_IMAGES, MUSIC_FILES } from '../utils/assetKeys';
+import { PLAYER_IMAGES, PLAYER_SHEETS, PLAYER_FRAME, PIE_IMAGES, MUSIC_FILES, SFX_FILES } from '../utils/assetKeys';
 import { generatePlaceholderTextures } from '../utils/placeholders';
 import { registerPlayerAnims } from '../utils/playerAnims';
 
@@ -26,6 +26,7 @@ export class PreloadScene extends Phaser.Scene {
       });
     }
     for (const [key, path] of Object.entries(MUSIC_FILES)) this.load.audio(key, path);
+    for (const [key, path] of Object.entries(SFX_FILES)) this.load.audio(key, path);
 
     // Never let a missing asset abort the boot — just log and continue.
     this.load.on('loaderror', (file: Phaser.Loader.File) => {

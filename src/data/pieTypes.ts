@@ -10,7 +10,7 @@ export const PIE_TYPES: PieType[] = [
   {
     id: 'apple',
     displayName: 'Apple Pie',
-    emoji: '🥧',
+    emoji: '🍎',
     description: 'Standard drop. Reliable damage, always ready.',
     damage: 26,
     cooldownMs: 650,

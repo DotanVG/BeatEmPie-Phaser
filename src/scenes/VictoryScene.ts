@@ -12,6 +12,7 @@ interface ResultData {
   wave: number;
   record: boolean;
   highScore: number;
+  pies?: number;
 }
 
 /** Victory summary shown after Captain Leviathan is defeated. */
@@ -80,6 +81,22 @@ export class VictoryScene extends Phaser.Scene {
             fontStyle: 'bold',
           },
           36,
+        ),
+      )
+      .setOrigin(0.5);
+
+    this.add
+      .text(
+        cx,
+        608,
+        `🥧 Pies dropped  ${data.pies ?? 0}`,
+        withEmojiPadding(
+          {
+            fontFamily: 'Trebuchet MS, sans-serif',
+            fontSize: '32px',
+            color: COLORS.cream,
+          },
+          32,
         ),
       )
       .setOrigin(0.5);
