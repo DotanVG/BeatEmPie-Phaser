@@ -29,7 +29,7 @@ export class PieDrop {
     private pie: PieType,
     targetX: number,
     targetY: number,
-    private onImpact: (x: number, y: number) => void,
+    private onImpact: (x: number, y: number, target?: Enemy) => void,
     homing?: Enemy,
   ) {
     this.tx = targetX;
@@ -95,7 +95,7 @@ export class PieDrop {
     const iy = this.ty;
     this.sprite.destroy();
     this.shadow.destroy();
-    this.onImpact(ix, iy);
+    this.onImpact(ix, iy, this.homing?.isAlive ? this.homing : undefined);
   }
 
   destroyDrop(): void {

@@ -146,7 +146,9 @@ export class PieSystem {
     const marker = new PieWarningMarker(this.scene, tx, ty, pie.warningRadius, pie.color);
     this.scene.time.delayedCall(pie.skyDropDelayMs, () => {
       marker.destroyMarker();
-      this.drops.push(new PieDrop(this.scene, pie, tx, ty, (ix, iy) => this.resolveImpact(pie, ix, iy), homing));
+      this.drops.push(
+        new PieDrop(this.scene, pie, tx, ty, (ix, iy, target) => this.resolveImpact(pie, ix, iy, target), homing),
+      );
     });
     return true;
   }
@@ -163,7 +165,8 @@ export class PieSystem {
     const front = { x: this.clampX(player.x + player.facingSign * 150), y: this.clampY(player.y) };
 
     if (pie.targetMode === 'homing') {
-      const e = this.scene.getNearestEnemy(player.x, player.y);
+      // Assassin: hunt the STRONGEST opponent on screen (boss first), not the nearest.
+      const e = this.strongestEnemy();
       return e ? { tx: e.x, ty: e.y, homing: e } : { tx: front.x, ty: front.y };
     }
     if (pie.targetMode === 'nearestEnemy') {
@@ -179,8 +182,23 @@ export class PieSystem {
     return e ? { tx: this.clampX(e.x), ty: this.clampY(e.y) } : { tx: front.x, ty: front.y };
   }
 
+  /** Boss first, then highest max HP; distance to the player breaks ties. */
+  private strongestEnemy(): Enemy | null {
+    const player = this.scene.player;
+    let best: Enemy | null = null;
+    let bestKey = -Infinity;
+    for (const e of this.scene.getActiveEnemies()) {
+      const key = (e.isBoss ? 1_000_000 : 0) + e.maxHealthValue * 1000 - distance(player.x, player.y, e.x, e.y);
+      if (key > bestKey) {
+        bestKey = key;
+        best = e;
+      }
+    }
+    return best;
+  }
+
   // --- Impact resolution ----------------------------------------------------
-  private resolveImpact(pie: PieType, x: number, y: number): void {
+  private resolveImpact(pie: PieType, x: number, y: number, target?: Enemy): void {
     this.scene.audio.playSfx(pie.soundKey);
     this.scene.effects.splat(x, y, pie.color, pie.impactRadius);
     this.scene.effects.burst(x, y, pie.particle);
@@ -220,10 +238,24 @@ export class PieSystem {
         this.resolveChain(pie, x, y);
         break;
 
-      case 'homing':
-        this.scene.effects.ring(x, y, pie.impactRadius, pie.color, 260);
-        this.damageArea(x, y, pie.impactRadius, pie.damage, pie.knockbackForce ?? 0, pie.id);
+      case 'homing': {
+        // Single-target assassin hit: no area damage, big instant advantage.
+        this.scene.effects.ring(x, y, pie.impactRadius * 0.6, pie.color, 260);
+        const victim =
+          target && target.isAlive ? target : this.scene.getNearestEnemy(x, y) ?? undefined;
+        if (victim && distance(x, y, victim.x, victim.y) <= victim.def.bodyRadius + 48) {
+          const dmg = victim.isBoss
+            ? pie.bossDamage ?? pie.damage
+            : victim.maxHealthValue >= (pie.bigEnemyThreshold ?? Number.POSITIVE_INFINITY)
+              ? Math.ceil(victim.maxHealthValue / 2) // big enemies: dead in exactly 2 hits
+              : Math.max(pie.damage, victim.health); // regulars: one shot
+          victim.takeDamage(dmg, { pieId: pie.id, isCrit: true });
+          if ((pie.knockbackForce ?? 0) > 0 && victim.isAlive) {
+            victim.applyKnockback(x, y, pie.knockbackForce ?? 0);
+          }
+        }
         break;
+      }
 
       case 'heavy':
         this.scene.effects.groundCrack(x, y, clamp(pie.impactRadius / 120, 1, 2.4));

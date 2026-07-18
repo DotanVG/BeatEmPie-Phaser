@@ -65,6 +65,10 @@ export interface PieType {
   /** Lemon Meringue chain settings. */
   chainCount?: number;
   chainRange?: number;
+  /** Assassin (Strawberry) tuning: flat damage vs the boss… */
+  bossDamage?: number;
+  /** …and the max-HP threshold from which enemies take 50% max HP per hit instead of being one-shot. */
+  bigEnemyThreshold?: number;
   targetMode: PieTargetMode;
   /** Primary tint for placeholder art + UI. */
   color: number;
