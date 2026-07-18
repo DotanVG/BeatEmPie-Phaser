@@ -80,7 +80,6 @@ export const PIE_TYPES: PieType[] = [
     warningRadius: 92,
     impactRadius: 110,
     effectType: 'chain',
-    chainCount: 4,
     chainRange: 280,
     targetMode: 'groundTarget',
     color: 0xffe24a,

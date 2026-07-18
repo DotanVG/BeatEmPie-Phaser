@@ -97,21 +97,78 @@ export class EffectsSystem {
     this.scene.tweens.add({ targets: rect, alpha: 0, duration: durationMs, onComplete: () => rect.destroy() });
   }
 
-  /** Polyline lightning bolt (Lemon Meringue chain). */
+  /**
+   * Chain lightning (Lemon Meringue): jagged, flickering multi-stroke bolts.
+   * Each hop is a midpoint-displaced path drawn as glow -> colored body ->
+   * white-hot core, with occasional thin forks and a strike flash at every
+   * chained enemy. The whole bolt re-jitters twice (flicker) before fading.
+   */
   lightning(points: Array<{ x: number; y: number }>, color = 0xffe24a): void {
     if (points.length < 2) return;
     const g = this.scene.add.graphics().setDepth(DEPTHS.EFFECT);
-    g.lineStyle(6, 0xffffff, 1);
-    g.beginPath();
-    g.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) g.lineTo(points[i].x, points[i].y);
-    g.strokePath();
-    g.lineStyle(3, color, 1);
-    g.beginPath();
-    g.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) g.lineTo(points[i].x, points[i].y);
-    g.strokePath();
-    this.scene.tweens.add({ targets: g, alpha: 0, duration: 280, onComplete: () => g.destroy() });
+
+    const jagged = (a: { x: number; y: number }, b: { x: number; y: number }): Array<{ x: number; y: number }> => {
+      const dist = Math.hypot(b.x - a.x, b.y - a.y);
+      const steps = Phaser.Math.Clamp(Math.round(dist / 26), 3, 14);
+      const nx = -(b.y - a.y) / (dist || 1); // unit normal
+      const ny = (b.x - a.x) / (dist || 1);
+      const path = [{ x: a.x, y: a.y }];
+      for (let s = 1; s < steps; s++) {
+        const t = s / steps;
+        // Largest jitter mid-bolt, pinched at both ends — reads as electricity.
+        const amp = Math.sin(t * Math.PI) * Phaser.Math.Clamp(dist * 0.14, 8, 26);
+        const off = Phaser.Math.FloatBetween(-amp, amp);
+        path.push({ x: a.x + (b.x - a.x) * t + nx * off, y: a.y + (b.y - a.y) * t + ny * off });
+      }
+      path.push({ x: b.x, y: b.y });
+      return path;
+    };
+
+    const strokePath = (path: Array<{ x: number; y: number }>): void => {
+      g.beginPath();
+      g.moveTo(path[0].x, path[0].y);
+      for (let i = 1; i < path.length; i++) g.lineTo(path[i].x, path[i].y);
+      g.strokePath();
+    };
+
+    const draw = (): void => {
+      g.clear();
+      for (let i = 1; i < points.length; i++) {
+        const path = jagged(points[i - 1], points[i]);
+        g.lineStyle(13, color, 0.22);
+        strokePath(path);
+        g.lineStyle(6, color, 0.75);
+        strokePath(path);
+        g.lineStyle(2.5, 0xffffff, 1);
+        strokePath(path);
+
+        // Occasional thin fork darting off a mid vertex.
+        if (path.length > 4 && Math.random() < 0.7) {
+          const v = path[Phaser.Math.Between(1, path.length - 2)];
+          const ang = Phaser.Math.FloatBetween(0, Math.PI * 2);
+          const len = Phaser.Math.Between(24, 58);
+          const mid = { x: v.x + Math.cos(ang) * len * 0.5, y: v.y + Math.sin(ang) * len * 0.5 };
+          const end = {
+            x: v.x + Math.cos(ang + Phaser.Math.FloatBetween(-0.5, 0.5)) * len,
+            y: v.y + Math.sin(ang + Phaser.Math.FloatBetween(-0.5, 0.5)) * len,
+          };
+          g.lineStyle(2, 0xffffff, 0.85);
+          strokePath([v, mid, end]);
+        }
+      }
+      // Strike flash on every chained enemy (skip the sky impact point 0).
+      for (let i = 1; i < points.length; i++) {
+        g.fillStyle(0xffffff, 0.9);
+        g.fillCircle(points[i].x, points[i].y, 9);
+        g.fillStyle(color, 0.35);
+        g.fillCircle(points[i].x, points[i].y, 20);
+      }
+    };
+
+    draw();
+    this.scene.time.delayedCall(45, () => g.active !== false && draw());
+    this.scene.time.delayedCall(95, () => g.active !== false && draw());
+    this.scene.tweens.add({ targets: g, alpha: 0, duration: 200, delay: 150, onComplete: () => g.destroy() });
   }
 
   /** Cracked-ground decal that lingers then fades (Meat Pie). */

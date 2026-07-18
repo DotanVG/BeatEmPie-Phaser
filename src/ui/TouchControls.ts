@@ -36,6 +36,8 @@ export class TouchControls {
 
     this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 200, 110, '🥧', 0xff6a4d, () => scene.pies.dropAuto());
     this.makeButton(GAME_WIDTH - 200, GAME_HEIGHT - 430, 84, '💨', 0x4f8cff, () => scene.player.tryDash());
+    // Mobile-only pause, top-right just below the fullscreen button.
+    this.makeButton(GAME_WIDTH - 88, 210, 44, '⏸', 0xffe08a, () => scene.togglePause());
 
     // Prev / next pie toggle above the dash button, with the current pie between the arrows.
     const togY = GAME_HEIGHT - 590;

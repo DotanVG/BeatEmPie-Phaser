@@ -62,8 +62,7 @@ export interface PieType {
   slowMultiplier?: number;
   freezeDurationMs?: number;
   knockbackForce?: number;
-  /** Lemon Meringue chain settings. */
-  chainCount?: number;
+  /** Lemon Meringue: max hop distance — the chain covers every enemy connected within this range. */
   chainRange?: number;
   /** Assassin (Strawberry) tuning: flat damage vs the boss… */
   bossDamage?: number;

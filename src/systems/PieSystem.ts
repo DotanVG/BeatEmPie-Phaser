@@ -302,19 +302,27 @@ export class PieSystem {
 
   private resolveChain(pie: PieType, x: number, y: number): void {
     const primary = this.scene.getNearestEnemy(x, y);
-    if (!primary) return;
+    if (!primary || distance(x, y, primary.x, primary.y) > (pie.chainRange ?? 250)) {
+      // Nothing in reach of the impact point — the bolt fizzles on the ground.
+      this.scene.effects.lightning([{ x, y }, { x: x + 30, y: y + 10 }], pie.color);
+      return;
+    }
     const hit = new Set<Enemy>();
     const points: Array<{ x: number; y: number }> = [{ x, y }];
     let current: Enemy | null = primary;
     let dmg = pie.damage;
-    const maxChains = pie.chainCount ?? 3;
+    const minDmg = pie.damage * 0.4;
+    let hops = 0;
 
-    for (let i = 0; i < maxChains && current; i++) {
+    // The chain keeps jumping while ANYONE unhit is within range of the last
+    // strike — it covers every enemy in the connected area, no fixed cap.
+    while (current) {
       hit.add(current);
       points.push({ x: current.x, y: current.y });
       current.takeDamage(dmg, { pieId: pie.id });
-      if (i > 0) this.scene.combat.addBonus(SCORING.lemonChainHit, 'CHAIN', current.x, current.y);
-      dmg *= 0.85;
+      if (hops > 0) this.scene.combat.addBonus(SCORING.lemonChainHit, 'CHAIN', current.x, current.y);
+      dmg = Math.max(minDmg, dmg * 0.85);
+      hops++;
       current = this.nearestExcluding(current.x, current.y, hit, pie.chainRange ?? 250);
     }
     this.scene.effects.lightning(points, pie.color);
