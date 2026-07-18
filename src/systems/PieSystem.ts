@@ -11,6 +11,7 @@ import { clamp, distance } from '../utils/math';
 import { PieWarningMarker } from '../entities/PieWarningMarker';
 import { PieDrop } from '../entities/PieDrop';
 import { PiePuddle } from '../entities/PiePuddle';
+import { resolveDropPoint } from '../utils/pieTargeting';
 
 interface ResolvedTarget {
   tx: number;
@@ -162,24 +163,22 @@ export class PieSystem {
 
   private resolveTarget(pie: PieType, preferred?: { x: number; y: number }): ResolvedTarget {
     const player = this.scene.player;
-    const front = { x: this.clampX(player.x + player.facingSign * 150), y: this.clampY(player.y) };
+    const nearest = this.scene.getNearestEnemy(player.x, player.y);
+    const strongest = this.strongestEnemy();
 
-    if (pie.targetMode === 'homing') {
-      // Assassin: hunt the STRONGEST opponent on screen (boss first), not the nearest.
-      const e = this.strongestEnemy();
-      return e ? { tx: e.x, ty: e.y, homing: e } : { tx: front.x, ty: front.y };
-    }
-    if (pie.targetMode === 'nearestEnemy') {
-      const e = this.scene.getNearestEnemy(player.x, player.y);
-      return e ? { tx: e.x, ty: e.y } : { tx: front.x, ty: front.y };
-    }
-    if (pie.targetMode === 'screenWide') {
-      return { tx: player.x, ty: player.y };
-    }
-    // groundTarget / puddle / lineTrail
-    if (preferred) return { tx: this.clampX(preferred.x), ty: this.clampY(preferred.y) };
-    const e = this.scene.getNearestEnemy(player.x, player.y);
-    return e ? { tx: this.clampX(e.x), ty: this.clampY(e.y) } : { tx: front.x, ty: front.y };
+    const point = resolveDropPoint(
+      pie.targetMode,
+      preferred,
+      { x: player.x, y: player.y, facingSign: player.facingSign },
+      nearest ? { x: nearest.x, y: nearest.y } : null,
+      strongest ? { x: strongest.x, y: strongest.y } : null,
+      { minX: ARENA.minX, maxX: ARENA.maxX, minY: ARENA.minY, maxY: ARENA.maxY },
+    );
+    return {
+      tx: point.tx,
+      ty: point.ty,
+      homing: point.homing === 'strongest' ? strongest ?? undefined : undefined,
+    };
   }
 
   /** Boss first, then highest max HP; distance to the player breaks ties. */
