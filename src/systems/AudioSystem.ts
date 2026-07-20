@@ -28,7 +28,15 @@ export class AudioSystem {
     if (this.currentKey === key && this.current?.isPlaying) return;
     this.stopMusic();
     this.currentKey = key;
-    if (!this.has(key) || this.muted) return;
+    if (this.muted) return;
+    if (!this.has(key)) {
+      // Music loads in the background (see MainMenuScene) — pick it up once it arrives,
+      // as long as nothing else has been requested since.
+      this.scene.load.once(`filecomplete-audio-${key}`, () => {
+        if (this.currentKey === key) this.playMusic(key, loop);
+      });
+      return;
+    }
     try {
       const music = this.scene.sound.add(key, { loop, volume: 0 });
       music.play();
