@@ -35,14 +35,14 @@ selected pie, number keys / Q-E to choose pies, Shift to dash, P/Esc to pause.
 
 | Pie | Effect type | Behaviour |
 |-----|-------------|-----------|
-| 🥧 Apple | damage | Low-cooldown reliable single drop |
+| 🍎 Apple | damage | Low-cooldown reliable single drop |
 | 🍒 Cherry | explosive | Big AOE + strong knockback + screen shake |
 | 🫐 Blueberry | freeze | Freezes weak foes, slows the resistant |
 | 🍋 Lemon Meringue | chain | Lightning chains between nearby enemies |
-| 🍓 Strawberry | homing | Assassin — hunts the strongest foe, one-shots regulars, halves bosses; no splash |
-| 🥩 Meat | heavy | Long wind-up, massive damage, cracks the ground, big shake |
-| 🍄 Mushroom | confusion | Enemies turn on their allies (boss/whale resist) |
-| 🍫 Chocolate | dot | Leaves a slowing, damaging puddle (area denial) |
+| 🍓 Strawberry | homing | Homing Assassin — hunts the strongest foe, one-shots regulars, hits stronger enemies hard; no splash |
+| 🥩 Meat | heavy | Heavy AOE — long wind-up, massive area-of-effect damage, cracks the ground, big shake |
+| 🍄 Mushroom | confusion | Zombie confusion — turned enemies attack their own allies (boss/whale resist) |
+| 🍫 Chocolate | dot | Damage Over Time (DOT) — leaves a slowing, damaging puddle (area denial) |
 | 🌶️ Chili | fire trail | A burning lane; burn lingers briefly after leaving it |
 | 🎃 Pumpkin | ultimate | Screen-wide blast, **limited charges**, damages (not one-shots) the boss — last slot, key `0` |
 

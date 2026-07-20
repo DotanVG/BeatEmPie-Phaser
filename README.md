@@ -40,14 +40,14 @@ See [docs/CONTROLS.md](docs/CONTROLS.md) for the full reference.
 
 | # | Pie | Power |
 |---|-----|-------|
-| 1 | 🥧 Apple Pie | Standard drop — reliable damage, always available |
+| 1 | 🍎 Apple Pie | Standard drop — reliable damage, always available |
 | 2 | 🍒 Cherry Pie | Explosive AOE — knocks nearby enemies back |
 | 3 | 🫐 Blueberry Pie | Freeze — locks weak foes in ice, slows the strong |
 | 4 | 🍋 Lemon Meringue | Chain Lightning — zaps between nearby enemies |
-| 5 | 🍓 Strawberry Pie | Assassin — hunts the strongest foe, one-shots regulars, halves bosses |
-| 6 | 🥩 Meat Pie | Heavy — massive damage, slow charge, cracks the ground |
-| 7 | 🍄 Mushroom Pie | Confusion — enemies turn and attack their own allies |
-| 8 | 🍫 Chocolate Pie | DOT — leaves a puddle that slows and damages over time |
+| 5 | 🍓 Strawberry Pie | Homing Assassin — hunts the strongest foe, one-shots regulars, hits stronger enemies hard |
+| 6 | 🥩 Meat Pie | Heavy AOE — massive area-of-effect damage, slow charge, cracks the ground |
+| 7 | 🍄 Mushroom Pie | Zombie Confusion — turned enemies attack their own allies |
+| 8 | 🍫 Chocolate Pie | Damage Over Time (DOT) — leaves a puddle that slows and damages over time |
 | 9 | 🌶️ Chili Pie | Fire Trail — a burning lane that scorches enemies who cross it |
 | 0 | 🎃 Pumpkin Pie | Ultimate — screen-wide blast, very limited charges (key `0`) |
 
@@ -71,7 +71,7 @@ npm test           # unit tests (node --test, tests/*.test.mjs)
 
 ## 🌐 Play it live
 
-- **Web:** https://beatempie.vercel.app/
+- **Web:** https://beat-em-pie.vercel.app/
 - **itch.io:** https://dotanv.itch.io/beatempie
 
 `npm run build` produces a fully static `dist/` folder deployable to any static host. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for setup instructions.
