@@ -48,8 +48,8 @@ npm run preview   # locally preview the production build
 
 ## Notes
 
-- Music files are large `.wav` tracks (~33 MB total) served as static assets. For faster
-  loads you may later transcode them to `.ogg`/`.mp3` and update the paths in
+- Music files are `.ogg` (transcoded from source WAVs, ~2.5 MB total) and load in the
+  background after the menu appears — see `MainMenuScene` and `MUSIC_FILES` in
   `src/utils/assetKeys.ts`.
 - `main` must always be deployable; deploy from `main` (promoted from `staging` after
   validation) — see [BRANCH_STRATEGY.md](BRANCH_STRATEGY.md).

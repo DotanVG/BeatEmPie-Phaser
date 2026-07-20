@@ -134,12 +134,16 @@ export const SFX_FILES: Record<string, string> = {
   [AUDIO.hitmarker]: 'assets/audio/sfx/hitmarker.wav',
 };
 
-/** Real music files. AudioSystem only plays a track if its key actually loaded. */
+/**
+ * Real music files (OGG, transcoded from source WAVs — placeholder soundtrack pending
+ * Noam's final pass). AudioSystem only plays a track if its key actually loaded; these
+ * load lazily in the background from MainMenuScene rather than blocking the boot screen.
+ */
 export const MUSIC_FILES: Record<string, string> = {
-  [AUDIO.musicMenu]: 'assets/audio/music/bgm_mainmenu.wav',
-  [AUDIO.musicCalm]: 'assets/audio/music/bgm_gameplay_calm.wav',
-  [AUDIO.musicIntense]: 'assets/audio/music/bgm_gameplay_intense.wav',
-  [AUDIO.musicBoss]: 'assets/audio/music/bgm_boss.wav',
-  [AUDIO.musicVictory]: 'assets/audio/music/bgm_victory.wav',
-  [AUDIO.musicGameOver]: 'assets/audio/music/bgm_gameover.wav',
+  [AUDIO.musicMenu]: 'assets/audio/music/bgm_mainmenu.ogg',
+  [AUDIO.musicCalm]: 'assets/audio/music/bgm_gameplay_calm.ogg',
+  [AUDIO.musicIntense]: 'assets/audio/music/bgm_gameplay_intense.ogg',
+  [AUDIO.musicBoss]: 'assets/audio/music/bgm_boss.ogg',
+  [AUDIO.musicVictory]: 'assets/audio/music/bgm_victory.ogg',
+  [AUDIO.musicGameOver]: 'assets/audio/music/bgm_gameover.ogg',
 };

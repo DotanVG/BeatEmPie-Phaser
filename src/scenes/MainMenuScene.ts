@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTHS } from '../game/constants';
-import { TEX, AUDIO } from '../utils/assetKeys';
+import { TEX, AUDIO, MUSIC_FILES } from '../utils/assetKeys';
 import { AudioSystem } from '../systems/AudioSystem';
 import { SaveSystem } from '../systems/SaveSystem';
 import { PIE_TYPES } from '../data/pieTypes';
@@ -349,6 +349,14 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     return candidate;
+  }
+
+  /** Background-loads music (skipped by PreloadScene) so the loading screen stays fast. */
+  private loadMusicDeferred(): void {
+    const missing = Object.entries(MUSIC_FILES).filter(([key]) => !this.cache.audio.exists(key));
+    if (missing.length === 0) return;
+    for (const [key, path] of missing) this.load.audio(key, path);
+    this.load.start();
   }
 
   private buildMuteToggle(): void {
