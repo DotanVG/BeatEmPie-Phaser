@@ -186,7 +186,7 @@ export class RotateScene extends Phaser.Scene {
   /**
    * Draw a counterclockwise "hat" arc from upper-right through the top to upper-left,
    * progressively filled from right (origin) to left (destination) by `fillT` (0–1), with
-   * a fixed arrowhead at the left end indicating the direction of rotation.
+   * the arrowhead tracking the leading (fill-front) end indicating the direction of rotation.
    */
   private drawRotationArrow(g: Phaser.GameObjects.Graphics, cx: number, cy: number, fillT: number): void {
     const radius = 215;
@@ -207,10 +207,10 @@ export class RotateScene extends Phaser.Scene {
     g.arc(cx, arcCy, radius, currentRad, originRad, false);
     g.strokePath();
 
-    // Arrowhead fixed at the left (destination) end, pointing further counterclockwise.
-    const ax = cx + radius * Math.cos(destRad);
-    const ay = arcCy + radius * Math.sin(destRad);
-    const tangent = destRad - Math.PI / 2;
+    // Arrowhead tracks the leading edge of the fill, pointing further counterclockwise.
+    const ax = cx + radius * Math.cos(currentRad);
+    const ay = arcCy + radius * Math.sin(currentRad);
+    const tangent = currentRad - Math.PI / 2;
     const headLen = 34;
     const spread = 0.42;
 
