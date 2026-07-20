@@ -5,17 +5,17 @@ import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../game/constants';
 const sineEaseInOut = (t: number): number => -(Math.cos(Math.PI * t) - 1) / 2;
 
 // Phone rotation cycle breakdown (ms):
-//   0–990   : rotate 0° → 90°  (easeInOut)
-//   990–1800: hold at 90°      (810 ms)
-//   1800–2790: rotate 90° → 0° (easeInOut)
+//   0–990   : rotate 0° → -90° (easeInOut, counterclockwise)
+//   990–1800: hold at -90°     (810 ms)
+//   1800–2790: rotate -90° → 0° (easeInOut)
 //   2790–3150: hold at 0°      (360 ms)
 const PHONE_IN = 990;
 const PHONE_HOLD_END = 1800; // PHONE_IN + 810
 const PHONE_OUT_END = 2790;  // PHONE_HOLD_END + 990
 const PHONE_CYCLE = 3150;
 
-// Arrow alpha pulse (ms): 0.2 → 0.95 → 0.2, triangle wave
-const ARROW_CYCLE = 2400;
+// Arrow fill/deplete cycle (ms): 0 → 1 → 0, triangle wave
+const ARROW_CYCLE = 1600;
 
 /**
  * Fullscreen "rotate your device" overlay rendered entirely through Phaser's own pipeline.
@@ -28,6 +28,8 @@ const ARROW_CYCLE = 2400;
 export class RotateScene extends Phaser.Scene {
   private phoneContainer!: Phaser.GameObjects.Container;
   private arrowGfx!: Phaser.GameObjects.Graphics;
+  private arrowCx = 0;
+  private arrowCy = 0;
 
   private startTime = 0;
   private elapsed = 0;
@@ -82,10 +84,10 @@ export class RotateScene extends Phaser.Scene {
 
     this.phoneContainer = this.add.container(cx, cy - 30, [phoneGfx]);
 
-    // Curved rotation arrow — opacity animated separately
+    // Curved rotation arrow — arc length animated via progressive fill
+    this.arrowCx = cx;
+    this.arrowCy = cy - 30;
     this.arrowGfx = this.add.graphics();
-    this.arrowGfx.setAlpha(0.2);
-    this.drawRotationArrow(this.arrowGfx, cx, cy - 30);
 
     // Labels
     this.add
@@ -159,19 +161,19 @@ export class RotateScene extends Phaser.Scene {
   }
 
   private computeAngle(t: number): number {
-    if (t < PHONE_IN) return sineEaseInOut(t / PHONE_IN) * 90;
-    if (t < PHONE_HOLD_END) return 90;
-    if (t < PHONE_OUT_END) return (1 - sineEaseInOut((t - PHONE_HOLD_END) / (PHONE_OUT_END - PHONE_HOLD_END))) * 90;
+    if (t < PHONE_IN) return sineEaseInOut(t / PHONE_IN) * -90;
+    if (t < PHONE_HOLD_END) return -90;
+    if (t < PHONE_OUT_END) return (1 - sineEaseInOut((t - PHONE_HOLD_END) / (PHONE_OUT_END - PHONE_HOLD_END))) * -90;
     return 0;
   }
 
   private applyAnimation(): void {
     this.phoneContainer.setAngle(this.computeAngle(this.elapsed));
 
-    // Arrow alpha: triangle wave 0.2 → 0.95 → 0.2
+    // Fill fraction: triangle wave 0 → 1 → 0
     const at = this.arrowElapsed / ARROW_CYCLE;
-    const alphaT = at < 0.5 ? at * 2 : 2 - at * 2;
-    this.arrowGfx.setAlpha(0.2 + alphaT * 0.75);
+    const fillT = at < 0.5 ? at * 2 : 2 - at * 2;
+    this.drawRotationArrow(this.arrowGfx, this.arrowCx, this.arrowCy, fillT);
   }
 
   private clearInterval(): void {
@@ -182,27 +184,33 @@ export class RotateScene extends Phaser.Scene {
   }
 
   /**
-   * Draw a clockwise "hat" arc from upper-left through the top to upper-right, with an
-   * arrowhead at the right end indicating the direction of rotation.
+   * Draw a counterclockwise "hat" arc from upper-right through the top to upper-left,
+   * progressively filled from right (origin) to left (destination) by `fillT` (0–1), with
+   * a fixed arrowhead at the left end indicating the direction of rotation.
    */
-  private drawRotationArrow(g: Phaser.GameObjects.Graphics, cx: number, cy: number): void {
+  private drawRotationArrow(g: Phaser.GameObjects.Graphics, cx: number, cy: number, fillT: number): void {
     const radius = 215;
     const arcCy = cy + 20;
 
-    const startDeg = 222;
-    const endDeg = 318;
-    const startRad = Phaser.Math.DegToRad(startDeg);
-    const endRad = Phaser.Math.DegToRad(endDeg);
+    const destDeg = 222; // left end — destination
+    const originDeg = 318; // right end — start of fill
+    const currentDeg = originDeg - fillT * (originDeg - destDeg);
 
+    const currentRad = Phaser.Math.DegToRad(currentDeg);
+    const originRad = Phaser.Math.DegToRad(originDeg);
+    const destRad = Phaser.Math.DegToRad(destDeg);
+
+    g.clear();
     g.lineStyle(8, COLORS.gold, 1);
 
     g.beginPath();
-    g.arc(cx, arcCy, radius, startRad, endRad, false);
+    g.arc(cx, arcCy, radius, currentRad, originRad, false);
     g.strokePath();
 
-    const ax = cx + radius * Math.cos(endRad);
-    const ay = arcCy + radius * Math.sin(endRad);
-    const tangent = endRad + Math.PI / 2;
+    // Arrowhead fixed at the left (destination) end, pointing further counterclockwise.
+    const ax = cx + radius * Math.cos(destRad);
+    const ay = arcCy + radius * Math.sin(destRad);
+    const tangent = destRad - Math.PI / 2;
     const headLen = 34;
     const spread = 0.42;
 
