@@ -39,7 +39,7 @@ selected pie, number keys / Q-E to choose pies, Shift to dash, P/Esc to pause.
 | 🍒 Cherry | explosive | Big AOE + strong knockback + screen shake |
 | 🫐 Blueberry | freeze | Freezes weak foes, slows the resistant |
 | 🍋 Lemon Meringue | chain | Lightning chains between nearby enemies |
-| 🍓 Strawberry | homing | Locks onto nearest enemy, can’t miss; re-targets if it dies |
+| 🍓 Strawberry | homing | Assassin — hunts the strongest foe, one-shots regulars, halves bosses; no splash |
 | 🥩 Meat | heavy | Long wind-up, massive damage, cracks the ground, big shake |
 | 🍄 Mushroom | confusion | Enemies turn on their allies (boss/whale resist) |
 | 🍫 Chocolate | dot | Leaves a slowing, damaging puddle (area denial) |

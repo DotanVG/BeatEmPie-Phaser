@@ -36,6 +36,7 @@ automatically on touch devices.
 | 🥧 button (bottom-right) | Drop the selected pie (auto-target) |
 | 💨 button (right) | Dash |
 | Tap a pie slot | Select that pie |
+| ↶ / ↷ buttons (either side of the dash button) | Cycle to the previous / next pie |
 
 ## Notes
 
@@ -44,7 +45,7 @@ automatically on touch devices.
 - Pies are **sky-drop attacks**: a warning marker shows where the pie will land, then it
   falls from above and impacts after a short delay (longer for the heavy Meat Pie).
 - Targeting depends on the pie: ground-target pies land at your cursor / nearest enemy,
-  homing (Strawberry) locks on, chain (Lemon) jumps to the nearest foe, and the Pumpkin
+  homing (Strawberry) hunts the strongest foe, chain (Lemon) jumps to the nearest foe, and the Pumpkin
   ultimate hits the whole screen.
 - Each pie has its own cooldown (shown filling on its selector slot). The Pumpkin Pie has
   **limited charges** instead — collect 🎃 pickups to refill.

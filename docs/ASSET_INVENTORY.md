@@ -11,12 +11,16 @@
 | Shushki idle | `Assets/Art/Sprites/Player/Shushki.png` | player | ✅ yes | `public/assets/sprites/player/shushki.png` | 128×192 single frame; used as idle pose |
 | Shushki walk | `Assets/Art/Sprites/Player/Shushki_Walk2.png` | player | ✅ yes | `public/assets/sprites/player/shushki_walk.png` | 128×192 single frame; swapped in while moving |
 | Shushki jump | `Assets/Art/Sprites/Player/Shushki_Jump.png` | player | ✅ yes | `public/assets/sprites/player/shushki_jump.png` | 128×192 single frame; used for dash / call-pie pose |
-| Main menu music | `Assets/Audio/Music/bgm_mainmenu.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_mainmenu.wav` | Title screen loop |
-| Calm gameplay music | `Assets/Audio/Music/bgm_gameplay_calm.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_gameplay_calm.wav` | Waves 1–3 |
-| Intense gameplay music | `Assets/Audio/Music/bgm_gameplay_intense.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_gameplay_intense.wav` | Waves 4–6 |
-| Boss music | `Assets/Audio/Music/bgm_boss.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_boss.wav` | Boss wave |
-| Victory music | `Assets/Audio/Music/bgm_victory.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_victory.wav` | Victory screen |
-| Game over music | `Assets/Audio/Music/bgm_gameover.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_gameover.wav` | Game over screen |
+| Main menu music | `Assets/Audio/Music/bgm_mainmenu.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_mainmenu.wav` | ⚠️ AI-generated placeholder — title screen loop |
+| Calm gameplay music | `Assets/Audio/Music/bgm_gameplay_calm.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_gameplay_calm.wav` | ⚠️ AI-generated placeholder — waves 1–3 |
+| Intense gameplay music | `Assets/Audio/Music/bgm_gameplay_intense.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_gameplay_intense.wav` | ⚠️ AI-generated placeholder — waves 4–6 |
+| Boss music | `Assets/Audio/Music/bgm_boss.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_boss.wav` | ⚠️ AI-generated placeholder — boss wave |
+| Victory music | `Assets/Audio/Music/bgm_victory.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_victory.wav` | ⚠️ AI-generated placeholder — victory screen |
+| Game over music | `Assets/Audio/Music/bgm_gameover.wav` | audio | ✅ yes | `public/assets/audio/music/bgm_gameover.wav` | ⚠️ AI-generated placeholder — game over screen |
+
+> **Music status:** all six tracks are AI-generated placeholders, not final compositions.
+> They stay in place — and `AudioSystem` keeps treating them as normal music — until
+> Noam creates the real soundtrack.
 
 ## Source paths inspected
 

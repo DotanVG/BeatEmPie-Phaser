@@ -25,7 +25,7 @@ Run before every handoff / PR (the `validate-before-handoff` hook automates this
 - [ ] Cherry Pie explodes and knocks enemies back
 - [ ] Blueberry Pie freezes weak enemies / slows strong ones
 - [ ] Lemon Meringue chains lightning between enemies
-- [ ] Strawberry Pie homes onto the nearest enemy
+- [ ] Strawberry Pie homes onto the strongest enemy
 - [ ] Meat Pie has a charge delay, heavy damage and a ground crack
 - [ ] Mushroom Pie confuses an enemy so it attacks allies
 - [ ] Pumpkin Pie fires a screen-wide ultimate and consumes a charge

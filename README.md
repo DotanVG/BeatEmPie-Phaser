@@ -26,7 +26,7 @@ Pies are **sky-drop attacks**, not thrown projectiles. Pick a pie, aim at the gr
 | Drop pie at cursor | Left click | Tap anywhere on screen |
 | Drop pie (auto-target) | `Space` | 🥧 button |
 | Select pie 1–10 | `1` `2` … `9` `0` | Tap a selector slot |
-| Cycle pies | `Q` / `E` | Tap a selector slot |
+| Cycle pies | `Q` / `E` | ↶ / ↷ prev/next buttons |
 | Dash | `Shift` | 💨 button |
 | Pause | `P` / `Esc` | — |
 | Restart (after game over) | `R` | On-screen button |
@@ -44,7 +44,7 @@ See [docs/CONTROLS.md](docs/CONTROLS.md) for the full reference.
 | 2 | 🍒 Cherry Pie | Explosive AOE — knocks nearby enemies back |
 | 3 | 🫐 Blueberry Pie | Freeze — locks weak foes in ice, slows the strong |
 | 4 | 🍋 Lemon Meringue | Chain Lightning — zaps between nearby enemies |
-| 5 | 🍓 Strawberry Pie | Homing — locks onto the nearest enemy, cannot miss |
+| 5 | 🍓 Strawberry Pie | Assassin — hunts the strongest foe, one-shots regulars, halves bosses |
 | 6 | 🥩 Meat Pie | Heavy — massive damage, slow charge, cracks the ground |
 | 7 | 🍄 Mushroom Pie | Confusion — enemies turn and attack their own allies |
 | 8 | 🍫 Chocolate Pie | DOT — leaves a puddle that slows and damages over time |
@@ -69,9 +69,12 @@ npm run lint       # ESLint
 npm test           # unit tests (node --test, tests/*.test.mjs)
 ```
 
-## 🌐 Deployment
+## 🌐 Play it live
 
-`npm run build` produces a fully static `dist/` folder. The Vite `base` is set to `./` so the build works from any subpath — drop it on **Vercel**, **Netlify**, **GitHub Pages**, or zip it for **itch.io**. Step-by-step instructions for each host are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+- **Web:** https://beatempie.vercel.app/
+- **itch.io:** https://dotanv.itch.io/beatempie
+
+`npm run build` produces a fully static `dist/` folder deployable to any static host. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for setup instructions.
 
 ## 🌿 Branch Strategy
 
