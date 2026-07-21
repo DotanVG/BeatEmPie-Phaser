@@ -24,14 +24,14 @@
   "license": "MIT",
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
-    "phaser": "^3.88.0"
+    "phaser": "^4.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.64.0",
     "@typescript-eslint/parser": "^8.18.0",
     "eslint": "^10.7.0",
-    "typescript": "^5.7.2",
+    "typescript": "^6.0.3",
     "vite": "^8.1.5"
   }
 }
