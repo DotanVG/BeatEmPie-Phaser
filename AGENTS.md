@@ -11,7 +11,7 @@ official web version of BeatEmPie.
 
 ## Tech stack
 
-Phaser 3 · TypeScript · Vite · npm · HTML5 Canvas/WebGL. No React, no backend, static build only.
+Phaser 4 · TypeScript · Vite · npm · HTML5 Canvas/WebGL. No React, no backend, static build only.
 
 ## Game concept
 

@@ -1,6 +1,6 @@
 ---
 name: phaser-architecture
-description: Conventions for BeatEmPie-Phaser's Phaser 3 + TypeScript architecture — scenes, systems, entities, the event bus and the tick pattern.
+description: Conventions for BeatEmPie-Phaser's Phaser 4 + TypeScript architecture — scenes, systems, entities, the event bus and the tick pattern.
 ---
 
 # Phaser Architecture
