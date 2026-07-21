@@ -2,7 +2,7 @@
 
 **BeatEmPie** is a 2D web arcade beat ’em up where **Shushki** fights waves of fish and whales by **dropping magical pies from the sky**. Each pie has a unique power — from explosive cherry blasts to chain-lightning lemon meringue. Master all ten and survive the onslaught, then take down the boss: **Captain Leviathan**.
 
-Built with **Phaser 3 + TypeScript + Vite**. Runs in any modern browser, no install required.
+Built with **Phaser 4 + TypeScript + Vite**. Runs in any modern browser, no install required.
 
 > _“Shushki fights waves of fish and whales by dropping magical pies from the sky. Each pie has a unique power, from explosive cherry blasts to chain lightning lemon meringue.”_
 

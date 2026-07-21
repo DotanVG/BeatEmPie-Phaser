@@ -1,6 +1,6 @@
 # Phaser Learning Notes
 
-A practical tour of the Phaser 3 concepts used in BeatEmPie, with where to find them
+A practical tour of the Phaser 4 concepts used in BeatEmPie, with where to find them
 in this codebase. Handy if this is your first serious 2D web game framework.
 
 ## Scene lifecycle

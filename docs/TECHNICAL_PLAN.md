@@ -1,8 +1,8 @@
 # Technical Plan
 
-## Why Phaser 3 + TypeScript + Vite
+## Why Phaser 4 + TypeScript + Vite
 
-- **Phaser 3** — mature, batteries-included 2D web engine: Arcade Physics, sprites,
+- **Phaser 4** — mature, batteries-included 2D web engine: Arcade Physics, sprites,
   groups, particles, tweens, cameras, input and audio out of the box. WebGL with a
   Canvas fallback, great for pixel-art arcade games.
 - **TypeScript** — typed pie/enemy/wave configs and event payloads catch mistakes at
