@@ -188,9 +188,9 @@
         opacity: 0.85;
       }
       #rotate-overlay .arrow-svg {
-        width: 16vw;
-        max-width: 90px;
-        animation: bep-arrow-pulse 1.6s ease-in-out infinite;
+        width: 20vw;
+        max-width: 96px;
+        height: auto;
       }
       #rotate-overlay h2 {
         font-size: 7vw;
@@ -216,17 +216,6 @@
           transform: rotate(0deg);
         }
       }
-      @keyframes bep-arrow-pulse {
-        0%,
-        100% {
-          opacity: 0.55;
-          transform: scale(0.94);
-        }
-        50% {
-          opacity: 1;
-          transform: scale(1.04);
-        }
-      }
     </style>
   </head>
   <body>
@@ -240,14 +229,34 @@
       <span class="fs-corner br" aria-hidden="true"></span>
     </button>
     <div id="rotate-overlay" aria-hidden="true">
-      <svg class="arrow-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!--
+        Curved rotate arrow: the stroke progressively draws from the right
+        end to the left (stroke-dashoffset 100->0), then un-draws back
+        (0->100), on a loop. The arrowhead rides the SAME path via
+        animateMotion with matching keyTimes, so it always sits exactly on
+        the curve, tangent to it (rotate="auto"), and always leads the
+        reveal — no separate/guessed coordinates that can drift out of
+        alignment with the curve.
+      -->
+      <svg class="arrow-svg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
         <path
-          d="M 82 62 A 40 40 0 1 1 74 27"
+          id="bep-arrow-path"
+          d="M 82 41 A 40 40 0 0 0 22 41"
+          fill="none"
+          pathLength="100"
           stroke="#ffe08a"
           stroke-width="7"
           stroke-linecap="round"
-        />
-        <polygon points="74,27 65,32 78,40" fill="#ffe08a" />
+          stroke-dasharray="100"
+          stroke-dashoffset="100"
+        >
+          <animate attributeName="stroke-dashoffset" values="100;0;100" keyTimes="0;0.5;1" dur="1.8s" repeatCount="indefinite" />
+        </path>
+        <polygon points="-7,-5 7,0 -7,5" fill="#ffe08a">
+          <animateMotion dur="1.8s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear">
+            <mpath href="#bep-arrow-path" xlink:href="#bep-arrow-path"></mpath>
+          </animateMotion>
+        </polygon>
       </svg>
       <div class="phone"></div>
       <h2>Rotate your device</h2>
