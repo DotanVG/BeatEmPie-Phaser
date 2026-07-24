@@ -7,7 +7,6 @@ import { GameScene } from '../scenes/GameScene';
 import { PauseScene } from '../scenes/PauseScene';
 import { GameOverScene } from '../scenes/GameOverScene';
 import { VictoryScene } from '../scenes/VictoryScene';
-import { RotateScene } from '../scenes/RotateScene';
 import { CursorScene } from '../scenes/CursorScene';
 
 /** Phaser game configuration: pixel-art, CSS-stretched canvas shell, Arcade physics. */
@@ -37,5 +36,5 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     },
   },
   // CursorScene is last: the global cursor overlay renders above everything.
-  scene: [BootScene, PreloadScene, MainMenuScene, GameScene, PauseScene, GameOverScene, VictoryScene, RotateScene, CursorScene],
+  scene: [BootScene, PreloadScene, MainMenuScene, GameScene, PauseScene, GameOverScene, VictoryScene, CursorScene],
 };

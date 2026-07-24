@@ -52,15 +52,9 @@ export function installOrientationGate(game: Phaser.Game): void {
   };
 
   const onEnterPortrait = (): void => {
-    // Launch the Phaser rotate-gate scene (replaces the old DOM #rotate-gate overlay).
-    // Optional chains guard against test mocks that omit run/stop on their scene stub.
-    if (!game.scene.isActive?.('RotateScene')) {
-      // SceneManager has no launch(); use systemScene's ScenePlugin which does.
-      // ScenePlugin.launch() queues a 'start' op so Phaser processes it on the
-      // next game step — this is the canonical way to start a parallel scene
-      // and guarantees update() is called.
-      game.scene.systemScene?.scene.launch('RotateScene');
-    }
+    // The visible overlay is pure CSS/DOM (#rotate-overlay in index.html), toggled by its
+    // own media query, so nothing needs to be launched here. This handler only coordinates
+    // pausing gameplay/audio.
 
     // Suspend audio for whatever scene is up (menu music included). Skip while the audio
     // context is still locked — it has nothing to pause yet and unlocks on first tap.
@@ -79,9 +73,6 @@ export function installOrientationGate(game: Phaser.Game): void {
   };
 
   const onEnterLandscape = (): void => {
-    // Stop the Phaser rotate-gate scene when landscape is restored.
-    game.scene.stop?.('RotateScene');
-
     if (autoPausedAudio && !game.sound.locked) {
       game.sound.resumeAll();
       autoPausedAudio = false;
@@ -127,9 +118,8 @@ export function installOrientationGate(game: Phaser.Game): void {
   document.addEventListener('fullscreenchange', queueRefresh);
   document.addEventListener('webkitfullscreenchange', queueRefresh as EventListener);
 
-  // Sync CSS shell immediately so dimensions are correct before first paint.
-  // The scene launch is deferred via queueRefresh (40 ms) so Phaser's SceneManager has
-  // time to register scenes before we attempt to launch RotateScene.
+  // Sync CSS shell immediately so dimensions are correct before first paint, then queue a
+  // debounced refresh to catch any viewport changes that land right after startup.
   syncViewportShell();
   syncScale();
   queueRefresh();

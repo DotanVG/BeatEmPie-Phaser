@@ -142,6 +142,91 @@
         transform: translate(-5px, -5px);
       }
 
+      /* Full-viewport "rotate your device" overlay. Pure CSS/DOM (not drawn inside the
+         Phaser canvas) so it is always crisp and full-size regardless of canvas letterboxing.
+         Visibility is driven entirely by the media query below; orientation.ts only reads
+         the same conditions to coordinate pausing gameplay/audio, it never toggles this. */
+      #rotate-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9500;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6vh;
+        background: #0b0d2b;
+        color: #ffe08a;
+        text-align: center;
+        padding: 8vw;
+      }
+      @media (orientation: portrait) and (pointer: coarse) {
+        #rotate-overlay {
+          display: flex;
+        }
+      }
+      #rotate-overlay .phone {
+        width: 34vw;
+        max-width: 220px;
+        aspect-ratio: 10 / 19;
+        border: 0.9vw solid #ffe08a;
+        border-radius: 5vw;
+        background: rgba(255, 224, 138, 0.08);
+        position: relative;
+        animation: bep-rotate 2.6s ease-in-out infinite;
+      }
+      #rotate-overlay .phone::before {
+        content: '';
+        position: absolute;
+        top: 6%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 24%;
+        height: 2.4%;
+        border-radius: 2vw;
+        background: #ffe08a;
+        opacity: 0.85;
+      }
+      #rotate-overlay .arrow-svg {
+        width: 16vw;
+        max-width: 90px;
+        animation: bep-arrow-pulse 1.6s ease-in-out infinite;
+      }
+      #rotate-overlay h2 {
+        font-size: 7vw;
+        margin: 0;
+        font-weight: bold;
+      }
+      #rotate-overlay p {
+        font-size: 4vw;
+        margin: 0;
+        color: #fff4d6;
+        opacity: 0.8;
+      }
+      @keyframes bep-rotate {
+        0%,
+        30% {
+          transform: rotate(0deg);
+        }
+        55%,
+        80% {
+          transform: rotate(-90deg);
+        }
+        100% {
+          transform: rotate(0deg);
+        }
+      }
+      @keyframes bep-arrow-pulse {
+        0%,
+        100% {
+          opacity: 0.55;
+          transform: scale(0.94);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.04);
+        }
+      }
     </style>
   </head>
   <body>
@@ -154,6 +239,20 @@
       <span class="fs-corner bl" aria-hidden="true"></span>
       <span class="fs-corner br" aria-hidden="true"></span>
     </button>
+    <div id="rotate-overlay" aria-hidden="true">
+      <svg class="arrow-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path
+          d="M 82 62 A 40 40 0 1 1 74 27"
+          stroke="#ffe08a"
+          stroke-width="7"
+          stroke-linecap="round"
+        />
+        <polygon points="74,27 65,32 78,40" fill="#ffe08a" />
+      </svg>
+      <div class="phone"></div>
+      <h2>Rotate your device</h2>
+      <p>BeatEmPie plays best in landscape 🥧</p>
+    </div>
     <script type="module" src="/src/game/main.ts"></script>
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
