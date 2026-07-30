@@ -3,5 +3,11 @@
 # These carry project memory and guardrails so every isolated worktree behaves
 # consistently, even on a shallow clone.
 CLAUDE.md
+AGENTS.md
 WORKFLOW.md
 .claude/
+.agents/skills/graphify/
+.codex/
+.graphifyignore
+scripts/graphify.mjs
+scripts/graphify-session-start.cjs

@@ -91,6 +91,26 @@ codex:
 7. Attach the PR URL to the issue.
 8. Move the issue to **In Review**.
 
+## Knowledge graph policy
+
+When `graphify-out/graph.json` exists:
+
+1. For unfamiliar, architectural, debugging, cross-cutting or likely multi-file tasks,
+   query Graphify before performing broad repository exploration.
+2. Use the graph to identify likely files, symbols, dependencies and execution paths.
+3. Open and verify the authoritative source files before editing.
+4. Never trust stale graph data over current source.
+5. For a clearly isolated edit, skip Graphify.
+6. After material structural changes, perform an incremental graph update when practical.
+7. After a major refactor, perform a full rebuild.
+8. Never commit `graphify-out/`.
+9. Do not block ordinary work only because the optional local graph is absent.
+
+This policy is part of Symphony's orchestration instructions. A fresh temporary
+worktree may not have the optional local output; do not build it during
+`after_create`, `before_run`, or every session. When a graph is intentionally
+available, use the repository Graphify commands and still verify source.
+
 ## Validation commands
 
 ```bash

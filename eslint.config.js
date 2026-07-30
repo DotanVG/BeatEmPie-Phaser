@@ -8,6 +8,18 @@ export default [
   },
   js.configs.recommended,
   {
+    files: ['scripts/graphify.mjs', 'scripts/graphify-session-start.cjs'],
+    languageOptions: {
+      globals: {
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        require: 'readonly',
+      },
+    },
+  },
+  {
     files: ['src/**/*.ts'],
     languageOptions: {
       parser: tsparser,
