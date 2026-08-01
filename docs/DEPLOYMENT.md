@@ -43,8 +43,8 @@ npm run preview   # locally preview the production build
 2. Zip the **contents** of `dist/` (so `index.html` is at the zip root, not inside a folder).
 3. On itch.io: create a project → **Kind: HTML** → upload the zip → tick
    **"This file will be played in the browser"**.
-4. Set a viewport (e.g. 1280×720) and enable fullscreen. The game scales responsively
-   (Phaser `Scale.FIT`), so it fits whatever frame you choose.
+4. Set a 16:9 viewport (1920×1080, 1280×720, or 960×540) and enable fullscreen. The
+   game uses centered discrete pixel scales, so a 16:9 frame minimizes letterboxing.
 
 ## Notes
 
