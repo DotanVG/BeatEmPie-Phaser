@@ -14,10 +14,6 @@
     <style>
       :root {
         color-scheme: dark;
-        --app-width: 100vw;
-        /* dvh tracks the URL-bar-adjusted mobile viewport; vh is the static fallback. */
-        --app-height: 100vh;
-        --app-height: 100dvh;
       }
       * {
         margin: 0;
@@ -54,12 +50,9 @@
         width: 100%;
         height: 100%;
       }
-      /* NONE-scale canvas stretched edge-to-edge over the navy shell (full-bleed, like desktop).
-         The vars default to the full viewport and are kept pixel-exact by the orientation gate. */
+      /* Phaser owns the canvas display size and margins through ScaleManager.setZoom(). */
       #game-root canvas {
         display: block;
-        width: var(--app-width) !important;
-        height: var(--app-height) !important;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
         /* The game draws its own cursor (see ui/GameCursor); hide the OS pointer so
@@ -91,7 +84,7 @@
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         cursor: pointer;
-        z-index: 9000;
+        z-index: 10000;
         transition: transform 160ms ease, background 160ms ease;
       }
       #fullscreen-btn:hover {
@@ -142,18 +135,208 @@
         transform: translate(-5px, -5px);
       }
 
+      /* Full-viewport portrait presentation. It is independent of the letterboxed
+         game canvas and remains inside #game-root when that element is fullscreen. */
+      #rotate-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9500;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding:
+          max(28px, env(safe-area-inset-top, 0px))
+          max(24px, env(safe-area-inset-right, 0px))
+          max(28px, env(safe-area-inset-bottom, 0px))
+          max(24px, env(safe-area-inset-left, 0px));
+        background:
+          radial-gradient(circle at 18% 15%, rgba(110, 231, 168, 0.12), transparent 28%),
+          radial-gradient(circle at 82% 78%, rgba(138, 90, 214, 0.22), transparent 34%),
+          linear-gradient(165deg, #14123a 0%, #0b0d2b 52%, #07091e 100%);
+        color: #fff4d6;
+        text-align: center;
+      }
+      html[data-rotate-gate='active'] #rotate-overlay {
+        display: flex;
+      }
+      @media (orientation: portrait) and (pointer: coarse) {
+        #rotate-overlay {
+          display: flex;
+        }
+      }
+      #rotate-overlay::before,
+      #rotate-overlay::after {
+        content: '';
+        position: absolute;
+        border: 2px solid rgba(255, 224, 138, 0.16);
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      #rotate-overlay::before {
+        width: 48vw;
+        height: 48vw;
+        top: -22vw;
+        right: -18vw;
+      }
+      #rotate-overlay::after {
+        width: 34vw;
+        height: 34vw;
+        bottom: -15vw;
+        left: -12vw;
+      }
+      .rotate-card {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        width: min(100%, 520px);
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(12px, 2.4vh, 24px);
+      }
+      .rotate-brand {
+        padding: 7px 14px;
+        border: 2px solid rgba(255, 224, 138, 0.32);
+        border-radius: 999px;
+        color: #ffe08a;
+        font-size: clamp(0.72rem, 3vw, 0.92rem);
+        font-weight: 800;
+        letter-spacing: 0.16em;
+      }
+      .rotate-visual {
+        position: relative;
+        width: min(78vw, 330px);
+        height: clamp(250px, 39vh, 340px);
+      }
+      .rotate-phone {
+        position: absolute;
+        top: 53%;
+        left: 50%;
+        width: clamp(112px, 30vw, 158px);
+        aspect-ratio: 10 / 18.5;
+        transform: translate(-50%, -50%);
+        border: 5px solid #ffe08a;
+        border-radius: 24px;
+        background: rgba(255, 224, 138, 0.08);
+        box-shadow: 0 0 0 5px rgba(11, 13, 43, 0.72), 0 22px 54px rgba(0, 0, 0, 0.32);
+        animation: beatempie-phone-rotate 3s ease-in-out infinite;
+      }
+      .rotate-phone::before {
+        content: '';
+        position: absolute;
+        top: 11px;
+        left: 50%;
+        width: 32%;
+        height: 6px;
+        transform: translateX(-50%);
+        border-radius: 999px;
+        background: #ffe08a;
+        opacity: 0.82;
+      }
+      .rotate-phone::after {
+        content: '';
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        width: 10px;
+        height: 10px;
+        transform: translateX(-50%);
+        border: 2px solid #ffe08a;
+        border-radius: 50%;
+        opacity: 0.82;
+      }
+      .rotate-screen {
+        position: absolute;
+        inset: 31px 12px 29px;
+        display: grid;
+        place-items: center;
+        border: 2px solid rgba(255, 244, 214, 0.16);
+        border-radius: 12px;
+        background:
+          radial-gradient(circle at 50% 42%, rgba(255, 224, 138, 0.22), transparent 34%),
+          linear-gradient(150deg, #3a2b6b, #14123a);
+        font-size: clamp(2.1rem, 10vw, 3.5rem);
+      }
+      .rotate-arrow {
+        position: absolute;
+        top: 10%;
+        left: 50%;
+        width: min(76vw, 310px);
+        transform: translateX(-50%);
+        color: #6ee7a8;
+        filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.28));
+        animation: beatempie-arrow-pulse 1.5s ease-in-out infinite;
+      }
+      .rotate-card h2 {
+        margin: 0;
+        color: #ffe08a;
+        font-size: clamp(2rem, 8vw, 3.25rem);
+        line-height: 1.05;
+        text-wrap: balance;
+      }
+      .rotate-card p {
+        max-width: 34ch;
+        margin: 0;
+        color: #fff4d6;
+        font-size: clamp(1rem, 4vw, 1.32rem);
+        line-height: 1.45;
+        opacity: 0.82;
+        text-wrap: balance;
+      }
+      .rotate-hint {
+        color: #9aa0c0;
+        font-size: clamp(0.78rem, 3.2vw, 0.98rem);
+        letter-spacing: 0.04em;
+      }
+      @keyframes beatempie-phone-rotate {
+        0%, 24% { transform: translate(-50%, -50%) rotate(0deg); }
+        48%, 76% { transform: translate(-50%, -50%) rotate(-90deg); }
+        100% { transform: translate(-50%, -50%) rotate(0deg); }
+      }
+      @keyframes beatempie-arrow-pulse {
+        0%, 100% { opacity: 0.42; transform: translateX(-50%) scale(0.96); }
+        50% { opacity: 1; transform: translateX(-50%) scale(1); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .rotate-phone {
+          animation: none;
+          transform: translate(-50%, -50%) rotate(-90deg);
+        }
+        .rotate-arrow {
+          animation: none;
+          opacity: 1;
+        }
+      }
+
     </style>
   </head>
   <body>
     <div id="game-root">
       <div id="boot-loader">Heating the ovens… 🥧</div>
+      <button id="fullscreen-btn" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
+        <span class="fs-corner tl" aria-hidden="true"></span>
+        <span class="fs-corner tr" aria-hidden="true"></span>
+        <span class="fs-corner bl" aria-hidden="true"></span>
+        <span class="fs-corner br" aria-hidden="true"></span>
+      </button>
+      <div id="rotate-overlay" role="status" aria-live="polite" aria-label="Rotate your device to landscape">
+        <div class="rotate-card">
+          <div class="rotate-brand">BEATEMPIE</div>
+          <div class="rotate-visual" aria-hidden="true">
+            <svg class="rotate-arrow" viewBox="0 0 320 150" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 270 120 A 128 128 0 0 0 50 120" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" />
+              <path d="M 50 120 L 73 91 M 50 120 L 84 132" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div class="rotate-phone">
+              <div class="rotate-screen">🥧</div>
+            </div>
+          </div>
+          <h2>Rotate your device</h2>
+          <p>BeatEmPie plays best in landscape, with the whole arena and every control in view.</p>
+          <div class="rotate-hint">Turn sideways to keep baking.</div>
+        </div>
+      </div>
     </div>
-    <button id="fullscreen-btn" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
-      <span class="fs-corner tl" aria-hidden="true"></span>
-      <span class="fs-corner tr" aria-hidden="true"></span>
-      <span class="fs-corner bl" aria-hidden="true"></span>
-      <span class="fs-corner br" aria-hidden="true"></span>
-    </button>
     <script type="module" src="/src/game/main.ts"></script>
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };

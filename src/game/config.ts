@@ -7,10 +7,9 @@ import { GameScene } from '../scenes/GameScene';
 import { PauseScene } from '../scenes/PauseScene';
 import { GameOverScene } from '../scenes/GameOverScene';
 import { VictoryScene } from '../scenes/VictoryScene';
-import { RotateScene } from '../scenes/RotateScene';
 import { CursorScene } from '../scenes/CursorScene';
 
-/** Phaser game configuration: pixel-art, CSS-stretched canvas shell, Arcade physics. */
+/** Phaser game configuration: fixed pixel-art framebuffer, discrete display scale, Arcade physics. */
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game-root',
@@ -19,15 +18,13 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
   pixelArt: true,
   roundPixels: true,
   scale: {
-    // Keep a stable 1920x1080 internal world while CSS stretches the canvas to the full shell.
+    // FIT still selects arbitrary ratios. NONE lets pixelPerfectScale.ts supply exact
+    // integer / reciprocal zooms while Phaser retains centering and input transforms.
     mode: Phaser.Scale.NONE,
-    autoCenter: Phaser.Scale.NO_CENTER,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
-    // Round the scaled canvas to whole pixels (no sub-pixel blur on the pixel-art canvas).
     autoRound: true,
-    // #game-root is explicitly sized in CSS; Phaser should keep its hands off the parent box.
-    expandParent: false,
   },
   physics: {
     default: 'arcade',
@@ -37,5 +34,5 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     },
   },
   // CursorScene is last: the global cursor overlay renders above everything.
-  scene: [BootScene, PreloadScene, MainMenuScene, GameScene, PauseScene, GameOverScene, VictoryScene, RotateScene, CursorScene],
+  scene: [BootScene, PreloadScene, MainMenuScene, GameScene, PauseScene, GameOverScene, VictoryScene, CursorScene],
 };

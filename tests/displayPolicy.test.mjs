@@ -197,25 +197,16 @@ test('orientation gate resumes audio after rotating back from portrait on non-ga
   assert.equal(resumeCalls, 1);
 });
 
-test('orientation gate tracks viewport resize even if orientation media-query never changes', async (t) => {
+test('orientation gate tracks viewport dimensions even if orientation media-query never changes', async (t) => {
   const previousWindowDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
   const previousDocumentDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'document');
   const windowTarget = createListenerTarget();
   const visualViewport = Object.assign(createListenerTarget(), { width: 932, height: 430 });
   const coarsePointerQuery = Object.assign(createListenerTarget(), { matches: true });
   const staleOrientationQuery = Object.assign(createListenerTarget(), { matches: false });
-  const rootStyle = new Map();
-  const animatedNodes = [
-    { style: {}, get offsetWidth() { return 220; } },
-    { style: {}, get offsetWidth() { return 220; } },
-  ];
   const documentElement = {
     dataset: {},
-    style: {
-      setProperty(name, value) {
-        rootStyle.set(name, value);
-      },
-    },
+    style: {},
   };
 
   Object.defineProperty(globalThis, 'document', {
@@ -223,10 +214,7 @@ test('orientation gate tracks viewport resize even if orientation media-query ne
     writable: true,
     value: Object.assign(createListenerTarget(), {
       documentElement,
-      querySelectorAll(selector) {
-        if (selector === '#rotate-gate .phone') return animatedNodes;
-        return [];
-      },
+      querySelectorAll: () => [],
     }),
   });
 
@@ -279,9 +267,6 @@ test('orientation gate tracks viewport resize even if orientation media-query ne
     },
   });
 
-  assert.equal(rootStyle.get('--app-width'), '932px');
-  assert.equal(rootStyle.get('--app-height'), '430px');
-
   globalThis.window.innerWidth = 430;
   globalThis.window.innerHeight = 932;
   visualViewport.width = 430;
@@ -291,8 +276,6 @@ test('orientation gate tracks viewport resize even if orientation media-query ne
 
   assert.equal(pauseCalls, 1);
   assert.equal(documentElement.dataset.rotateGate, 'active');
-  assert.equal(rootStyle.get('--app-width'), '430px');
-  assert.equal(rootStyle.get('--app-height'), '932px');
 
   globalThis.window.innerWidth = 932;
   globalThis.window.innerHeight = 430;

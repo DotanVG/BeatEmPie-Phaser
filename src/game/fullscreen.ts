@@ -1,4 +1,3 @@
-import type Phaser from 'phaser';
 import { shouldShowFullscreenButton } from './displayPolicy';
 
 type FullscreenDocument = Document & {
@@ -61,7 +60,7 @@ async function exitFullscreen(): Promise<void> {
 let installed = false;
 
 /** Install the global top-right fullscreen button shared by every scene. */
-export function installFullscreenButton(game: Phaser.Game): void {
+export function installFullscreenButton(): void {
   if (installed) return;
 
   const button = document.getElementById('fullscreen-btn') as HTMLButtonElement | null;
@@ -85,8 +84,6 @@ export function installFullscreenButton(game: Phaser.Game): void {
     button.setAttribute('aria-label', label);
     button.title = label;
 
-    game.scale.updateBounds();
-    game.scale.refresh();
   };
 
   button.addEventListener('click', async () => {
