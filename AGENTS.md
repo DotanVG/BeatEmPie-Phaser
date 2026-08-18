@@ -88,6 +88,26 @@ repo where technically necessary.)
 - PRs target `staging`, include summary, implementation details, validation commands run,
   visuals if relevant, linked issue, and `Closes #<N>` when applicable.
 
+## Knowledge graph policy
+
+When `graphify-out/graph.json` exists:
+
+1. For unfamiliar, architectural, debugging, cross-cutting or likely multi-file tasks,
+   query Graphify before performing broad repository exploration.
+2. Use the graph to identify likely files, symbols, dependencies and execution paths.
+3. Open and verify the authoritative source files before editing.
+4. Never trust stale graph data over current source.
+5. For a clearly isolated edit, skip Graphify.
+6. After material structural changes, perform an incremental graph update when practical.
+7. After a major refactor, perform a full rebuild.
+8. Never commit `graphify-out/`.
+9. Do not block ordinary work only because the optional local graph is absent.
+
+Codex discovers the small adapter at `.agents/skills/graphify/SKILL.md`; the
+adapter explicitly loads the canonical skill without claiming cross-platform
+skill discovery. The trusted project `SessionStart` hook only announces an
+existing graph and never builds or updates one.
+
 ## Commands
 
 ```bash

@@ -39,5 +39,12 @@ Thumbs.db
 # Misc
 coverage/
 .cache/
-.agents/
+graphify-out/
 
+# Keep local agent scratch data ignored while committing only the canonical
+# Codex Graphify adapter.
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/graphify/
+!.agents/skills/graphify/**

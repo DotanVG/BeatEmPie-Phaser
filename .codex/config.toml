@@ -1,0 +1,4 @@
+[features]
+# Current Codex uses `hooks`; 0.118 accepts the deprecated alias.
+hooks = true
+codex_hooks = true
