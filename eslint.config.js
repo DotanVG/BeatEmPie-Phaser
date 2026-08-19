@@ -8,6 +8,19 @@ export default [
   },
   js.configs.recommended,
   {
+    // Node-side build tooling (e.g. the favicon generator), not shipped to the browser.
+    files: ['tools/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        process: 'readonly',
+        Buffer: 'readonly',
+        console: 'readonly',
+      },
+    },
+  },
+  {
     files: ['src/**/*.ts'],
     languageOptions: {
       parser: tsparser,
