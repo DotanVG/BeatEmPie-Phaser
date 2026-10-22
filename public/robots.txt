@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://beat-em-pie.vercel.app/sitemap.xml
