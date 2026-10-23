@@ -1,7 +1,17 @@
 import Phaser from 'phaser';
+import { inject } from '@vercel/analytics';
+import { injectSpeedInsights } from '@vercel/speed-insights';
 import { gameConfig } from './config';
 import { installFullscreenButton } from './fullscreen';
 import { installOrientationGate } from './orientation';
+
+if (location.hostname === 'beat-em-pie.vercel.app') {
+  const beforeSend = <T extends { url: string }>(event: T): T => ({
+    ...event, url: location.origin + location.pathname,
+  });
+  inject({ beforeSend });
+  injectSpeedInsights({ beforeSend });
+}
 
 /** Entry point. Boots the Phaser game (the HTML pre-loader is removed in BootScene). */
 const game = new Phaser.Game(gameConfig);
