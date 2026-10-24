@@ -21,10 +21,32 @@ test('VideoGame JSON-LD agrees with page metadata and published game facts', () 
   });
   assert.equal(game.gamePlatform, 'Web browser');
   assert.deepEqual(game.genre, ['Arcade', "Beat 'em up"]);
-  assert.deepEqual(game.offers, { '@type': 'Offer', price: 0 });
+  assert.deepEqual(game.offers, {
+    '@type': 'Offer', price: 0, priceCurrency: 'USD', availability: 'https://schema.org/InStock',
+  });
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
   assert.equal(game.sameAs, 'https://dotanv.itch.io/beatempie');
   assert.ok(readme.includes(game.sameAs));
+});
+
+test('CSP preserves existing iframe ancestors and allows itch web and desktop embeds', () => {
+  const headers = config.headers.flatMap(rule => rule.headers);
+  assert.ok(headers.some(header => header.key.toLowerCase() === 'content-security-policy'));
+  const policies = headers.filter(header =>
+    ['content-security-policy', 'content-security-policy-report-only'].includes(header.key.toLowerCase()),
+  );
+  for (const policy of policies) {
+    const ancestors = policy.value.split(';').map(directive => directive.trim().split(/\s+/))
+      .find(([name]) => name === 'frame-ancestors');
+    if (policy.key.toLowerCase() === 'content-security-policy-report-only' && !ancestors) continue;
+    assert.ok(ancestors, policy.key);
+    for (const source of [
+      "'self'", 'https://*.itch.io', 'https://itch.io', 'https://html-classic.itch.zone',
+      'https://html.itch.zone', 'https://*.itch.zone', 'https://*.hwcdn.net', 'itch-cave:',
+    ]) {
+      assert.ok(ancestors.includes(source), `${policy.key}: ${source}`);
+    }
+  }
 });
 
 test('hosting policy denies unused powerful APIs without restricting game features', () => {
