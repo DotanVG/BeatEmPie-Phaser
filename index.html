@@ -55,7 +55,7 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "VideoGame",
+        "@type": ["VideoGame", "WebApplication"],
         "name": "BeatEmPie",
         "description": "BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky.",
         "url": "https://beat-em-pie.vercel.app/",
@@ -66,6 +66,9 @@
           "url": "https://dotanv.vercel.app"
         },
         "gamePlatform": "Web browser",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript and HTML5 canvas",
         "genre": ["Arcade", "Beat 'em up"],
         "offers": {
           "@type": "Offer",
@@ -124,6 +127,8 @@
       #landing h2 { color: #ffe08a; font-size: 1.25rem; }
       #landing p { margin: 1rem 0; }
       #landing a { color: #ffe08a; text-underline-offset: 0.2em; }
+      #landing summary { cursor: pointer; color: #ffe08a; }
+      #landing img { display: block; max-width: 100%; height: auto; margin-top: 1rem; }
       .controls {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
@@ -285,6 +290,11 @@
       <p>A game by Dotan · Romi · Noam.
         <a href="https://dotanv.vercel.app">Dotan Veretzky</a> ·
         <a href="https://dotanv.itch.io/beatempie">BeatEmPie on itch.io</a></p>
+      <details>
+        <summary>See gameplay</summary>
+        <img src="./landing-gameplay.webp" width="800" height="450" loading="lazy" decoding="async"
+          alt="Shushki surrounded by blue fish as a pie falls from the sky, with her health bar and ten pie slots visible." />
+      </details>
     </main>
     <div id="game-root" role="region" aria-label="BeatEmPie game" tabindex="-1">
       <div id="boot-loader">Start game to heat the ovens… 🥧</div>
