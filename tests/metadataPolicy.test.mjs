@@ -11,7 +11,7 @@ test('VideoGame JSON-LD agrees with page metadata and published game facts', () 
   assert.equal(blocks.length, 1);
   const game = JSON.parse(blocks[0][1]);
   assert.equal(game['@context'], 'https://schema.org');
-  assert.equal(game['@type'], 'VideoGame');
+  assert.deepEqual(game['@type'], ['VideoGame', 'WebApplication']);
   assert.equal(game.name, 'BeatEmPie');
   assert.equal(game.description, html.match(/name="description"\s+content="([^"]+)"/)[1]);
   assert.equal(game.url, html.match(/rel="canonical" href="([^"]+)"/)[1]);
@@ -20,6 +20,13 @@ test('VideoGame JSON-LD agrees with page metadata and published game facts', () 
     '@type': 'Person', name: 'Dotan Veretzky', url: 'https://dotanv.vercel.app',
   });
   assert.equal(game.gamePlatform, 'Web browser');
+  assert.equal(game.applicationCategory, 'GameApplication');
+  assert.equal(game.operatingSystem, 'Any');
+  assert.equal(game.browserRequirements, 'Requires JavaScript and HTML5 canvas');
+  assert.ok(!('aggregateRating' in game) && !('review' in game) && !('rating' in game));
+  for (const url of [game.url, game.image, game.author.url, game.sameAs, game.offers.availability]) {
+    assert.equal(new URL(url).protocol, 'https:');
+  }
   assert.deepEqual(game.genre, ['Arcade', "Beat 'em up"]);
   assert.deepEqual(game.offers, {
     '@type': 'Offer', price: 0, priceCurrency: 'USD', availability: 'https://schema.org/InStock',
