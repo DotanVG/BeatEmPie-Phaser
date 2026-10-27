@@ -80,6 +80,8 @@
       :root {
         color-scheme: dark;
         --app-width: 100vw;
+        --app-left: 0px;
+        --app-top: 0px;
         /* dvh tracks the URL-bar-adjusted mobile viewport; vh is the static fallback. */
         --app-height: 100vh;
         --app-height: 100dvh;
@@ -148,7 +150,13 @@
         background: #0b0d2b;
         touch-action: none;
       }
-      .game-active #game-root { position: fixed; inset: 0; height: 100%; }
+      .game-active #game-root {
+        position: fixed;
+        left: var(--app-left);
+        top: var(--app-top);
+        width: var(--app-width);
+        height: var(--app-height);
+      }
       html:not(.game-active) #fullscreen-btn { display: none; }
       #game-root:fullscreen,
       #game-root:-webkit-full-screen {
@@ -181,7 +189,7 @@
         z-index: 10;
       }
       #fullscreen-btn {
-        position: fixed;
+        position: absolute;
         top: calc(env(safe-area-inset-top, 0px) + 18px);
         right: calc(env(safe-area-inset-right, 0px) + 18px);
         width: 58px;
@@ -280,13 +288,13 @@
     </main>
     <div id="game-root" role="region" aria-label="BeatEmPie game" tabindex="-1">
       <div id="boot-loader">Heating the ovens… 🥧</div>
+      <button id="fullscreen-btn" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
+        <span class="fs-corner tl" aria-hidden="true"></span>
+        <span class="fs-corner tr" aria-hidden="true"></span>
+        <span class="fs-corner bl" aria-hidden="true"></span>
+        <span class="fs-corner br" aria-hidden="true"></span>
+      </button>
     </div>
-    <button id="fullscreen-btn" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
-      <span class="fs-corner tl" aria-hidden="true"></span>
-      <span class="fs-corner tr" aria-hidden="true"></span>
-      <span class="fs-corner bl" aria-hidden="true"></span>
-      <span class="fs-corner br" aria-hidden="true"></span>
-    </button>
     <script type="module">
       import('/src/game/main.ts').catch(() => {
         document.getElementById('landing-status').hidden = true;

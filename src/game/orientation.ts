@@ -41,6 +41,8 @@ export function installOrientationGate(game: Phaser.Game): void {
 
     root.style.setProperty('--app-width', `${width}px`);
     root.style.setProperty('--app-height', `${height}px`);
+    root.style.setProperty('--app-left', `${window.visualViewport?.offsetLeft ?? 0}px`);
+    root.style.setProperty('--app-top', `${window.visualViewport?.offsetTop ?? 0}px`);
     root.dataset.rotateGate = active ? 'active' : 'inactive';
 
     return active;
@@ -121,6 +123,7 @@ export function installOrientationGate(game: Phaser.Game): void {
   };
   coarsePointerQuery.addEventListener('change', queueRefresh);
   window.visualViewport?.addEventListener('resize', queueRefresh);
+  window.visualViewport?.addEventListener('scroll', queueRefresh);
   window.addEventListener('resize', queueRefresh);
   window.addEventListener('orientationchange', queueRefresh);
   window.screen.orientation?.addEventListener('change', queueRefresh);
