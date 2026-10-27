@@ -78,10 +78,19 @@ test('viewport sizing uses the full layout viewport, not the URL-bar-shrunk visu
     measureViewport({
       innerWidth: 932,
       innerHeight: 430,
-      visualViewport: { width: 915.4, height: 411.6 },
+      visualViewport: { width: 915.4, height: 411.6, scale: 1 },
     }),
     { width: 932, height: 430 },
   );
+});
+
+test('zoomed viewport fits the visible area without rounding beyond its edges', () => {
+  assert.deepEqual(measureViewport({
+    innerWidth: 812, innerHeight: 375,
+    visualViewport: { width: 406, height: 187.5, scale: 2 },
+  }), { width: 406, height: 187 });
+  assert.deepEqual(measureViewport({ innerWidth: 812, innerHeight: 375 }),
+    { width: 812, height: 375 });
 });
 
 test('rotate gate is driven by coarse-pointer portrait viewport dimensions', () => {
@@ -303,4 +312,17 @@ test('orientation gate tracks viewport resize even if orientation media-query ne
 
   assert.equal(resumeCalls, 1);
   assert.equal(documentElement.dataset.rotateGate, 'inactive');
+
+  Object.assign(visualViewport, { width: 466, height: 215, scale: 2, offsetLeft: 18, offsetTop: 24 });
+  visualViewport.emit('resize');
+  await new Promise((resolve) => globalThis.setTimeout(resolve, 60));
+  assert.equal(rootStyle.get('--app-width'), '466px');
+  assert.equal(rootStyle.get('--app-height'), '215px');
+  visualViewport.offsetLeft = 32;
+  visualViewport.emit('scroll');
+  await new Promise((resolve) => globalThis.setTimeout(resolve, 60));
+  assert.equal(rootStyle.get('--app-left'), '32px');
+  assert.equal(rootStyle.get('--app-top'), '24px');
+  assert.equal(pauseCalls, 1);
+  assert.equal(resumeCalls, 1);
 });

@@ -7,13 +7,23 @@ import Phaser from 'phaser';
 
 type Sprite = Phaser.GameObjects.Sprite | Phaser.Physics.Arcade.Sprite | Phaser.GameObjects.Image;
 
-/** White flash on hit, restoring the original tint afterwards. */
-export function hitFlash(scene: Phaser.Scene, target: Sprite, durationMs = 90): void {
-  const t2 = target as unknown as { tint: number; tintFill: boolean };
-  t2.tint = 0xffffff;
-  t2.tintFill = true;
+/** Latest flash per target, so an earlier flash's timer never ends a newer one early. */
+const activeFlash = new WeakMap<Sprite, number>();
+
+/**
+ * Solid white flash on hit (Phaser 4 FILL tint mode). Afterwards the tint mode goes back to
+ * MULTIPLY and `restore` re-applies the owner's own tint (enemies: base or status tint);
+ * without one, the tint is cleared.
+ */
+export function hitFlash(scene: Phaser.Scene, target: Sprite, durationMs = 90, restore?: () => void): void {
+  const id = (activeFlash.get(target) ?? 0) + 1;
+  activeFlash.set(target, id);
+  target.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL);
   scene.time.delayedCall(durationMs, () => {
-    if (target.active) target.clearTint();
+    if (!target.active || activeFlash.get(target) !== id) return;
+    target.setTintMode(Phaser.TintModes.MULTIPLY);
+    if (restore) restore();
+    else target.clearTint();
   });
 }
 

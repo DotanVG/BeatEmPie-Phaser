@@ -81,3 +81,34 @@ and keep the game fully playable until bespoke art is dropped in.
   `pie_splat.png` (92×76, from source sheet 2) is tinted per-pie on impact.
 - Source images live in `art_source/` (not shipped; `public/assets` holds the
   processed game-ready files).
+
+## Site icons (favicon set)
+
+Not game assets — these are the browser/tab/home-screen icons for the deployed page.
+
+All of them are nearest-neighbour blow-ups of a single hand-authored **16×16 pixel-art
+grid** (a lattice pie in its tin with a cherry on top) defined in
+[`tools/generate-favicon.mjs`](../tools/generate-favicon.mjs). The crust and tin hues are
+lifted from `pie_cherry.png` (`#ffb470` / `#c3fdfe`); the plate is the page `theme-color`
+`#0b0d2b`, which keeps the icon legible on both light and dark browser chrome.
+
+| File | Size(s) | Used by |
+|------|---------|---------|
+| `public/favicon.ico` | 16, 32, 48 (32-bit BMP entries) | browser tabs, bookmarks, legacy crawlers |
+| `public/favicon.svg` | vector | modern browsers (`type="image/svg+xml"`), crisp at any DPI |
+| `public/apple-touch-icon.png` | 180×180 | iOS home screen (iOS applies its own rounding) |
+| `public/icon-192.png` | 192×192 | web manifest |
+| `public/icon-512.png` | 512×512 | web manifest, install prompts |
+| `public/icon-512-maskable.png` | 512×512 | web manifest `purpose: maskable` — art inset to the centre 80% safe zone |
+
+Regenerate the whole set (never hand-edit the outputs — edit `GRID` and re-run):
+
+```bash
+node tools/generate-favicon.mjs public
+```
+
+Pass a second path to also emit a 16px and a 20× zoom preview for eyeballing changes:
+
+```bash
+node tools/generate-favicon.mjs public ./preview-out
+```

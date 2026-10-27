@@ -1,20 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script defer src="/analytics.js"></script>
+    <meta name="google-site-verification" content="fc4RYsO0VwwNCjlPSo_Lev-1lY9r2phQK_Fa64YpjrQ" />
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta
       name="description"
       content="BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky."
     />
-    <title>BeatEmPie 🥧</title>
+    <meta name="author" content="Dotan, Romi, Noam" />
+    <meta name="date" content="2026-10-24T14:13:08+03:00" />
+    <meta
+      name="keywords"
+      content="BeatEmPie, browser game, arcade game, beat em up, Phaser, HTML5 game, indie game"
+    />
+    <meta name="theme-color" content="#0b0d2b" />
+    <link rel="canonical" href="https://beat-em-pie.vercel.app/" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <title>BeatEmPie — browser beat 'em up</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://beat-em-pie.vercel.app/" />
+    <meta property="og:site_name" content="BeatEmPie" />
+    <meta property="og:title" content="BeatEmPie — browser beat 'em up" />
+    <meta
+      property="og:description"
+      content="BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky."
+    />
+    <meta property="og:image" content="https://beat-em-pie.vercel.app/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="BeatEmPie artwork showing Shushki dropping magical pies while surrounded by hostile fish and Captain Leviathan"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BeatEmPie — browser beat 'em up" />
+    <meta
+      name="twitter:description"
+      content="BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky."
+    />
+    <meta name="twitter:image" content="https://beat-em-pie.vercel.app/og-image.jpg" />
+    <meta
+      name="twitter:image:alt"
+      content="BeatEmPie artwork showing Shushki dropping magical pies while surrounded by hostile fish and Captain Leviathan"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "BeatEmPie",
+        "description": "BeatEmPie — a 2D web arcade beat 'em up where Shushki fights waves of fish and whales by dropping magical pies from the sky.",
+        "url": "https://beat-em-pie.vercel.app/",
+        "image": "https://beat-em-pie.vercel.app/og-image.jpg",
+        "author": {
+          "@type": "Person",
+          "name": "Dotan Veretzky",
+          "url": "https://dotanv.vercel.app"
+        },
+        "gamePlatform": "Web browser",
+        "genre": ["Arcade", "Beat 'em up"],
+        "offers": {
+          "@type": "Offer",
+          "price": 0,
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        },
+        "sameAs": "https://dotanv.itch.io/beatempie"
+      }
+    </script>
     <style>
       :root {
         color-scheme: dark;
         --app-width: 100vw;
+        --app-left: 0px;
+        --app-top: 0px;
         /* dvh tracks the URL-bar-adjusted mobile viewport; vh is the static fallback. */
         --app-height: 100vh;
         --app-height: 100dvh;
@@ -26,28 +93,71 @@
       }
       html,
       body {
-        /* inset:0 pins the shell to the whole window so the navy background always covers the
-           full viewport - no uncovered strip (the mobile "grey bar") can ever show through. */
+        min-height: 100%;
+        background: #0b0d2b;
+        color: #fff4d6;
+        font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+      }
+      html.game-active,
+      .game-active body {
         position: fixed;
         inset: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: #0b0d2b;
-        font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
-        touch-action: none;
         -webkit-user-select: none;
         user-select: none;
         overscroll-behavior: none;
       }
+      #landing {
+        max-width: 64rem;
+        margin: auto;
+        padding: 3rem max(1.25rem, env(safe-area-inset-left)) 2rem;
+        font-size: 1.125rem;
+        line-height: 1.6;
+      }
+      #landing h1 {
+        color: #ffe08a;
+        font-size: clamp(2rem, 6vw, 3.5rem);
+        line-height: 1.15;
+      }
+      #landing h2 { color: #ffe08a; font-size: 1.25rem; }
+      #landing p { margin: 1rem 0; }
+      #landing a { color: #ffe08a; text-underline-offset: 0.2em; }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+        gap: 1.5rem;
+        margin: 1.5rem 0;
+      }
+      #start-game {
+        padding: 0.8rem 2rem;
+        border: 2px solid #ffe08a;
+        border-radius: 0.5rem;
+        background: #ffe08a;
+        color: #0b0d2b;
+        font: bold 1.25rem 'Trebuchet MS', sans-serif;
+        cursor: pointer;
+      }
+      #start-game:disabled { opacity: 0.65; cursor: wait; }
+      :focus-visible { outline: 3px solid #fff4d6; outline-offset: 5px; }
+      .game-active #landing { display: none; }
       #game-root {
-        position: fixed;
-        inset: 0;
+        position: relative;
         width: 100%;
-        height: 100%;
+        height: var(--app-height);
         overflow: hidden;
         background: #0b0d2b;
+        touch-action: none;
       }
+      .game-active #game-root {
+        position: fixed;
+        left: var(--app-left);
+        top: var(--app-top);
+        width: var(--app-width);
+        height: var(--app-height);
+      }
+      html:not(.game-active) #fullscreen-btn { display: none; }
       #game-root:fullscreen,
       #game-root:-webkit-full-screen {
         inset: 0;
@@ -79,7 +189,7 @@
         z-index: 10;
       }
       #fullscreen-btn {
-        position: fixed;
+        position: absolute;
         top: calc(env(safe-area-inset-top, 0px) + 18px);
         right: calc(env(safe-area-inset-right, 0px) + 18px);
         width: 58px;
@@ -145,19 +255,51 @@
     </style>
   </head>
   <body>
-    <div id="game-root">
+    <main id="landing">
+      <h1>BeatEmPie — browser beat 'em up</h1>
+      <p>BeatEmPie is a free browser arcade beat 'em up where Shushki drops magical pies
+        from the sky to fight waves of fish and whales.</p>
+      <p>Survive seven waves, choose from ten magical pies, and defeat Captain Leviathan.</p>
+      <button id="start-game" type="button" aria-controls="game-root" disabled>Start game</button>
+      <p id="landing-status" role="status">Heating the ovens… The game is loading.</p>
+      <p id="load-error" role="alert" hidden>The game could not load. Reload this page to try again.
+        You can still read the controls and game information here.</p>
+      <noscript><p>JavaScript is required to play BeatEmPie. Enable JavaScript and reload this page
+        to start. The controls and game information are available below.</p></noscript>
+      <div class="controls">
+        <section aria-labelledby="desktop-controls">
+          <h2 id="desktop-controls">Desktop controls</h2>
+          <p>Move with WASD or the arrow keys. Aim with the mouse and click to drop a pie at the
+            cursor, or press Space to auto-target. Select pies with 1–0, cycle with Q / E,
+            dash with Shift, and pause with P / Esc.</p>
+        </section>
+        <section aria-labelledby="touch-controls">
+          <h2 id="touch-controls">Touch controls</h2>
+          <p>Move with the on-screen joystick. Tap the arena to drop a pie, or use the pie button
+            to auto-target. Tap a pie slot to select it, use the curved arrows to cycle pies,
+            the dash button to dash, and the pause button to pause.</p>
+        </section>
+      </div>
+      <p>Play in a web browser with a keyboard and mouse or a touch screen.
+        On phones and tablets, rotate to landscape to play.</p>
+      <p>A game by Dotan · Romi · Noam.
+        <a href="https://dotanv.vercel.app">Dotan Veretzky</a> ·
+        <a href="https://dotanv.itch.io/beatempie">BeatEmPie on itch.io</a></p>
+    </main>
+    <div id="game-root" role="region" aria-label="BeatEmPie game" tabindex="-1">
       <div id="boot-loader">Heating the ovens… 🥧</div>
+      <button id="fullscreen-btn" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
+        <span class="fs-corner tl" aria-hidden="true"></span>
+        <span class="fs-corner tr" aria-hidden="true"></span>
+        <span class="fs-corner bl" aria-hidden="true"></span>
+        <span class="fs-corner br" aria-hidden="true"></span>
+      </button>
     </div>
-    <button id="fullscreen-btn" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
-      <span class="fs-corner tl" aria-hidden="true"></span>
-      <span class="fs-corner tr" aria-hidden="true"></span>
-      <span class="fs-corner bl" aria-hidden="true"></span>
-      <span class="fs-corner br" aria-hidden="true"></span>
-    </button>
-    <script type="module" src="/src/game/main.ts"></script>
-    <script>
-      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    <script type="module">
+      import('/src/game/main.ts').catch(() => {
+        document.getElementById('landing-status').hidden = true;
+        document.getElementById('load-error').hidden = false;
+      });
     </script>
-    <script defer src="/_vercel/insights/script.js"></script>
   </body>
 </html>

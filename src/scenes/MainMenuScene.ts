@@ -15,6 +15,7 @@ import { PieInfoCard } from '../ui/PieInfoCard';
 import { stepFloaters, type MenuFloaterBounds, type MenuFloaterState } from '../utils/menuFloaters';
 import { getHudRightInset } from '../game/displayPolicy';
 import { installMissClickPuff, menuPieDrop } from '../ui/menuPieFx';
+import { connectLanding, enterGameplay } from '../game/landing';
 
 interface MenuFloater {
   image: Phaser.GameObjects.Image;
@@ -164,7 +165,9 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.input.keyboard?.once('keydown-ENTER', () => this.startGame());
     this.input.keyboard?.once('keydown-SPACE', () => this.startGame());
+    const disconnectLanding = connectLanding(() => this.startGame());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      disconnectLanding();
       document.removeEventListener('fullscreenchange', this.relayoutTopRight);
       document.removeEventListener('webkitfullscreenchange', this.relayoutTopRight as EventListener);
       window.removeEventListener('resize', this.relayoutTopRight);
@@ -401,6 +404,9 @@ export class MainMenuScene extends Phaser.Scene {
   private startGame(): void {
     if (this.starting) return;
     this.starting = true;
+    enterGameplay();
+    this.scale.updateBounds();
+    this.scale.refresh();
     this.audio.playSfx(AUDIO.uiClick);
     this.pieCard.hide();
 

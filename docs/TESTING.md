@@ -45,6 +45,18 @@ Run before every handoff / PR (the `validate-before-handoff` hook automates this
 
 ## Automated runtime sanity (optional)
 
+With the dev server at `http://127.0.0.1:4193`, run the zoom-entry regression:
+
+```bash
+node tools/check-zoom-entry.mjs
+```
+
+Requires a separately installed Playwright and Chromium. Optional positional arguments are
+the Playwright module path/URL, Chromium executable path, and dev-server URL. The check uses
+Chromium page-scale emulation at 2x, enters from both orientations, and verifies that the
+canvas, player, touch controls and fullscreen button fit the visible 812x375 landscape
+viewport. It also checks that the landing retains permissive zoom metadata.
+
 The game loop is delta-driven, so it can be stepped headlessly for smoke testing. With the
 dev server running and the game exposed on `window.game` (dev builds only), `game.loop.step(t)`
 can be pumped with increasing timestamps to fast-forward `GameScene` and assert no exceptions,

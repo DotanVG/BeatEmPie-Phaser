@@ -91,7 +91,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   takeDamage(amount: number, opts: DamageOpts = {}): void {
     if (this.dead) return;
     this.health -= amount;
-    if (!opts.fromDot) hitFlash(this.gscene, this);
+    if (!opts.fromDot) hitFlash(this.gscene, this, undefined, () => this.refreshTint());
 
     // Damage numbers (DOT ticks shown smaller & dimmer to avoid spam).
     this.gscene.effects.floatingText(

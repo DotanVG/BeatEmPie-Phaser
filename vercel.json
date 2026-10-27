@@ -1,14 +1,27 @@
 {
   "headers": [
     {
+      "source": "/assets/([^/]+-[A-Za-z0-9_-]{8}\\.[^/]+)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'sha256-6+AmyFiEFMAU4fbYkttRRlWQ23FuyaT1Cx9YOz4CSCw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://*.vercel-insights.com; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://*.itch.io https://itch.io https://html-classic.itch.zone https://html.itch.zone"
+          "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com 'sha256-6+AmyFiEFMAU4fbYkttRRlWQ23FuyaT1Cx9YOz4CSCw='; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.google-analytics.com https://www.googletagmanager.com data: blob:; media-src 'self' blob:; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.vercel-insights.com; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://*.itch.io https://itch.io https://html-classic.itch.zone https://html.itch.zone https://*.itch.zone https://*.hwcdn.net itch-cave:"
         },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), hid=(), midi=(), display-capture=(), xr-spatial-tracking=()"
+        }
       ]
     }
   ]
