@@ -91,28 +91,65 @@
       }
       html,
       body {
-        /* inset:0 pins the shell to the whole window so the navy background always covers the
-           full viewport - no uncovered strip (the mobile "grey bar") can ever show through. */
+        min-height: 100%;
+        background: #0b0d2b;
+        color: #fff4d6;
+        font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+      }
+      html.game-active,
+      .game-active body {
         position: fixed;
         inset: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: #0b0d2b;
-        font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
         touch-action: none;
         -webkit-user-select: none;
         user-select: none;
         overscroll-behavior: none;
       }
+      #landing {
+        max-width: 64rem;
+        margin: auto;
+        padding: 3rem max(1.25rem, env(safe-area-inset-left)) 2rem;
+        font-size: 1.125rem;
+        line-height: 1.6;
+      }
+      #landing h1 {
+        color: #ffe08a;
+        font-size: clamp(2rem, 6vw, 3.5rem);
+        line-height: 1.15;
+      }
+      #landing h2 { color: #ffe08a; font-size: 1.25rem; }
+      #landing p { margin: 1rem 0; }
+      #landing a { color: #ffe08a; text-underline-offset: 0.2em; }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+        gap: 1.5rem;
+        margin: 1.5rem 0;
+      }
+      #start-game {
+        padding: 0.8rem 2rem;
+        border: 2px solid #ffe08a;
+        border-radius: 0.5rem;
+        background: #ffe08a;
+        color: #0b0d2b;
+        font: bold 1.25rem 'Trebuchet MS', sans-serif;
+        cursor: pointer;
+      }
+      #start-game:disabled { opacity: 0.65; cursor: wait; }
+      :focus-visible { outline: 3px solid #fff4d6; outline-offset: 5px; }
+      .game-active #landing { display: none; }
       #game-root {
-        position: fixed;
-        inset: 0;
+        position: relative;
         width: 100%;
-        height: 100%;
+        height: var(--app-height);
         overflow: hidden;
         background: #0b0d2b;
       }
+      .game-active #game-root { position: fixed; inset: 0; height: 100%; }
+      html:not(.game-active) #fullscreen-btn { display: none; }
       #game-root:fullscreen,
       #game-root:-webkit-full-screen {
         inset: 0;
@@ -210,7 +247,38 @@
     </style>
   </head>
   <body>
-    <div id="game-root">
+    <main id="landing">
+      <h1>BeatEmPie — browser beat 'em up</h1>
+      <p>BeatEmPie is a free browser arcade beat 'em up where Shushki drops magical pies
+        from the sky to fight waves of fish and whales.</p>
+      <p>Survive seven waves, choose from ten magical pies, and defeat Captain Leviathan.</p>
+      <button id="start-game" type="button" aria-controls="game-root" disabled>Start game</button>
+      <p id="landing-status" role="status">Heating the ovens… The game is loading.</p>
+      <p id="load-error" role="alert" hidden>The game could not load. Reload this page to try again.
+        You can still read the controls and game information here.</p>
+      <noscript><p>JavaScript is required to play BeatEmPie. Enable JavaScript and reload this page
+        to start. The controls and game information are available below.</p></noscript>
+      <div class="controls">
+        <section aria-labelledby="desktop-controls">
+          <h2 id="desktop-controls">Desktop controls</h2>
+          <p>Move with WASD or the arrow keys. Aim with the mouse and click to drop a pie at the
+            cursor, or press Space to auto-target. Select pies with 1–0, cycle with Q / E,
+            dash with Shift, and pause with P / Esc.</p>
+        </section>
+        <section aria-labelledby="touch-controls">
+          <h2 id="touch-controls">Touch controls</h2>
+          <p>Move with the on-screen joystick. Tap the arena to drop a pie, or use the pie button
+            to auto-target. Tap a pie slot to select it, use the curved arrows to cycle pies,
+            the dash button to dash, and the pause button to pause.</p>
+        </section>
+      </div>
+      <p>Play in a web browser with a keyboard and mouse or a touch screen.
+        On phones and tablets, rotate to landscape to play.</p>
+      <p>A game by Dotan · Romi · Noam.
+        <a href="https://dotanv.vercel.app">Dotan Veretzky</a> ·
+        <a href="https://dotanv.itch.io/beatempie">BeatEmPie on itch.io</a></p>
+    </main>
+    <div id="game-root" role="region" aria-label="BeatEmPie game" tabindex="-1">
       <div id="boot-loader">Heating the ovens… 🥧</div>
     </div>
     <button id="fullscreen-btn" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
@@ -219,6 +287,11 @@
       <span class="fs-corner bl" aria-hidden="true"></span>
       <span class="fs-corner br" aria-hidden="true"></span>
     </button>
-    <script type="module" src="/src/game/main.ts"></script>
+    <script type="module">
+      import('/src/game/main.ts').catch(() => {
+        document.getElementById('landing-status').hidden = true;
+        document.getElementById('load-error').hidden = false;
+      });
+    </script>
   </body>
 </html>
