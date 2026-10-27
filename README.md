@@ -69,6 +69,49 @@ npm run lint       # ESLint
 npm test           # unit tests (node --test, tests/*.test.mjs)
 ```
 
+### Optional local knowledge graph
+
+[Graphify](https://github.com/Graphify-Labs/graphify) builds a source-focused
+knowledge graph for architectural, debugging, and cross-cutting development
+questions. It is optional local tooling and is not a game dependency. The
+verified distribution is `graphifyy` while its command and Python module are
+named `graphify`:
+
+```bash
+uv tool install "graphifyy==0.9.30"
+npm run graph:build
+npm run graph:status
+```
+
+`graph:build` performs a full rebuild. Code relationships use local,
+deterministic AST extraction; allowed documentation uses a logged-in Claude CLI
+when available and otherwise falls back to code-only extraction. After material
+structural changes, use `npm run graph:update`. After a major refactor or a
+documentation/scope change, rebuild. `npm run graph:check` reports whether the
+graph is stale.
+
+Agents prefer an existing graph for unfamiliar, architectural, debugging,
+cross-cutting, or likely multi-file tasks, then verify the source files before
+editing. They skip it for isolated edits. Session startup only reports graph
+availability; it never builds or updates the graph. Codex runs the optional
+project hook only after the checkout's hooks are reviewed/trusted; `AGENTS.md`
+still supplies the policy when lifecycle hooks are unavailable.
+
+Intentional queries remain available:
+
+```bash
+npm run graph:query -- "How does input reach PieSystem and create a pie drop?"
+npm run graph:query -- "How do WaveManager and EnemySpawner cooperate?" --dfs
+npm run graph:path -- "InputSystem" "PieSystem"
+npm run graph:explain -- "StatusController"
+```
+
+All outputs (`graph.json`, `graph.html`, `GRAPH_REPORT.md`, the manifest, and
+local metadata) stay under ignored `graphify-out/`. They are machine-local,
+potentially stale, and never committed; current source remains authoritative.
+Use `pipx install "graphifyy==0.9.30"` or an isolated virtual environment if
+`uv` is unavailable.
+
 ## 🌐 Play it live
 
 - **Web:** https://beat-em-pie.vercel.app/

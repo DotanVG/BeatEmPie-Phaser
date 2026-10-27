@@ -8,6 +8,18 @@ export default [
   },
   js.configs.recommended,
   {
+    files: ['scripts/graphify.mjs', 'scripts/graphify-session-start.cjs'],
+    languageOptions: {
+      globals: {
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        require: 'readonly',
+      },
+    },
+  },
+  {
     // Node-side build tooling (e.g. the favicon generator), not shipped to the browser.
     files: ['tools/**/*.mjs'],
     languageOptions: {
