@@ -261,8 +261,8 @@
         from the sky to fight waves of fish and whales.</p>
       <p>Survive seven waves, choose from ten magical pies, and defeat Captain Leviathan.</p>
       <button id="start-game" type="button" aria-controls="game-root" disabled>Start game</button>
-      <p id="landing-status" role="status">Heating the ovens… The game is loading.</p>
-      <p id="load-error" role="alert" hidden>The game could not load. Reload this page to try again.
+      <p id="landing-status" role="status">Start when you’re ready to load the game.</p>
+      <p id="load-error" role="alert" hidden>The game could not load. <a href="">Reload and retry</a>.
         You can still read the controls and game information here.</p>
       <noscript><p>JavaScript is required to play BeatEmPie. Enable JavaScript and reload this page
         to start. The controls and game information are available below.</p></noscript>
@@ -287,7 +287,7 @@
         <a href="https://dotanv.itch.io/beatempie">BeatEmPie on itch.io</a></p>
     </main>
     <div id="game-root" role="region" aria-label="BeatEmPie game" tabindex="-1">
-      <div id="boot-loader">Heating the ovens… 🥧</div>
+      <div id="boot-loader">Start game to heat the ovens… 🥧</div>
       <button id="fullscreen-btn" type="button" aria-label="Enter fullscreen" title="Enter fullscreen" hidden>
         <span class="fs-corner tl" aria-hidden="true"></span>
         <span class="fs-corner tr" aria-hidden="true"></span>
@@ -296,7 +296,7 @@
       </button>
     </div>
     <script type="module">
-      import('/src/game/main.ts').catch(() => {
+      import('/src/game/entry.ts').catch(() => {
         document.getElementById('landing-status').hidden = true;
         document.getElementById('load-error').hidden = false;
       });
