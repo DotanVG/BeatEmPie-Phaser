@@ -16,7 +16,7 @@ try {
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(process.argv[4] ?? 'http://127.0.0.1:4193');
-    await page.waitForFunction(() => globalThis.game?.scene.isActive('MainMenuScene'));
+    await page.waitForFunction(() => globalThis.document.querySelector('#start-game')?.disabled === false);
     const viewportMeta = await page.locator('meta[name="viewport"]').getAttribute('content');
     assert.doesNotMatch(viewportMeta, /maximum-scale|user-scalable/);
     const cdp = await context.newCDPSession(page);
@@ -27,7 +27,7 @@ try {
     // Native keyboard activation avoids Playwright's locator-tap coordinate mismatch at 2x.
     await page.locator('#start-game').focus();
     await page.keyboard.press('Space');
-    await page.waitForFunction(() => globalThis.game.scene.isActive('GameScene'));
+    await page.waitForFunction(() => globalThis.game?.scene.isActive('GameScene'));
     if (portrait) await page.setViewportSize({ width: 812, height: 375 });
     await page.waitForFunction(() => {
       const rect = globalThis.document.querySelector('canvas').getBoundingClientRect();
