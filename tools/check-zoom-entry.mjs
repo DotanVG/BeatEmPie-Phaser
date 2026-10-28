@@ -27,8 +27,9 @@ try {
     // Native keyboard activation avoids Playwright's locator-tap coordinate mismatch at 2x.
     await page.locator('#start-game').focus();
     await page.keyboard.press('Space');
-    await page.waitForFunction(() => globalThis.game?.scene.isActive('GameScene'));
+    await page.waitForFunction(() => globalThis.game?.scene.getScene('GameScene')?.player);
     if (portrait) await page.setViewportSize({ width: 812, height: 375 });
+    await page.waitForFunction(() => globalThis.game.scene.isActive('GameScene'));
     await page.waitForFunction(() => {
       const rect = globalThis.document.querySelector('canvas').getBoundingClientRect();
       const v = globalThis.visualViewport;

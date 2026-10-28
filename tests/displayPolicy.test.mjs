@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { EventEmitter } from 'node:events';
 
 import {
   getHudRightInset,
@@ -166,6 +167,7 @@ test('orientation gate resumes audio after rotating back from portrait on non-ga
   const installOrientationGate = await loadOrientationGate();
 
   installOrientationGate({
+    events: new EventEmitter(),
     sound: {
       locked: false,
       pauseAll: () => {
@@ -266,6 +268,7 @@ test('orientation gate tracks viewport resize even if orientation media-query ne
 
   const installOrientationGate = await loadOrientationGate();
   installOrientationGate({
+    events: new EventEmitter(),
     sound: {
       locked: false,
       pauseAll: () => {
@@ -325,4 +328,99 @@ test('orientation gate tracks viewport resize even if orientation media-query ne
   assert.equal(rootStyle.get('--app-top'), '24px');
   assert.equal(pauseCalls, 1);
   assert.equal(resumeCalls, 1);
+});
+
+test('portrait gate follows gameplay activation and audio unlock without a resize', async (t) => {
+  const installOrientationGate = await loadOrientationGate();
+  const cases = [
+    { name: 'portrait start before scenes boot', booted: false },
+    { name: 'portrait restart after scenes boot', booted: true },
+    { name: 'gameplay resumes in portrait', event: 'resume' },
+    { name: 'gameplay wakes in portrait', event: 'wake' },
+    { name: 'manual pause stays owned by the player', userPaused: true },
+    { name: 'audio unlocks while portrait is still gated', locked: true },
+    { name: 'desktop portrait never gates', coarse: false },
+    { name: 'ended game stays untouched', ended: true },
+  ];
+  for (const scenario of cases) {
+    await t.test(scenario.name, (t) => {
+      const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+      const previousDocument = Object.getOwnPropertyDescriptor(globalThis, 'document');
+      let refresh;
+      const viewport = Object.assign(createListenerTarget(), {
+        innerWidth: 375, innerHeight: 812,
+        matchMedia: () => Object.assign(createListenerTarget(), { matches: scenario.coarse !== false }),
+        screen: {},
+        setTimeout: (callback) => { refresh = callback; return 1; },
+        clearTimeout() {},
+      });
+      Object.defineProperty(globalThis, 'window', { configurable: true, value: viewport });
+      Object.defineProperty(globalThis, 'document', {
+        configurable: true,
+        value: Object.assign(createListenerTarget(), {
+          documentElement: { dataset: {}, style: { setProperty() {} } },
+        }),
+      });
+      t.after(() => {
+        if (previousWindow) Object.defineProperty(globalThis, 'window', previousWindow);
+        else delete globalThis.window;
+        if (previousDocument) Object.defineProperty(globalThis, 'document', previousDocument);
+        else delete globalThis.document;
+      });
+
+      let active = false;
+      let paused = false;
+      let suspends = 0;
+      let resumes = 0;
+      let audioPauses = 0;
+      let audioResumes = 0;
+      const gs = {
+        events: new EventEmitter(),
+        isGameEnded: scenario.ended ?? false,
+        suspendForOrientation() { suspends++; active = false; paused = true; },
+        resumeFromOrientation() { resumes++; active = true; paused = false; },
+      };
+      const game = {
+        events: new EventEmitter(),
+        scene: {
+          isBooted: scenario.booted ?? true,
+          isActive: (key) => key === 'GameScene' && active,
+          isPaused: () => paused,
+          getScene: () => gs,
+        },
+        sound: Object.assign(new EventEmitter(), {
+          locked: scenario.locked ?? false,
+          pauseAll() { audioPauses++; },
+          resumeAll() { audioResumes++; },
+        }),
+        scale: { updateBounds() {}, refresh() {} },
+      };
+      installOrientationGate(game);
+      refresh(); // Portrait is detected before GameScene exists.
+      game.scene.isBooted = true;
+      game.events.emit('ready');
+      active = !scenario.userPaused;
+      paused = scenario.userPaused ?? false;
+      const pausesBeforeCreate = audioPauses;
+      gs.events.emit(scenario.event ?? 'create', gs);
+      const shouldSuspend = !scenario.userPaused && !scenario.ended && scenario.coarse !== false;
+      assert.equal(suspends, shouldSuspend ? 1 : 0);
+      assert.equal(paused, shouldSuspend || Boolean(scenario.userPaused));
+      if (shouldSuspend && !scenario.locked) assert.ok(audioPauses > pausesBeforeCreate);
+
+      game.sound.locked = false;
+      game.sound.emit('unlocked', game.sound);
+      assert.equal(suspends, shouldSuspend ? 1 : 0, 'unlock must not take another pause');
+      assert.equal(audioPauses > 0, scenario.coarse !== false);
+
+      Object.assign(viewport, { innerWidth: 812, innerHeight: 375 });
+      viewport.emit('resize');
+      refresh();
+      assert.equal(resumes, shouldSuspend ? 1 : 0);
+      assert.equal(paused, Boolean(scenario.userPaused));
+      assert.equal(audioResumes, scenario.coarse !== false ? 1 : 0);
+      gs.events.emit('resume');
+      assert.equal(suspends, shouldSuspend ? 1 : 0, 'landscape resume must stay active');
+    });
+  }
 });
