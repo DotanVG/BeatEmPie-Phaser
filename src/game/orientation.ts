@@ -111,6 +111,20 @@ export function installOrientationGate(game: Phaser.Game): void {
     syncScale();
   };
 
+  // Portrait can precede gameplay creation or the first audio-unlocking gesture.
+  const syncActiveScene = (): void => {
+    if (rotateGateActive) onEnterPortrait();
+  };
+  const watchGameScene = (): void => {
+    const gs = game.scene.getScene('GameScene');
+    gs.events.on('create', syncActiveScene);
+    gs.events.on('resume', syncActiveScene);
+    gs.events.on('wake', syncActiveScene);
+    game.sound.on('unlocked', syncActiveScene);
+  };
+  if (game.scene.isBooted) watchGameScene();
+  else game.events.once('ready', watchGameScene);
+
   // Keep the stretched canvas shell synced while the mobile URL bar shows/hides or the
   // device rotates. A short timeout coalesces the resize/orientation event bursts.
   let refreshTimer: number | null = null;
