@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "graph:build": "node scripts/graphify.mjs build",
     "graph:update": "node scripts/graphify.mjs update",
     "graph:cluster": "node scripts/graphify.mjs cluster",
