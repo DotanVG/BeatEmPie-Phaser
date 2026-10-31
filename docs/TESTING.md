@@ -55,7 +55,7 @@ Requires a separately installed Playwright and Chromium. Optional positional arg
 the Playwright module path/URL, Chromium executable path, and dev-server URL. The check uses
 Chromium page-scale emulation at 2x, enters from both orientations, and verifies that the
 canvas, player, touch controls and fullscreen button fit the visible 812x375 landscape
-viewport. It also checks that the landing retains permissive zoom metadata.
+viewport. It also checks that the menu boots directly and retains permissive zoom metadata.
 
 The game loop is delta-driven, so it can be stepped headlessly for smoke testing. With the
 dev server running and the game exposed on `window.game` (dev builds only), `game.loop.step(t)`
