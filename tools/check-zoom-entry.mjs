@@ -16,16 +16,15 @@ try {
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(process.argv[4] ?? 'http://127.0.0.1:4193');
-    await page.waitForFunction(() => globalThis.document.querySelector('#start-game')?.disabled === false);
+    await page.waitForFunction(() => globalThis.game?.scene.isActive('MainMenuScene'));
     const viewportMeta = await page.locator('meta[name="viewport"]').getAttribute('content');
     assert.doesNotMatch(viewportMeta, /maximum-scale|user-scalable/);
     const cdp = await context.newCDPSession(page);
     await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 2 });
     await page.waitForFunction(() => globalThis.visualViewport.scale === 2);
-    assert.equal(await page.locator('#landing').isVisible(), true);
+    assert.equal(await page.locator('#landing, #start-game').count(), 0);
     assert.equal(await page.evaluate(() => globalThis.getComputedStyle(globalThis.document.body).touchAction), 'auto');
-    // Native keyboard activation avoids Playwright's locator-tap coordinate mismatch at 2x.
-    await page.locator('#start-game').focus();
+    // The menu retains its existing keyboard entry at any zoom level.
     await page.keyboard.press('Space');
     await page.waitForFunction(() => globalThis.game?.scene.getScene('GameScene')?.player);
     if (portrait) await page.setViewportSize({ width: 812, height: 375 });

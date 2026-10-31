@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { URL } from 'node:url';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
@@ -16,6 +16,8 @@ test('VideoGame JSON-LD agrees with page metadata and published game facts', () 
   assert.equal(game.description, html.match(/name="description"\s+content="([^"]+)"/)[1]);
   assert.equal(game.url, html.match(/rel="canonical" href="([^"]+)"/)[1]);
   assert.equal(game.image, html.match(/property="og:image" content="([^"]+)"/)[1]);
+  assert.equal(game.screenshot, 'https://beat-em-pie.vercel.app/landing-gameplay.webp');
+  assert.ok(existsSync(new URL('../public/landing-gameplay.webp', import.meta.url)));
   assert.deepEqual(game.author, {
     '@type': 'Person', name: 'Dotan Veretzky', url: 'https://dotanv.vercel.app',
   });
@@ -34,6 +36,28 @@ test('VideoGame JSON-LD agrees with page metadata and published game facts', () 
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
   assert.equal(game.sameAs, 'https://dotanv.itch.io/beatempie');
   assert.ok(readme.includes(game.sameAs));
+});
+
+test('social metadata and discovery files consistently describe the production game', () => {
+  const production = 'https://beat-em-pie.vercel.app/';
+  const title = html.match(/<title>([^<]+)<\/title>/)[1];
+  const description = html.match(/name="description"\s+content="([^"]+)"/)[1];
+  for (const prefix of ['og', 'twitter']) {
+    for (const [field, expected] of [['title', title], ['description', description], ['image', `${production}og-image.jpg`]]) {
+      const tag = html.match(new RegExp(`<meta\\s+(?:property|name)="${prefix}:${field}"\\s+content="([^"]+)"`));
+      assert.equal(tag?.[1], expected, `${prefix}:${field}`);
+    }
+    assert.match(html, new RegExp(`(?:property|name)="${prefix}:image:alt"\\s+content="[^"]+"`));
+  }
+  assert.match(html, /name="twitter:card" content="summary_large_image"/);
+  assert.equal(html.match(/property="og:url" content="([^"]+)"/)[1], production);
+  assert.equal(html.match(/rel="canonical" href="([^"]+)"/)[1], production);
+  const robots = readFileSync(new URL('../public/robots.txt', import.meta.url), 'utf8');
+  assert.match(robots, /User-agent: \*\s+Allow: \//);
+  assert.ok(robots.includes(`Sitemap: ${production}sitemap.xml`));
+  const sitemap = readFileSync(new URL('../public/sitemap.xml', import.meta.url), 'utf8');
+  assert.match(sitemap, /xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9"/);
+  assert.deepEqual([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]), [production]);
 });
 
 test('CSP preserves existing iframe ancestors and allows itch web and desktop embeds', () => {
