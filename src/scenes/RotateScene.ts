@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../game/constants';
+import { getRotatePromptLayout, type SafeInsets } from '../game/displayPolicy';
 
 // Easing helper — same curve Phaser's Sine.easeInOut uses
 const sineEaseInOut = (t: number): number => -(Math.cos(Math.PI * t) - 1) / 2;
@@ -17,6 +18,31 @@ const PHONE_CYCLE = 3150;
 // Arrow fill/deplete cycle (ms): 0 → 1 → 0, triangle wave
 const ARROW_CYCLE = 1600;
 
+// Unscaled prompt artwork bounds (world px), centered on the content container's origin.
+const CONTENT_WIDTH = 860;
+const CONTENT_HEIGHT = 640;
+// Phone + arrow pivot, relative to the content origin.
+const PHONE_Y = -85;
+
+/** Resolve env(safe-area-inset-*) to pixels via a throwaway probe element. */
+function readSafeInsets(): SafeInsets {
+  const probe = document.createElement('div');
+  probe.style.cssText =
+    'position:fixed;visibility:hidden;pointer-events:none;' +
+    'padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) ' +
+    'env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);';
+  document.body.appendChild(probe);
+  const cs = getComputedStyle(probe);
+  const insets = {
+    top: parseFloat(cs.paddingTop) || 0,
+    right: parseFloat(cs.paddingRight) || 0,
+    bottom: parseFloat(cs.paddingBottom) || 0,
+    left: parseFloat(cs.paddingLeft) || 0,
+  };
+  probe.remove();
+  return insets;
+}
+
 /**
  * Fullscreen "rotate your device" overlay rendered entirely through Phaser's own pipeline.
  * Launched by orientation.ts when a touch device enters portrait; stopped on landscape.
@@ -28,8 +54,9 @@ const ARROW_CYCLE = 1600;
 export class RotateScene extends Phaser.Scene {
   private phoneContainer!: Phaser.GameObjects.Container;
   private arrowGfx!: Phaser.GameObjects.Graphics;
-  private arrowCx = 0;
-  private arrowCy = 0;
+  private content!: Phaser.GameObjects.Container;
+  private layoutW = -1;
+  private layoutH = -1;
 
   private startTime = 0;
   private elapsed = 0;
@@ -54,12 +81,16 @@ export class RotateScene extends Phaser.Scene {
     const cx = GAME_WIDTH / 2;
     const cy = GAME_HEIGHT / 2;
 
-    // Dark backdrop
+    // Dark backdrop — a flat fill, so stretching it with the canvas is harmless.
     this.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x07091e, 0.97);
+
+    // Everything with a shape lives in one container that layout() counter-scales against
+    // the CSS canvas stretch, so the prompt keeps its aspect ratio in portrait.
+    const parts: Phaser.GameObjects.GameObject[] = [];
 
     // Violet radial glow (faked with stacked low-alpha circles)
     for (let i = 5; i >= 1; i--) {
-      this.add.circle(cx, cy - 60, 320 * (i / 5), 0x3a2b6b, 0.05 * i);
+      parts.push(this.add.circle(0, PHONE_Y - 30, 300 * (i / 5), 0x3a2b6b, 0.05 * i));
     }
 
     // Phone shape — drawn on a container so rotation works as a unit
@@ -82,31 +113,40 @@ export class RotateScene extends Phaser.Scene {
     phoneGfx.fillRoundedRect(-22, -phoneH / 2 + 14, 44, 8, 4);
     phoneGfx.fillCircle(0, phoneH / 2 - 20, 12);
 
-    this.phoneContainer = this.add.container(cx, cy - 30, [phoneGfx]);
+    this.phoneContainer = this.add.container(0, PHONE_Y, [phoneGfx]);
+    parts.push(this.phoneContainer);
 
     // Curved rotation arrow — arc length animated via progressive fill
-    this.arrowCx = cx;
-    this.arrowCy = cy - 30;
     this.arrowGfx = this.add.graphics();
+    parts.push(this.arrowGfx);
 
     // Labels
-    this.add
-      .text(cx, cy + 220, 'Rotate your device', {
-        fontFamily: 'Trebuchet MS, sans-serif',
-        fontSize: '72px',
-        color: COLORS.goldHex,
-        fontStyle: 'bold',
-      })
-      .setOrigin(0.5);
+    parts.push(
+      this.add
+        .text(0, 165, 'Rotate your device', {
+          fontFamily: 'Trebuchet MS, sans-serif',
+          fontSize: '72px',
+          color: COLORS.goldHex,
+          fontStyle: 'bold',
+        })
+        .setOrigin(0.5),
+    );
 
-    this.add
-      .text(cx, cy + 315, 'BeatEmPie plays best in landscape 🥧', {
-        fontFamily: 'Trebuchet MS, sans-serif',
-        fontSize: '42px',
-        color: '#fff4d6',
-      })
-      .setOrigin(0.5)
-      .setAlpha(0.72);
+    parts.push(
+      this.add
+        .text(0, 260, 'BeatEmPie plays best in landscape 🥧', {
+          fontFamily: 'Trebuchet MS, sans-serif',
+          fontSize: '42px',
+          color: '#fff4d6',
+        })
+        .setOrigin(0.5)
+        .setAlpha(0.72),
+    );
+
+    this.content = this.add.container(cx, cy, parts);
+    this.layoutW = -1;
+    this.layoutH = -1;
+    this.layout();
 
     // We intentionally ignore prefers-reduced-motion: this overlay is functional
     // instruction, not decorative animation. A static phone at 90° gave no visual
@@ -167,13 +207,35 @@ export class RotateScene extends Phaser.Scene {
     return 0;
   }
 
+  /** Re-fit the prompt whenever the canvas' on-screen size changes (URL bar, rotation). */
+  private layout(): void {
+    const canvas = this.game.canvas;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (w === this.layoutW && h === this.layoutH) return;
+    this.layoutW = w;
+    this.layoutH = h;
+
+    const { x, y, scaleX, scaleY } = getRotatePromptLayout({
+      worldWidth: GAME_WIDTH,
+      worldHeight: GAME_HEIGHT,
+      viewportWidth: w,
+      viewportHeight: h,
+      safe: readSafeInsets(),
+      contentWidth: CONTENT_WIDTH,
+      contentHeight: CONTENT_HEIGHT,
+    });
+    this.content.setPosition(x, y).setScale(scaleX, scaleY);
+  }
+
   private applyAnimation(): void {
+    this.layout();
     this.phoneContainer.setAngle(this.computeAngle(this.elapsed));
 
     // Fill fraction: triangle wave 0 → 1 → 0
     const at = this.arrowElapsed / ARROW_CYCLE;
     const fillT = at < 0.5 ? at * 2 : 2 - at * 2;
-    this.drawRotationArrow(this.arrowGfx, this.arrowCx, this.arrowCy, fillT);
+    this.drawRotationArrow(this.arrowGfx, 0, PHONE_Y, fillT);
   }
 
   private clearInterval(): void {
