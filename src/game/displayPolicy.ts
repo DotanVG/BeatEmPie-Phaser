@@ -59,3 +59,47 @@ export function measureViewport(source: ViewportMeasurementSource): { width: num
 export function shouldShowRotateGate(state: RotateGateState): boolean {
   return state.coarsePointer && state.height > state.width;
 }
+
+export interface SafeInsets {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+export interface RotatePromptLayoutInput {
+  /** Internal (world) canvas size. */
+  worldWidth: number;
+  worldHeight: number;
+  /** On-screen (CSS px) size the canvas is stretched to. */
+  viewportWidth: number;
+  viewportHeight: number;
+  safe: SafeInsets;
+  /** Unscaled size of the prompt artwork, in world px. */
+  contentWidth: number;
+  contentHeight: number;
+}
+
+/**
+ * The canvas keeps a 1920x1080 world but CSS stretches it to the viewport, so a portrait
+ * phone squashes everything horizontally. Return a world-space position and a non-uniform
+ * counter-scale that cancels that stretch: the prompt renders at one uniform on-screen
+ * scale, fitted and centered inside the safe area.
+ */
+export function getRotatePromptLayout(input: RotatePromptLayoutInput): { x: number; y: number; scaleX: number; scaleY: number } {
+  const { worldWidth, worldHeight, viewportWidth, viewportHeight, safe } = input;
+  const vw = Math.max(1, viewportWidth);
+  const vh = Math.max(1, viewportHeight);
+  const safeW = Math.max(1, vw - safe.left - safe.right);
+  const safeH = Math.max(1, vh - safe.top - safe.bottom);
+  const stretchX = vw / worldWidth;
+  const stretchY = vh / worldHeight;
+  const screenScale = Math.min(safeW / input.contentWidth, safeH / input.contentHeight);
+
+  return {
+    x: (safe.left + safeW / 2) / stretchX,
+    y: (safe.top + safeH / 2) / stretchY,
+    scaleX: screenScale / stretchX,
+    scaleY: screenScale / stretchY,
+  };
+}
