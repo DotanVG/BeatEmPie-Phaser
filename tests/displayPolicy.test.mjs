@@ -7,6 +7,7 @@ import { EventEmitter } from 'node:events';
 
 import {
   getHudRightInset,
+  getRotatePromptLayout,
   hasManagedGameScene,
   measureViewport,
   shouldShowFullscreenButton,
@@ -107,6 +108,31 @@ test('rotate gate is driven by coarse-pointer portrait viewport dimensions', () 
     shouldShowRotateGate({ width: 430, height: 932, coarsePointer: false }),
     false,
   );
+});
+
+test('rotate prompt keeps its aspect ratio and centers inside the safe area', () => {
+  const base = { worldWidth: 1920, worldHeight: 1080, contentWidth: 860, contentHeight: 640 };
+  const cases = [
+    { viewportWidth: 390, viewportHeight: 844, safe: { top: 47, right: 0, bottom: 34, left: 0 } },
+    { viewportWidth: 360, viewportHeight: 640, safe: { top: 0, right: 0, bottom: 0, left: 0 } },
+    { viewportWidth: 820, viewportHeight: 1180, safe: { top: 24, right: 0, bottom: 20, left: 0 } },
+  ];
+  for (const c of cases) {
+    const { x, y, scaleX, scaleY } = getRotatePromptLayout({ ...base, ...c });
+    // World -> CSS stretch applied by the canvas shell.
+    const sx = c.viewportWidth / 1920;
+    const sy = c.viewportHeight / 1080;
+    const onScreenX = scaleX * sx;
+    const onScreenY = scaleY * sy;
+    assert.ok(Math.abs(onScreenX - onScreenY) < 1e-9, 'no stretch: uniform on-screen scale');
+
+    const safeW = c.viewportWidth - c.safe.left - c.safe.right;
+    const safeH = c.viewportHeight - c.safe.top - c.safe.bottom;
+    assert.ok(860 * onScreenX <= safeW + 1e-9 && 640 * onScreenY <= safeH + 1e-9, 'fits safe area');
+    assert.ok(Math.abs(860 * onScreenX - safeW) < 1e-6 || Math.abs(640 * onScreenY - safeH) < 1e-6, 'fills one axis');
+    assert.ok(Math.abs(x * sx - (c.safe.left + safeW / 2)) < 1e-9, 'horizontally centered');
+    assert.ok(Math.abs(y * sy - (c.safe.top + safeH / 2)) < 1e-9, 'vertically centered');
+  }
 });
 
 test('orientation management can recover a paused GameScene', () => {
