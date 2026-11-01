@@ -41,6 +41,8 @@ export function installOrientationGate(game: Phaser.Game): void {
 
     root.style.setProperty('--app-width', `${width}px`);
     root.style.setProperty('--app-height', `${height}px`);
+    root.style.setProperty('--app-left', `${window.visualViewport?.offsetLeft ?? 0}px`);
+    root.style.setProperty('--app-top', `${window.visualViewport?.offsetTop ?? 0}px`);
     root.dataset.rotateGate = active ? 'active' : 'inactive';
 
     return active;
@@ -109,6 +111,20 @@ export function installOrientationGate(game: Phaser.Game): void {
     syncScale();
   };
 
+  // Portrait can precede gameplay creation or the first audio-unlocking gesture.
+  const syncActiveScene = (): void => {
+    if (rotateGateActive) onEnterPortrait();
+  };
+  const watchGameScene = (): void => {
+    const gs = game.scene.getScene('GameScene');
+    gs.events.on('create', syncActiveScene);
+    gs.events.on('resume', syncActiveScene);
+    gs.events.on('wake', syncActiveScene);
+    game.sound.on('unlocked', syncActiveScene);
+  };
+  if (game.scene.isBooted) watchGameScene();
+  else game.events.once('ready', watchGameScene);
+
   // Keep the stretched canvas shell synced while the mobile URL bar shows/hides or the
   // device rotates. A short timeout coalesces the resize/orientation event bursts.
   let refreshTimer: number | null = null;
@@ -121,6 +137,7 @@ export function installOrientationGate(game: Phaser.Game): void {
   };
   coarsePointerQuery.addEventListener('change', queueRefresh);
   window.visualViewport?.addEventListener('resize', queueRefresh);
+  window.visualViewport?.addEventListener('scroll', queueRefresh);
   window.addEventListener('resize', queueRefresh);
   window.addEventListener('orientationchange', queueRefresh);
   window.screen.orientation?.addEventListener('change', queueRefresh);
