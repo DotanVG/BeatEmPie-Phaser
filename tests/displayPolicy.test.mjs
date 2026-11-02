@@ -115,7 +115,11 @@ test('rotate prompt keeps its aspect ratio and centers inside the safe area', ()
   const cases = [
     { viewportWidth: 390, viewportHeight: 844, safe: { top: 47, right: 0, bottom: 34, left: 0 } },
     { viewportWidth: 360, viewportHeight: 640, safe: { top: 0, right: 0, bottom: 0, left: 0 } },
+    { viewportWidth: 360, viewportHeight: 780, safe: { top: 0, right: 0, bottom: 0, left: 0 } },
+    { viewportWidth: 412, viewportHeight: 915, safe: { top: 0, right: 0, bottom: 0, left: 0 } },
     { viewportWidth: 820, viewportHeight: 1180, safe: { top: 24, right: 0, bottom: 20, left: 0 } },
+    { viewportWidth: 390, viewportHeight: 844, safe: { top: 47, right: 8, bottom: 34, left: 16 } },
+    { viewportWidth: 820, viewportHeight: 1180, safe: { top: 300, right: 0, bottom: 300, left: 0 } },
   ];
   for (const c of cases) {
     const { x, y, scaleX, scaleY } = getRotatePromptLayout({ ...base, ...c });
