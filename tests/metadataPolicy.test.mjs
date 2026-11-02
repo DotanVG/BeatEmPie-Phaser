@@ -71,9 +71,10 @@ test('CSP preserves existing iframe ancestors and allows itch web and desktop em
       .find(([name]) => name === 'frame-ancestors');
     if (policy.key.toLowerCase() === 'content-security-policy-report-only' && !ancestors) continue;
     assert.ok(ancestors, policy.key);
+    for (const wide of ['*', 'https:', 'http:', 'data:']) assert.ok(!ancestors.includes(wide), policy.key + ': ' + wide);
     for (const source of [
       "'self'", 'https://*.itch.io', 'https://itch.io', 'https://html-classic.itch.zone',
-      'https://html.itch.zone', 'https://*.itch.zone', 'https://*.hwcdn.net', 'itch-cave:',
+      'https://html.itch.zone', 'https://*.itch.zone', 'https://*.hwcdn.net', 'itch-cave:', 'https://kamario.games', 'https://*.kamario.games',
     ]) {
       assert.ok(ancestors.includes(source), `${policy.key}: ${source}`);
     }
