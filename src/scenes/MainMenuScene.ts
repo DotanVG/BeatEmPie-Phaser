@@ -70,6 +70,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.time.addEvent({ delay: 2600, loop: true, callback: () => this.spawnSwimmer() });
 
     this.audio = new AudioSystem(this);
+    this.loadMusicDeferred();
     this.audio.playMusic(AUDIO.musicMenu);
 
     const cx = GAME_WIDTH / 2;
