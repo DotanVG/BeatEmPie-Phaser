@@ -1,0 +1,25 @@
+# BeatEmPie
+
+> BeatEmPie is a free 2D web arcade beat 'em up, built with Phaser and TypeScript, where Shushki fights waves of fish and whales by dropping magical pies from the sky, then takes on the boss Captain Leviathan.
+
+## About
+
+- [Dotan Veretzky](https://dotanv.vercel.app/): software engineer, game developer, web and AI developer. Author of BeatEmPie.
+- [LinkedIn](https://www.linkedin.com/in/dotan-v/)
+- [GitHub](https://github.com/DotanVG)
+- [Personal site](https://dotanv.vercel.app/)
+
+## Play
+
+- [Play BeatEmPie](https://beat-em-pie.vercel.app/): browser game, no install required.
+- [itch.io](https://dotanv.itch.io/beatempie)
+
+## Source
+
+- [GitHub repository](https://github.com/DotanVG/BeatEmPie-Phaser)
+
+## Docs
+
+- [README](https://github.com/DotanVG/BeatEmPie-Phaser/blob/main/README.md): gameplay, controls, and local setup.
+- [Controls](https://github.com/DotanVG/BeatEmPie-Phaser/blob/main/docs/CONTROLS.md): keyboard, mouse, and touch controls.
+- [Game design](https://github.com/DotanVG/BeatEmPie-Phaser/blob/main/docs/GAME_DESIGN.md): waves, pies, and the boss fight.

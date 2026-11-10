@@ -19,7 +19,14 @@ test('VideoGame JSON-LD agrees with page metadata and published game facts', () 
   assert.equal(game.screenshot, 'https://beat-em-pie.vercel.app/landing-gameplay.webp');
   assert.ok(existsSync(new URL('../public/landing-gameplay.webp', import.meta.url)));
   assert.deepEqual(game.author, {
-    '@type': 'Person', name: 'Dotan Veretzky', url: 'https://dotanv.vercel.app',
+    '@type': 'Person',
+    name: 'Dotan Veretzky',
+    description: 'Software engineer, game developer, web and AI developer',
+    url: 'https://dotanv.vercel.app',
+    sameAs: [
+      'https://www.linkedin.com/in/dotan-v/',
+      'https://github.com/DotanVG',
+    ],
   });
   assert.equal(game.gamePlatform, 'Web browser');
   assert.equal(game.applicationCategory, 'GameApplication');
