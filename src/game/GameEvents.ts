@@ -1,6 +1,6 @@
 /**
  * Central registry of gameplay event names. Systems and UI communicate through
- * the GameScene's event emitter (`scene.events`) using these keys, so nothing
+ * the GameScene's event emitter (`scene.bus`) using these keys, so nothing
  * has to hold hard references to everything else.
  */
 export const GameEvents = {

@@ -6,7 +6,6 @@ import { GameEvents } from '../game/GameEvents';
 import { StatusController, StatusApply } from './StatusController';
 import { hitFlash } from '../utils/animation';
 import { emojiText } from '../utils/text';
-import { SCORING } from '../data/balance';
 import { TEX } from '../utils/assetKeys';
 
 /** Zombie-green flash tint for confused (mushroomed) enemies. */
@@ -352,20 +351,6 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       });
       this.iceImage.destroy();
       this.iceImage = undefined;
-    }
-  }
-
-  /** Bonus score lookups for special kills (used by CombatSystem). */
-  static specialBonus(special?: string): number {
-    switch (special) {
-      case 'mushroomAlly':
-        return SCORING.mushroomAllyKill;
-      case 'chocolateDot':
-        return SCORING.chocolateDotKill;
-      case 'chiliBurn':
-        return SCORING.chiliBurnKill;
-      default:
-        return 0;
     }
   }
 
