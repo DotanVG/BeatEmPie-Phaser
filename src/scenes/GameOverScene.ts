@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { ResultData } from '../types/game';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../game/constants';
 import { TEX, AUDIO } from '../utils/assetKeys';
 import { AudioSystem } from '../systems/AudioSystem';
@@ -6,14 +7,6 @@ import { makeButton } from '../ui/Button';
 import { withEmojiPadding } from '../utils/text';
 import { popIn } from '../utils/animation';
 import { installMissClickPuff } from '../ui/menuPieFx';
-
-interface ResultData {
-  score: number;
-  wave: number;
-  record: boolean;
-  highScore: number;
-  pies?: number;
-}
 
 /** Defeat summary with restart / menu and a high-score notice. */
 export class GameOverScene extends Phaser.Scene {

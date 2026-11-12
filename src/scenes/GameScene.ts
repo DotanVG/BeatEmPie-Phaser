@@ -10,7 +10,7 @@ import { Player } from '../entities/Player';
 import { Enemy } from '../entities/Enemy';
 import { BossWhale } from '../entities/BossWhale';
 import { Pickup } from '../entities/Pickup';
-import type { EnemyKind } from '../types/game';
+import type { EnemyKind, ResultData } from '../types/game';
 
 import { AudioSystem } from '../systems/AudioSystem';
 import { EffectsSystem } from '../systems/EffectsSystem';
@@ -296,7 +296,7 @@ export class GameScene extends Phaser.Scene {
     // Defeat lingers longer so the full death animation (collapse → X-X eyes) is seen.
     this.time.delayedCall(victory ? 1400 : 2400, () => {
       this.sound.stopAll();
-      const data = {
+      const data: ResultData = {
         score: this.combat.score,
         wave: this.currentWaveNumber,
         record,
