@@ -289,6 +289,7 @@ export class GameScene extends Phaser.Scene {
 
   private endGame(victory: boolean): void {
     if (this.gameEnded) return;
+    this.effects.dash.cancel();
     this.gameEnded = true;
     this.isInputLocked = true;
     const record = this.combat.finalize();
