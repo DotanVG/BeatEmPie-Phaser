@@ -112,6 +112,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     else this.setTexture(TEX.shushkiJump);
     this.gscene.audio.playSfx(AUDIO.pieCall, 0.4);
     this.gscene.effects.ring(this.x, this.y, 90, 0xffe08a, 260);
+    this.gscene.effects.dash.begin(this, dx / len, dy / len, this.baseScale,
+      this.displayHeight * (this.useAnims ? 0.47 : 0.42));
     return true;
   }
 
@@ -125,6 +127,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   takeDamage(amount: number, fromX?: number, fromY?: number): void {
     if (this.dead || this.invulnTimer > 0 || this.isDashing) return;
+    this.gscene.effects.dash.cancel();
     this.health = Math.max(0, this.health - amount);
     this.invulnTimer = PLAYER.invulnMs;
 
@@ -150,6 +153,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private defeat(): void {
+    this.gscene.effects.dash.cancel();
     this.dead = true;
     this.setVelocity(0, 0);
     (this.body as Phaser.Physics.Arcade.Body).enable = false;
@@ -213,6 +217,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     else this.updatePose(deltaMs);
     this.clampToArena();
     this.syncShadow();
+    this.gscene.effects.dash.tick(deltaMs, this.isDashing);
   }
 
   /** Frame-animation state selection. Art faces RIGHT, so flip when facing left. */
@@ -279,6 +284,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   override destroy(fromScene?: boolean): void {
+    this.gscene.effects.dash.cancel();
     this.shadow?.destroy();
     super.destroy(fromScene);
   }
