@@ -10,22 +10,8 @@ export function distance(ax: number, ay: number, bx: number, by: number): number
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-export function distanceSq(ax: number, ay: number, bx: number, by: number): number {
-  const dx = bx - ax;
-  const dy = by - ay;
-  return dx * dx + dy * dy;
-}
-
-export function angleBetween(ax: number, ay: number, bx: number, by: number): number {
-  return Math.atan2(by - ay, bx - ax);
-}
-
 export function randBetween(min: number, max: number): number {
   return min + Math.random() * (max - min);
-}
-
-export function randInt(min: number, max: number): number {
-  return Math.floor(randBetween(min, max + 1));
 }
 
 export function pickRandom<T>(arr: readonly T[]): T {

@@ -4,12 +4,17 @@ import { TEX } from '../utils/assetKeys';
 import { FloatingText, FloatingTextOptions } from '../ui/FloatingText';
 import type { ParticleMeta } from '../types/game';
 import { FX } from '../data/balance';
+import { DashEffects } from './DashEffects';
 
 type ShakeKind = 'small' | 'medium' | 'big';
 
 /** All non-gameplay visual feedback: particles, rings, lightning, shakes, flashes, text. */
 export class EffectsSystem {
-  constructor(private scene: Phaser.Scene) {}
+  readonly dash: DashEffects;
+
+  constructor(private scene: Phaser.Scene) {
+    this.dash = new DashEffects(scene);
+  }
 
   /** One-shot particle explosion using a pie/effect's particle metadata. */
   burst(x: number, y: number, meta: ParticleMeta): void {

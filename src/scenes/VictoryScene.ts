@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { ResultData } from '../types/game';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../game/constants';
 import { TEX, AUDIO } from '../utils/assetKeys';
 import { AudioSystem } from '../systems/AudioSystem';
@@ -6,14 +7,6 @@ import { makeButton } from '../ui/Button';
 import { emojiText, withEmojiPadding } from '../utils/text';
 import { popIn } from '../utils/animation';
 import { installMissClickPuff } from '../ui/menuPieFx';
-
-interface ResultData {
-  score: number;
-  wave: number;
-  record: boolean;
-  highScore: number;
-  pies?: number;
-}
 
 /** Victory summary shown after Captain Leviathan is defeated. */
 export class VictoryScene extends Phaser.Scene {

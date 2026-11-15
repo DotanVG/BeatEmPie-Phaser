@@ -2,7 +2,6 @@ import type { GameScene } from '../scenes/GameScene';
 import { GameEvents } from '../game/GameEvents';
 import { SCORING } from '../data/balance';
 import { SaveSystem } from './SaveSystem';
-import { Enemy } from '../entities/Enemy';
 
 interface DamagedPayload {
   amount: number;
@@ -55,7 +54,7 @@ export class CombatSystem {
     this.comboMultiplier = Math.min(SCORING.maxComboMultiplier, 1 + this.combo * SCORING.comboStep);
 
     const base = p.isBoss ? SCORING.bossKill : p.scoreValue || SCORING.killBase;
-    const bonus = Enemy.specialBonus(p.special);
+    const bonus = this.specialBonus(p.special);
     const points = Math.round(base * this.comboMultiplier) + bonus;
     this.addScore(points, p.x, p.y, true);
 
@@ -66,6 +65,19 @@ export class CombatSystem {
     }
 
     this.emitCombo();
+  }
+
+  private specialBonus(special?: string): number {
+    switch (special) {
+      case 'mushroomAlly':
+        return SCORING.mushroomAllyKill;
+      case 'chocolateDot':
+        return SCORING.chocolateDotKill;
+      case 'chiliBurn':
+        return SCORING.chiliBurnKill;
+      default:
+        return 0;
+    }
   }
 
   private onPlayerDamaged(): void {

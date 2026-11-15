@@ -141,3 +141,11 @@ export interface SaveData {
   sfxVolume: number;
   muted: boolean;
 }
+
+export interface ResultData {
+  score: number;
+  wave: number;
+  record: boolean;
+  highScore: number;
+  pies?: number;
+}

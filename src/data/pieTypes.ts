@@ -6,6 +6,7 @@ import { AUDIO } from '../utils/assetKeys';
  * resolve targeting, falling, impact, status effects, cooldowns and charges.
  * Each pie's placeholder texture is generated at load time keyed `pie-<id>`.
  */
+/** Slot order for number keys 1..0 and the on-screen selector. */
 export const PIE_TYPES: PieType[] = [
   {
     id: 'apple',
@@ -220,9 +221,6 @@ export const PIE_TYPES: PieType[] = [
     unlockWave: 0,
   },
 ];
-
-/** Slot order for number keys 1..0 and the on-screen selector. */
-export const PIE_ORDER: string[] = PIE_TYPES.map((p) => p.id);
 
 export const PIE_BY_ID: Record<string, PieType> = Object.fromEntries(
   PIE_TYPES.map((p) => [p.id, p]),

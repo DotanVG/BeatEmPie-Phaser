@@ -27,10 +27,6 @@ export class WaveManager {
     this.stateTimer = WAVE.firstWaveDelayMs;
   }
 
-  get currentWaveName(): string {
-    return this.waveIndex >= 0 && this.waveIndex < WAVES.length ? WAVES[this.waveIndex].name : '';
-  }
-
   update(deltaMs: number): void {
     switch (this.state) {
       case 'intermission':
